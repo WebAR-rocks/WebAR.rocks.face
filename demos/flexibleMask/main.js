@@ -82,7 +82,7 @@ let _flexibleMaskMesh = null;
 
 function main(){
   // get the 2 canvas from the DOM:
-  const canvasFaceFilterLM = document.getElementById('WebARRocksFaceCanvas');
+  const canvasFace = document.getElementById('WebARRocksFaceCanvas');
   const canvasThree = document.getElementById('threeCanvas');
 
   // Init WebAR.rocks.face through the helper:
@@ -90,7 +90,7 @@ function main(){
     spec:  {
       NNCpath: '../../dist/NNC.json'
     },
-    canvas: canvasFaceFilterLM,
+    canvas: canvasFace,
     canvasThree: canvasThree,
     
     features: {

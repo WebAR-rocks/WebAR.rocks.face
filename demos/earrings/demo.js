@@ -1,13 +1,13 @@
 "use strict";
 
-let _canvasFaceFilterLM = null, _canvasOverlay = null, _ctx = null;
+let _canvasFace = null, _canvasOverlay = null, _ctx = null;
 let _earringImage = null;
 
 const _earringSettings = {
   image: 'images/earring.png',
   angleHide: 5, //head rotation angle in degrees from which we should hide the earrings
   angleHysteresis: 0.5, //add hysteresis to angleHide value, in degrees
-  scale: 0.08,   // width of the earring compared to the face width (1 -> 100% of the face width)
+  scale: 0.08,    // width of the earring compared to the face width (1 -> 100% of the face width)
   pullUp: 0.05,   // 0 -> earring are displayed at the bottom of the spotted position
                   // 1 -> earring are displaed above the spotted position 
   k: 0.7,  // position is interpolated between 2 keypoints. this is the interpolation coefficient
@@ -20,7 +20,7 @@ function start(){
   WebARRocksFaceCanvas2DHelper.init({
     spec: {
       NNCpath: '../../dist/NN_EARS.json', // neural network model file
-      canvas: _canvasFaceFilterLM
+      canvas: _canvasFace
     },
 
     callbackReady: function(err, spec){ // called when everything is ready
@@ -29,7 +29,7 @@ function start(){
         return;
       }
 
-      console.log('INFO in demo.js: FaceFilterLM is ready :)');
+      console.log('INFO in demo.js: WebAR.rocks.face is ready :)');
     },
 
     callbackTrack: function(data){
@@ -105,7 +105,7 @@ function main(){
   _earringImage.src = _earringSettings.image;
 
   // Get canvas from the DOM:
-  _canvasFaceFilterLM = document.getElementById('WebARRocksFaceCanvas');
+  _canvasFace = document.getElementById('WebARRocksFaceCanvas');
   _canvasOverlay = document.getElementById('overlayCanvas');
 
   // Create 2D context for the overlay canvas (where the earring are drawn):
@@ -115,7 +115,7 @@ function main(){
   // and add an event handler to capture window resize:
   WebARRocksResizer.size_canvas({
     isFullScreen: true,
-    canvas: _canvasFaceFilterLM,     // WebARRocksFace main canvas
+    canvas: _canvasFace,     // WebARRocksFace main canvas
     overlayCanvas: [_canvasOverlay], // other canvas which should be resized at the same size of the main canvas
     callback: start
   })

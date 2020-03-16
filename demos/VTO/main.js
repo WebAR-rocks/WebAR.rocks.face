@@ -1,12 +1,12 @@
 
 function main(){
   // get the 2 canvas from the DOM:
-  const canvasFaceFilterLM = document.getElementById('WebARRocksFaceCanvas');
+  const canvasFace = document.getElementById('WebARRocksFaceCanvas');
   const canvasThree = document.getElementById('threeCanvas');
 
   // init EZMirror:
   WebARRocksMirror.init({
-    canvasFaceFilterLM: canvasFaceFilterLM,
+    canvasFace: canvasFace,
     canvasThree: canvasThree,
 
     // initial canvas dimensions:

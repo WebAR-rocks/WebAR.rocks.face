@@ -233,7 +233,7 @@ const WebARRocksFaceHelper = (function(){
 
   function init_featureThreejs(){
     console.log('INFO in WebARRocksFaceHelper - init_featureThreejs()');
-    if (_featureThree.isUseSeparateCanvas){ // FaceFilterLM and THREE.js use 2 canvas with 2 different WebGL context
+    if (_featureThree.isUseSeparateCanvas){ // WebAR.rocks.face and THREE.js use 2 canvas with 2 different WebGL context
       _featureThree.renderer = new THREE.WebGLRenderer({
         canvas: _featureThree.canvas,
         alpha: true,
@@ -241,7 +241,7 @@ const WebARRocksFaceHelper = (function(){
         preserveDrawingBuffer: true
       });
       _featureThree.renderer.setClearAlpha(0);
-    } else { // WebGL context and canvas are shared between FaceFilterLM and THREE.js
+    } else { // WebGL context and canvas are shared between WebAR.rocks.face and THREE.js
       _featureThree.renderer = new THREE.WebGLRenderer({
         context: _gl,
         canvas: _cv,

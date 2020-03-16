@@ -4,14 +4,14 @@
 const WebARRocksMirror = (function(){
   // private variables:
   const _defaultSpec = { // default init specs
-    canvasFaceFilterLM: null,
+    canvasFace: null,
     canvasThree: null,
 
     // initial dimensions:
     width: window.innerWidth,
     height: window.innerHeight,
 
-    specFaceFilterLM: {
+    specWebARRocksFace: {
       NNCpath: '../../dist/NN_VTO.json',
       /*scanSettings: { // harden detection:
         threshold: 0.9,
@@ -51,7 +51,7 @@ const WebARRocksMirror = (function(){
     occluder: null,
     loadingManager: null
   };
-  let _spec = null, _facefilerLMObjects = null;
+  let _spec = null, _WARFObjects = null;
 
   const _states = {
     error: -3,
@@ -245,8 +245,8 @@ const WebARRocksMirror = (function(){
 
       // add new model to face follower object:
       _threeInstances.glasses = threeGlasses;
-      if (_facefilerLMObjects.threeFaceFollower){
-        _facefilerLMObjects.threeFaceFollower.add(threeGlasses);
+      if (_WARFObjects.threeFaceFollower){
+        _WARFObjects.threeFaceFollower.add(threeGlasses);
       }
 
       if (callback){
@@ -257,16 +257,16 @@ const WebARRocksMirror = (function(){
 
   function remove_glasses(){
     // remove previous model:
-    if (_facefilerLMObjects.threeFaceFollower && _threeInstances.glasses){
-      _facefilerLMObjects.threeFaceFollower.remove(_threeInstances.glasses);
+    if (_WARFObjects.threeFaceFollower && _threeInstances.glasses){
+      _WARFObjects.threeFaceFollower.remove(_threeInstances.glasses);
       _threeInstances.glasses = null;
     }
   }
 
   function build_scene(){
-    const renderer = _facefilerLMObjects.threeRenderer; // instance of THREE.WebGLRenderer
-    const scene = _facefilerLMObjects.threeScene; // instance of THREE.Scene
-    const composer = _facefilerLMObjects.threeComposer;
+    const renderer = _WARFObjects.threeRenderer; // instance of THREE.WebGLRenderer
+    const scene = _WARFObjects.threeScene; // instance of THREE.Scene
+    const composer = _WARFObjects.threeComposer;
 
     // improve WebGLRenderer settings:
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -355,16 +355,16 @@ const WebARRocksMirror = (function(){
           w *= window.devicePixelRatio;
           h *= window.devicePixelRatio;
         }
-        _spec.canvasFaceFilterLM.width = w;
-        _spec.canvasFaceFilterLM.height = h;
+        _spec.canvasFace.width = w;
+        _spec.canvasFace.height = h;
         _spec.canvasThree.width = w;
         _spec.canvasThree.height = h;
 
 
         // Init WebAR.rocks.face through the helper:
         WebARRocksFaceHelper.init({
-          spec: _spec.specFaceFilterLM,
-          canvas: _spec.canvasFaceFilterLM,
+          spec: _spec.specWebARRocksFace,
+          canvas: _spec.canvasFace,
           canvasThree: _spec.canvasThree,
           
           isPostProcessing: (_spec.bloom) ? true : false,
@@ -381,7 +381,7 @@ const WebARRocksMirror = (function(){
               _state = _states.error;
               return;
             }
-            _facefilerLMObjects = facefilerLMObjects;
+            _WARFObjects = facefilerLMObjects;
             build_scene();
             _state = _states.idle;
             resolve();
@@ -421,7 +421,7 @@ const WebARRocksMirror = (function(){
       const width = cvBg.width, height = cvBg.height;
 
       // foreground image (3D rendering):
-      const cvFg = _facefilerLMObjects.threeRenderer.domElement;
+      const cvFg = _WARFObjects.threeRenderer.domElement;
 
       // flip horizontally:
       const cv = document.createElement('canvas');
