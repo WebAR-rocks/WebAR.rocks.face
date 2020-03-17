@@ -57,10 +57,10 @@ Here are the main features of the library:
 
 ## Demonstrations
 
-* debug view (displays the face landmarks): [source code](/demos/basic/)
-* earrings VTO: [source code](/demos/earrings/)
-* glasses VTO: [source code](/demos/VTO/)
-* 3D flexible mask: [source code](/demos/flexibleMask/)
+* debug view (displays the face landmarks): [live demo](https://webar.rocks/demos/face/demos/basic/), [source code](/demos/basic/)
+* earrings VTO: [live demo](https://webar.rocks/demos/face/demos/earrings/), [source code](/demos/earrings/)
+* glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTO/), [source code](/demos/VTO/)
+* 3D flexible mask: [live demo](https://webar.rocks/demos/face/demos/flexibleMask/), [source code](/demos/flexibleMask/)
 
 
 ## Specifications
