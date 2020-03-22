@@ -88,7 +88,7 @@ function main(){
   // Init WebAR.rocks.face through the helper:
   WebARRocksFaceHelper.init({
     spec:  {
-      NNCpath: '../../dist/NNC.json'
+      NNCpath: '../../dist/NN_FACE.json'
     },
     canvas: canvasFace,
     canvasThree: canvasThree,
