@@ -49,7 +49,7 @@ Here are the main features of the library:
   * `WebARRocksFace.js`: main minified script,
   * `WebARRocksFaceES6.js`: main minified script for ES6 use (with `import` or `require`),
   * `NNC.json`: file storing the neural network parameters, loaded by the main script,
-  * `NNC<xxx>.json`: alternative neural network models,
+  * `NN_<xxx>.json`: alternative neural network models,
 * `/helpers/`: scripts which can help you to use this library in some specific use cases,
 * `/libs/`: 3rd party libraries and 3D engines used in the demos.
 
@@ -61,6 +61,7 @@ Here are the main features of the library:
 * earrings VTO: [live demo](https://webar.rocks/demos/face/demos/earrings/), [source code](/demos/earrings/)
 * glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTO/), [source code](/demos/VTO/)
 * 3D flexible mask: [live demo](https://webar.rocks/demos/face/demos/flexibleMask/), [source code](/demos/flexibleMask/)
+* GIF Face replacement: [live demo](https://webar.rocks/demos/face/demos/faceReplacement/gif), [source code](/demos/faceReplacement/gif/)
 
 
 ## Specifications
