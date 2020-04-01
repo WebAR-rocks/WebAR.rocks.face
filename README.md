@@ -235,7 +235,7 @@ Be careful to enable gzip HTTP/HTTPS compression for JSON and JS files. Indeed, 
 
 The neuron network file, `dist/NN_<xxx>.json` is loaded using an ajax `XMLHttpRequest` after calling `WEBARROCKSFACE.init()`. This loading is proceeded after the user has accepted to share its camera. So we won't load this quite heavy file if the user refuses to share it or if there is no webcam available. The loading can be faster if you systematically preload `dist/NN_<xxx>.json` using a service worker or a simple raw `XMLHttpRequest` just after the HTML page loading. Then the file will be already in the browser cache when WebAR.rocks.face will request it.
 
-Some directories of the latest version of this library are hosted on `https://cdn.webar.rocks/face/`:
+Some directories of the latest version of this library are hosted on `https://cdn.webar.rocks/face/` and served through a content delivery network (CDN):
 
 * [/dist](/dist/)
 * [/helpers](/helpers/)
