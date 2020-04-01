@@ -4,7 +4,7 @@ function main(){
   const canvasFace = document.getElementById('WebARRocksFaceCanvas');
   const canvasThree = document.getElementById('threeCanvas');
 
-  // init EZMirror:
+  // init WebAR.rock.mirror:
   WebARRocksMirror.init({
     canvasFace: canvasFace,
     canvasThree: canvasThree,
