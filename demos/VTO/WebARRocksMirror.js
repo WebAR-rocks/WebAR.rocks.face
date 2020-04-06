@@ -452,6 +452,18 @@ const WebARRocksMirror = (function(){
         _timerResize = null;
       }, _spec.resizeDelay);
       return true;
+    },
+
+    destroy: function(){
+      return new Promise(function(accept, reject){
+        WEBARROCKSFACE.destroy().finally(function(){
+          _state = _states.notLoaded;
+          if (_WARFObjects.threeRenderer){
+            _WARFObjects.threeRenderer = null;
+          }
+          accept();
+        });
+      });
     }
   }; //end that
   return that;
