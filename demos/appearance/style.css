@@ -8,8 +8,7 @@ a:hover {
 
 body {
   overflow: auto; overflow-y: auto;
-  background-color: white;
-  background-image: url('bg.png');
+  background-color: #eee;
   background-attachment: fixed;
   background-position: center;
   background-size: contain;

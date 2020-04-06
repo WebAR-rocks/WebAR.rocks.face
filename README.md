@@ -186,7 +186,7 @@ After the initialization (ie after that `callbackReady` is launched ) , these me
 
 * `WEBARROCKSFACE.set_animateDelay(<integer> delay)`: Change the `animateDelay` (see `init()` arguments),
 
-* `set_inputTexture(<WebGLTexture> tex, <integer> width, <integer> height)`: Change the video input by a WebGL Texture instance. The dimensions of the texture, in pixels, should be provided,
+* `WEBARROCKSFACE.set_inputTexture(<WebGLTexture> tex, <integer> width, <integer> height)`: Change the video input by a WebGL Texture instance. The dimensions of the texture, in pixels, should be provided,
 
 * `WEBARROCKSFACE.reset_inputTexture()`: Come back to the user's video as input texture,
 
@@ -209,6 +209,8 @@ After the initialization (ie after that `callbackReady` is launched ) , these me
   * `[<float> minValue, <float> maxValue] alphaRange`: it specify how to apply `k`. Between 2 successive detections, we blend the previous `detectState` values with the current detection values using a mixing factor `alpha`. `alpha=<minValue>` if `k<0.0` and `alpha=<maxValue>` if `k>1.0`. Between the 2 values, the variation is quadratic.
 
 * `WEBARROCKSFACE.update_videoElement(<video> vid, <function|False> callback)`: change the video element used for the face detection (which can be provided via `VIDEOSETTINGS.videoElement`) by another video element. A callback function can be called when it is done.
+
+* `WEBARROCKSFACE.destroy()`: Clean both graphic memory and JavaScript memory, uninit the library. After that you need to init the library again. A `Promise` is returned.
 
 
 ### Multiple faces
