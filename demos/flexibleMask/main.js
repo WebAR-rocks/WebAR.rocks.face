@@ -20,7 +20,7 @@ const _spec = {
     "upperLipBot": [-0.03,-26.01,94.81],
     "lowerLipBot": [-0.03,-30.70,94.04],
 
-   "leftEyeBrowInt": [11.70,64.66,57.81],
+    "leftEyeBrowInt": [11.70,64.66,57.81],
     "rightEyeBrowInt": [-11.70,64.66,57.81],
     
 
@@ -89,6 +89,10 @@ function main(){
   WebARRocksFaceHelper.init({
     spec:  {
       NNCpath: '../../dist/NN_FACE.json'
+      /*,videoSettings: {
+        idealWidth: 1280,
+        idealHeight: 800
+      }*/
     },
     canvas: canvasFace,
     canvasThree: canvasThree,

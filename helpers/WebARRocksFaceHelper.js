@@ -2,7 +2,7 @@
 
 const WebARRocksFaceHelper = (function(){
   const _settings = {
-    cameraMinVideoDimFov: 34, // vertical camera FoV in degrees
+    cameraMinVideoDimFov: 38, // min camera FoV in degrees (either horizontal or vertical depending on the camera)
     
     objPointsPositions: { // 3d positions, got using Blender in edit mode and opening dev/face.obj
              // the value added as comment is the point indice
@@ -152,7 +152,7 @@ const WebARRocksFaceHelper = (function(){
       program: shaderProgram,
       uniforms:{}
     };
-  } //end build_shaderProgram()
+  }
   //END VANILLA WEBGL HELPERS
 
   //BEGIN FEATURES SPECIFIC
@@ -316,13 +316,15 @@ const WebARRocksFaceHelper = (function(){
       return;
     }
 
-    console.log('INFO in WebARRocksFaceHelper: WebAR.Rocks.face is ready. spec=', spec);
+    console.log('INFO in WebARRocksFaceHelper: WebAR.Rocks.face is ready. spec =', spec);
     
     _gl = spec.GL;
     _cv = spec.canvasElement;
     _glVideoTexture = spec.videoTexture;
     _landmarksLabels = spec.landmarksLabels;
     _videoElement = spec.video;
+
+    console.log('INFO in WebARRocksFaceHelper: video resolution =', _videoElement.videoWidth, 'x', _videoElement.videoHeight);
 
     _landmarksLabels.forEach(function(label, ind){
       _landmarksIndices[label] = ind;
