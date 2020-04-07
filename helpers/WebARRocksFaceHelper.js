@@ -5,7 +5,7 @@ const WebARRocksFaceHelper = (function(){
     cameraMinVideoDimFov: 38, // min camera FoV in degrees (either horizontal or vertical depending on the camera)
     
     objPointsPositions: { // 3d positions, got using Blender in edit mode and opening dev/face.obj
-             // the value added as comment is the point indice
+                          // the value added as comment is the point indice
       'leftEyeCtr': [33.7,37.9,45.9], // 6022
       'rightEyeCtr':[-33.7,37.9,45.9], // 5851
 
@@ -47,7 +47,7 @@ const WebARRocksFaceHelper = (function(){
     pointSize: 5, // when landmarks are displayed, their size in pixels
 
     // debug options:
-    debugObjPoints: false // display cubes on 3D landmark points - to debug solvePnP feature
+    debugObjPoints: 0 // display cubes on 3D landmark points - to debug solvePnP feature
   };
 
 
@@ -85,13 +85,26 @@ const WebARRocksFaceHelper = (function(){
       8 * _deg2rad
     ], //ry values (in radians) where to change the solver
     isCenterObjPoints: false,
-    solverChangeHysteresis: 8 * _deg2rad, //hysteresis in radian, to avoid solver switch instabilities
+    solverChangeHysteresis: 5 * _deg2rad, //hysteresis in radian, to avoid solver switch instabilities
 
     objPoints: [], //will be sorted by solver
     objPointsMeans: [],
     imgPointsLabels: [
+      // first parameter set: same solver for all sides::
+
       // 1st solver: right side
-      ['chin', 'leftEyeExt', 'noseOuter', 'leftEarBottom', 'rightEarBottom', 'noseLeft'],
+      ['chin', 'leftEarBottom', 'rightEarBottom', 'noseOuter', 'leftEyeExt', 'rightEyeExt'],
+
+      // 2nd solver: face 
+      ['chin', 'leftEarBottom', 'rightEarBottom', 'noseOuter', 'leftEyeExt', 'rightEyeExt'],
+
+      // 3rd solver: left side
+      ['chin', 'leftEarBottom', 'rightEarBottom', 'noseOuter', 'leftEyeExt', 'rightEyeExt'],
+
+
+      // second parameter set: change solver depending on face side:
+      // 1st solver: right side
+      /*['chin', 'leftEyeExt', 'noseOuter', 'leftEarBottom', 'rightEarBottom', 'noseLeft'],
 
       // 2nd solver: face 
       ['chin', 'noseOuter', 'leftEyeExt', 'rightEyeExt', 'rightEarBottom', 'leftEarBottom'],
