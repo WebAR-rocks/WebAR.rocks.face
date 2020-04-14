@@ -375,13 +375,13 @@ const WebARRocksMirror = (function(){
             solvePnP: true,
             threejs: true
           },
-          callbackReady: function(err, facefilerLMObjects){
+          callbackReady: function(err, threeInstances){
             if (err){
               reject(err);
               _state = _states.error;
               return;
             }
-            _WARFObjects = facefilerLMObjects;
+            _WARFObjects = threeInstances;
             build_scene();
             _state = _states.idle;
             resolve();

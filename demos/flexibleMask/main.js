@@ -76,7 +76,7 @@ const _spec = {
   debugCube: false //display a cube tracking the head
 }
 
-let _facefilerLMObjects = null;
+let _threeInstances = null;
 let _flexibleMaskHelper = null;
 let _flexibleMaskMesh = null;
 
@@ -107,23 +107,26 @@ function main(){
       if (_flexibleMaskMesh === null){
         return;
       }
-      _flexibleMaskHelper.update_flexibleMask(_facefilerLMObjects.threeCamera, _flexibleMaskMesh, detectState);
+      _flexibleMaskHelper.update_flexibleMask(_threeInstances.threeCamera, _flexibleMaskMesh, detectState);
     },
 
-    callbackReady: function(err, facefilerLMObjects){
+    callbackReady: function(err, threeInstances){
       if (err){
         console.log('ERROR in main.js: ', err);
         return;
       }
       WebARRocksFaceHelper.resize(window.innerWidth, window.innerHeight);
       _flexibleMaskHelper = WebARRocksFaceFlexibleMaskHelper;
-      build_scene(facefilerLMObjects);
+
+      // threeInstances are the THREE.js instances initialized by the helper
+      // There are a THREE.Camera, a THREE.Scene and an object following the face
+      build_scene(threeInstances);
     }
   }); //end WebARRocksFaceHelper.init() 
 } //end main()
 
-function build_scene(facefilerLMObjects){
-  _facefilerLMObjects = facefilerLMObjects;
+function build_scene(threeInstances){
+  _threeInstances = threeInstances;
   const threeLoadingManager = new THREE.LoadingManager();
 
   // add a 3D placeholder:
@@ -131,7 +134,7 @@ function build_scene(facefilerLMObjects){
     const debugMat = new THREE.MeshNormalMaterial({side: THREE.DoubleSide});
     const debugCubeMesh = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), debugMat);
     debugCubeMesh.scale.multiplyScalar(180);
-    _facefilerLMObjects.threeFaceFollower.add(debugCubeMesh);
+    _threeInstances.threeFaceFollower.add(debugCubeMesh);
   }
 
   // build and add the flexible mask:
@@ -142,26 +145,25 @@ function build_scene(facefilerLMObjects){
     });
     //window.debugFlexibleMaskMesh = _flexibleMaskMesh; // for debugging in the JS console
     tweak_maskMaterial(_flexibleMaskMesh.material);
-    _facefilerLMObjects.threeFaceFollower.add(_flexibleMaskMesh);
+    _threeInstances.threeFaceFollower.add(_flexibleMaskMesh);
   }).catch(function(err){
     console.log(err);
   });
 
   // add lighting:
   const pointLight = new THREE.PointLight(0xffffff, 2);
-  _facefilerLMObjects.threeScene.add(pointLight);
+  _threeInstances.threeScene.add(pointLight);
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-  _facefilerLMObjects.threeScene.add(ambientLight);
+  _threeInstances.threeScene.add(ambientLight);
 
   threeLoadingManager.onLoad = start;
 }
 
 function tweak_maskMaterial(mat){
-  //mat.uniforms.opacity.value = 0.6;
+  //mat.uniforms.opacity.value = 0.6; // make the mask half transparent, for debug
   mat.uniforms.metalness.value = 0;
-  mat.uniforms.roughness.value = 1;
-  
+  mat.uniforms.roughness.value = 1; 
 }
 
 function start(){
