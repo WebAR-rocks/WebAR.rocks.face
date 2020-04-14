@@ -26,7 +26,7 @@ function main(){
     // It is useful to hide the left glasses branch when the head turns on the left.
     occluderURL: "assets/models3D/occluder.glb",
     glassesURL: "assets/models3D/glasses1.glb", //initial model loaded. false or null -> no model
-    envmapURL: "assets/envmaps/venice_sunset_2k.hdr",
+    envmapURL: "assets/envmaps/venice_sunset_1k.hdr",
 
     // lighting:
     pointLightIntensity: 1.5, //intensity of the point light. Set to 0 to disable
