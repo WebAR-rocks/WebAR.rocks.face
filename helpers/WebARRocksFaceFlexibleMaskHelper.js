@@ -730,7 +730,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
       });
       
       const flexibleMaskMesh = that.build_flexibleMask(geom, flexibleMaskPoints, {
-        kpInfluenceDecay: ARTrackingFaceMetadata['DEFORMINFLUCENCERANGE']
+        kpInfluenceDecay: ARTrackingFaceMetadata['DEFORMINFLUCENCERANGE'] || _defaultBuildOptions.kpInfluenceDecay
       });
 
       if (updateSolvePnP){

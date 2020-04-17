@@ -7,7 +7,6 @@
       "MATRIX": [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1],
 
       "DEFORMEDID": "deformedMask",
-      "DEFORMINFLUCENCERANGE": [60, 120],
       "DEFORMEDKEYPOINTS": [
         {
           "label": "LEFT_EYEBROW_INSIDE",
