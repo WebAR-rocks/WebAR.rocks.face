@@ -5,17 +5,48 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
   const _settings = {
     debugMaskMesh: false,
     debugKeypointInfluencesCoeffs: -1,  // -1 -> disabled, otherwise indice of the point to debug
-    debugKeypointInfluencesRendering: false,
-    debugKeypointInfluencesKeepOnlyMostInfluencial: false,
+    debugKeypointInfluencesRendering: 0,
+    debugKeypointInfluencesCount: 0,
+    debugKeypointInfluencesKeepOnlyMostInfluencial: 0,
     debugKeypointDisplacement: -1 // Indice of kp: -1 -> disabled, 2 -> nose outer
   };
+  _settings.debugKeypointInfluencesRendering = _settings.debugKeypointInfluencesRendering || _settings.debugKeypointInfluencesCount;
 
   const _defaultBuildOptions = {
     kpInfluenceDecay: [+Infinity, +Infinity]
   };
 
+  // maps labels proposed for GLTF AR Tracking standard to internal naming:
+  const _stdLabelsMap = {
+    "LEFT_EYEBROW_INSIDE": "leftEyeBrowInt",
+    "RIGHT_EYEBROW_INSIDE": "rightEyeBrowInt",
 
-  //BEGIN MISC THREE.JS HELPERS
+    "LEFT_EYE_INSIDE": "leftEyeInt",
+    "RIGHT_EYE_INSIDE": "rightEyeInt",
+    "LEFT_EYE_OUTSIDE": "leftEyeExt",
+    "RIGHT_EYE_OUTSIDE": "rightEyeExt",
+    "LEFT_EYE_TOP": "leftEyeTop",
+    "RIGHT_EYE_TOP": "rightEyeTop",
+    "LEFT_EYE_BOTTOM": "leftEyeBot",
+    "RIGHT_EYE_BOTTOM": "rightEyeBot",
+
+    "LEFT_EAR_BOTTOM": "leftEarBottom",
+    "RIGHT_EAR_BOTTOM": "rightEarBottom",
+
+    "LEFT_NOSE": "noseLeft",
+    "RIGHT_NOSE": "noseRight",
+    "NOSE_BOTTOM": "noseBottom",
+
+    "LEFT_MOUTH": "mouthLeft",
+    "RIGHT_MOUTH": "mouthRight",
+    "MOUTH_TOP": "upperLipBot",
+    "MOUTH_BOTTOM": "lowerLipTop",
+
+    "CHIN_BOTTOM": "chin"
+  };
+
+
+  // BEGIN MISC THREE.JS HELPERS
   function tweak_threeShaderAdd(code, chunk, glslCode){
     return code.replace(chunk, chunk+"\n"+glslCode);
   }
@@ -25,10 +56,34 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
   function tweak_threeShaderRepl(code, chunk, glslCode){
     return code.replace(chunk, glslCode);
   }
-  //END MISC THREE.JS HELPERS
+  // END MISC THREE.JS HELPERS
 
 
   // BEGIN EDGEGRAPH FUNCTIONS
+  function add_edge(ia, ib, edgeGraph, edges){
+    // orient edge by sorting indices:
+    const ifrom = (ia < ib) ? ia : ib;
+    const ito = (ia < ib) ? ib : ia;
+
+    // test if the edge is already registered:
+    if (edgeGraph[ifrom].some(function(edge){
+      return edge.to === ito;
+    })){
+      return;
+    }
+
+    const edge = {
+      from: ifrom,
+      to: ito,
+      browsedFor: [],
+      data: null
+    };
+
+    // add the edge to the edgegraph:
+    edgeGraph[ifrom].push(edge);
+    edgeGraph[ito].push(edge);
+    edges.push(edge);
+  };  
   function is_edgeNotBrowsedForKp(kpInd, edge){
     return (edge.browsedFor.indexOf(kpInd) === -1);
   }
@@ -47,37 +102,78 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
     }); //end forEach equivalent point
     return connectedEdges;
   }
-  //END EDGEGRAPH FUNCTIONS
+  function get_connectedPointsIndice(edgeGraph, pointIndice){
+    return edgeGraph[pointIndice].map(function(edge){
+      return get_edgeOtherPointIndice(edge, pointIndice);
+    });
+  }
+  // END EDGEGRAPH FUNCTIONS
+
+
+  // BEGIN MISC HELPERS
+  function remove_valFromList(val, list){
+    const i = list.indexOf(val);
+    if (i !== -1) list.splice(i, 1);
+  }
+  function intersect_lists(listA, listB){
+    return listA.filter(function(a){
+      return listB.includes(a);
+    });
+  }
+  function test_ifQuad(A, B, C, D){
+    // compute edges unit vectors:
+    const ABu = A.clone().sub(B).normalize();
+    const BCu = B.clone().sub(C).normalize();
+    const CDu = C.clone().sub(D).normalize();
+    const DAu = D.clone().sub(A).normalize();
+    const maxDot = Math.max(Math.abs(ABu.dot(BCu)), Math.abs(BCu.dot(CDu)), Math.abs(CDu.dot(DAu)), Math.abs(DAu.dot(ABu)));
+    return ( maxDot < 0.2 );
+  }
+  // END MISC HELPERS
 
   const that = {
     load_geometryFromGLTF: function(loadingManager, GLTFUrl){
       return new Promise(function(resolve, reject){
         new THREE.GLTFLoader(loadingManager).load(GLTFUrl, function(model){
-          let threeGeom = null, threeGeomParent = null, isFucked = false;
-          model.scene.traverse(function(threeStuff){
-            if (threeStuff.type !== 'Mesh' || !threeStuff.geometry){
-              return;
-            }
-            if (threeGeom === null){
-              threeGeomParent = threeStuff;
-              threeGeom = threeStuff.geometry;
-            } else if (threeGeom !== threeStuff.geometry){
-              reject('MULTIPLE_GEOMETRIES');
-              isFucked = true;
-            }
-          }); //end scene traversal
-
-          if (isFucked){
-            return;
-          }
-          if (threeGeom){
-            threeGeom.userData.originalMaterial = threeGeomParent.material;
-            resolve(threeGeom);
-          } else {
-            reject('NO_GEOMETRY');
-          }
+          const geom = that.extract_flexibleMaskGeometry(model.scene, null);
+          resolve(geom);
         }); //end GLTF loading
       }); //end return new Promise
+    },
+
+
+    extract_flexibleMaskGeometry: function(scene, geomName){
+      let threeGeom = null, threeGeomParent = null, err = null;
+      scene.traverse(function(threeStuff){
+        if (threeStuff.type !== 'Mesh' || !threeStuff.geometry){
+          return;
+        }
+        const isNameValid = ( !geomName || ( geomName && geomName === threeStuff.name ));
+        if (!isNameValid){
+          return;
+        }
+        if (threeGeom === null){
+          threeGeomParent = threeStuff;
+          threeGeom = threeStuff.geometry;
+        } else if (threeGeom !== threeStuff.geometry){
+          err = 'MULTIPLE_GEOMETRIES';
+          return;
+        }
+      }); //end scene traversal
+
+      if (err){
+        throw new Error(err);
+      }
+      if (threeGeom){
+        threeGeom.userData.originalMaterial = threeGeomParent.material;
+        if (threeGeomParent.parent){
+          threeGeomParent.parent.remove(threeGeomParent);
+        }
+        return threeGeom;
+      } else {
+        throw new Error('NO_GEOMETRY');
+        return null;
+      }
     },
 
 
@@ -126,46 +222,61 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
         edgeGraph[i] = [];
       }
       const edges = [];
-
-
-      // Build edges graph:
-      const add_edge = function(ia, ib){
-        // orient edge by sorting indices:
-        const ifrom = (ia < ib) ? ia : ib;
-        const ito = (ia < ib) ? ib : ia;
-
-        // test if the edge is already registered:
-        if (edgeGraph[ifrom].some(function(edge){
-          return edge.to === ito;
-        })){
-          return;
-        }
-
-        const edge = {
-          from: ifrom,
-          to: ito,
-          browsedFor: [],
-          data: null
-        };
-
-        // add the edge to the edgegraph:
-        edgeGraph[ifrom].push(edge);
-        edgeGraph[ito].push(edge);
-        edges.push(edge);
-      };
+      
       const nFaces = geom.index.count / 3;
       for (let i=0; i<nFaces; ++i){
         const ia = geom.index.array[3*i];
         const ib = geom.index.array[3*i + 1];
         const ic = geom.index.array[3*i + 2];
         
-        add_edge(ia, ib);
-        add_edge(ib, ic);
-        add_edge(ic, ia);  
+        add_edge(ia, ib, edgeGraph, edges);
+        add_edge(ib, ic, edgeGraph, edges);
+        add_edge(ic, ia, edgeGraph, edges);  
       }
 
       geom.userData.edgeGraph = edgeGraph;
       geom.userData.edges = edges;
+    },
+
+
+    add_diagonalEdges: function(geom){
+      const edgeGraph = geom.userData.edgeGraph;
+      const edges = geom.userData.edges;
+      const vertices = geom.userData.vertices;
+
+      // create counter diagonal edges:
+      const counterDiagonalEdgesParams = []; 
+      edges.forEach(function(edge){
+        // test if edge is a diagonal edge:
+        // Extract list of points connected to FROM, except TO:
+        const fromConnecteds = get_connectedPointsIndice(edgeGraph, edge.from);
+        remove_valFromList(edge.to, fromConnecteds)
+
+        // Extract list of points connected to TO, except FROM:
+        const toConnecteds = get_connectedPointsIndice(edgeGraph, edge.to);
+        remove_valFromList(edge.from, toConnecteds)
+        
+        // compute intersection between fromConnecteds and toConnecteds:
+        const L = intersect_lists(toConnecteds, fromConnecteds);
+        if (L.length !== 2) return;
+        
+        if (!test_ifQuad(
+          vertices[edge.from],
+          vertices[L[0]],
+          vertices[edge.to],
+          vertices[L[1]]
+          )) return;
+
+        // we need to create the counterDiagonal edge:
+        const counterEdgeParams = [L[0], L[1]];
+        counterDiagonalEdgesParams.push(counterEdgeParams);
+      });
+      console.log('INFO in WebARRocksFaceFlexibleMaskHelper: ', counterDiagonalEdgesParams.length, 'counter diagonal edges have been found');
+
+      // add counter diagonal edges to geom data:
+      counterDiagonalEdgesParams.forEach(function(counterEdgeParams){
+        add_edge(counterEdgeParams[0], counterEdgeParams[1], edgeGraph, edges);
+      });
     },
 
 
@@ -187,12 +298,20 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
         if (!allFace3DKeypoints[label]){
           return;
         }
+
+        const kpPos = new THREE.Vector3();
+        const kpData = allFace3DKeypoints[label];
+        if (typeof(kpData) === 'number'){ // indice is provided
+          kpPos.copy(vertices[kpData]);
+        } else { // position is provided
+          kpPos.fromArray(kpData);
+        }
         
         // instantiate keypoint:
         const keypoint = {
           label: label,
           ind: labelIndice,
-          position: new THREE.Vector3().fromArray(allFace3DKeypoints[label]),
+          position: kpPos,
           positionMesh: new THREE.Vector3(),
           positionView: new THREE.Vector3(),
           positionClip: new THREE.Vector4(),
@@ -225,9 +344,9 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
     },
 
 
-    compute_keypointsInfluences: function(geom, keypoints){
+    compute_closestKeypointsEdgeDistances: function(geom, keypoints){
       // for each point of geom, get between 1 and 3 closest keypoints
-      // and their influence.
+      // and their edge distance
       // 
       // do an edgegraph browse in width starting by keypoints
       
@@ -237,6 +356,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
       for (let i = 0; i<vertices.length; ++i){
         keypointsInfluences[i] = [];
       }
+      console.log('Info in flexible mask helper: there are ', vertices.length, 'vertices in the flexible geometry');
 
       // get vertices equivalences:
       const verticesEqs = geom.userData.verticesEqs;
@@ -301,13 +421,27 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
       that.reset_edgeGraphBrowse(geom);
       
       return keypointsInfluences;
-    }, //end compute_keypointsInfluences()
+    }, //end compute_closestKeypointsEdgeDistances()
 
 
-    normalize_keypointsInfluences: function( keypointsInfluences ){
-      // normalize, pad keypointsInfluences
-      // build VBO ready array
-      
+    compute_keypointsInfluences: function( keypoints, keypointsInfluences ){
+      // compute mean distance:
+      const edgeDistanceMeansPerKeypoint = new Float32Array(keypoints.length);
+      const edgeDistanceMeansPerKeypointCount = new Uint16Array(keypoints.length);
+      keypointsInfluences.forEach(function(influences){
+        for (let i=0; i<influences.length; ++i){
+          const infl = influences[i];
+          edgeDistanceMeansPerKeypoint[infl.kpIndice] += infl.edgeDistance;
+          ++edgeDistanceMeansPerKeypointCount[infl.kpIndice];
+        }
+      });
+      for (let i=0; i<keypoints.length; ++i){
+        if (edgeDistanceMeansPerKeypointCount[i]){
+          edgeDistanceMeansPerKeypoint[i] /= edgeDistanceMeansPerKeypointCount[i];
+        }
+      }     
+
+      // compute keypoints influences from edge distances:
       const n = keypointsInfluences.length;
       const keypointsIndices = new Float32Array(3 * n);
       const keypointsMorphInfluences = new Float32Array(3 * n);
@@ -329,6 +463,10 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
           // if there is only 1 influence, bind to KP:
           keypointsIndices [ 3 * i ] = influences[0].kpIndice;
           keypointsMorphInfluences[ 3 * i ] = 1;
+          if (_settings.debugKeypointInfluencesCount){
+            keypointsIndices [ 3 * i ] = 1;
+            keypointsMorphInfluences[ 3 * i ] = 1;
+          }
           return;
         }
 
@@ -350,16 +488,24 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
           const influence = nullEdgesInfluences[0];
           keypointsIndices [ 3 * i ] = influence.kpIndice;
           keypointsMorphInfluences[ 3 * i ] = 1;
+          if (_settings.debugKeypointInfluencesCount){
+            keypointsIndices [ 3 * i ] = 2;
+            keypointsMorphInfluences[ 3 * i ] = 0;
+          }
           return;
-        } else if (nullEdgesInfluences.length > 0){
+        } else if (nullEdgesInfluences.length > 1){
           const nInfls = Math.min(nullEdgesInfluences.length, 3);
           for (let iInfl = 0; iInfl<nInfls; ++iInfl){
             const influence = nullEdgesInfluences[iInfl];
             keypointsIndices [ 3 * i ] = influence.kpIndice;
             keypointsMorphInfluences[ 3 * i ] = 1 / nInfls;
           }
-          return;
+          if (_settings.debugKeypointInfluencesCount){
+            keypointsIndices [ 3 * i ] = 3;
+            keypointsMorphInfluences[ 3 * i ] = 1;
+          }
           //throw new Error ('invalid influences');
+          return;          
         }
 
         // now we have 2 or 3 keypoints and none has a null edgeDistance
@@ -367,15 +513,33 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
         keypointsIndices [ 3 * i + 1 ] = influences[1].kpIndice;
 
         if (influences.length === 2){
+          if (_settings.debugKeypointInfluencesCount){
+            keypointsIndices [ 3 * i ] = 4;
+            keypointsMorphInfluences[ 3 * i ] = 1;
+            return;
+          }
           const sumEdgeDistances = influences[1].edgeDistance + influences[0].edgeDistance;
           keypointsMorphInfluences[ 3 * i ] = influences[1].edgeDistance / sumEdgeDistances;
           keypointsMorphInfluences[ 3 * i + 1 ] = influences[0].edgeDistance / sumEdgeDistances;
           return;
         }
 
+        // There are 3 keypoints:
+        if (_settings.debugKeypointInfluencesCount){
+          keypointsIndices [ 3 * i ] = 5;
+          keypointsMorphInfluences[ 3 * i ] = 1;
+          return;
+        }
+
         keypointsIndices [ 3 * i + 2 ] = influences[2].kpIndice;
 
-        const ea = influences[0].edgeDistance, eb = influences[1].edgeDistance, ec = influences[2].edgeDistance;
+        const f = function(infl){
+          const d = infl.edgeDistance;
+          const d0 = edgeDistanceMeansPerKeypoint[infl.kpIndice];
+          return Math.exp(2*d/d0);
+        }
+
+        const ea = f(influences[0]), eb = f(influences[1]), ec = f(influences[2]);
         const denom = ea*eb + ea*ec + eb*ec;
 
         keypointsMorphInfluences[ 3 * i ] = eb*ec / denom;
@@ -395,7 +559,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
         indices: keypointsIndices,
         morphInfluences: keypointsMorphInfluences
       };
-    }, //end normalize_keypointsInfluences()
+    }, //end compute_keypointsInfluences()
 
 
     decay_keypointsMorphInfluences: function(geom, keypoints, keypointsMorphInfluences, decayRange){
@@ -556,8 +720,29 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
     },
 
 
-    build_flexibleMask: function(geom, face3DKeypointsPositions, optionsArg){
+    build_flexibleMaskFromStdMetadata(scene, ARTrackingFaceMetadata, updateSolvePnP){
+      const geom = that.extract_flexibleMaskGeometry(scene, ARTrackingFaceMetadata['DEFORMEDID']);
+      const flexibleMaskPoints = {};
+      ARTrackingFaceMetadata['DEFORMEDKEYPOINTS'].forEach(function(stdKp){
+        if (!_stdLabelsMap[stdKp['label']]) return;
+        const label = _stdLabelsMap[stdKp['label']];
+        flexibleMaskPoints[label] = stdKp['co'];
+      });
+      
+      const flexibleMaskMesh = that.build_flexibleMask(geom, flexibleMaskPoints, {
+        kpInfluenceDecay: ARTrackingFaceMetadata['DEFORMINFLUCENCERANGE']
+      });
 
+      if (updateSolvePnP){
+        // update pose computation using AR tracking metadata:
+        WebARRocksFaceHelper.update_solvePnP(flexibleMaskPoints, null);
+      }
+
+      return flexibleMaskMesh;
+    },
+
+
+    build_flexibleMask: function(geom, face3DKeypointsPositions, optionsArg){
       const options = Object.assign({}, _defaultBuildOptions, optionsArg);
 
       if (_settings.debugMaskMesh){
@@ -565,10 +750,12 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
       }
 
       that.preprocess_geom(geom); // build edge graph, vertices array, ...
+      that.add_diagonalEdges(geom); // detect quads and add diagonal edges
+
       const keypoints = that.select_keypoints(geom, face3DKeypointsPositions);
       const keypointsCount = keypoints.length;
-      const keypointsInfluences = that.compute_keypointsInfluences(geom, keypoints);
-      const keypointsMorphInfluences = that.normalize_keypointsInfluences(keypointsInfluences);
+      const keypointsInfluences = that.compute_closestKeypointsEdgeDistances(geom, keypoints);
+      const keypointsMorphInfluences = that.compute_keypointsInfluences(keypoints, keypointsInfluences);
       if (_settings.debugKeypointInfluencesCoeffs !== -1){
         that.debug_keypointInfluencesCoeffs(keypoints, keypointsInfluences, keypointsMorphInfluences, _settings.debugKeypointInfluencesCoeffs);
       }

@@ -272,8 +272,6 @@ const WebARRocksMirror = (function(){
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.outputEncoding = THREE.sRGBEncoding;
 
-    // set lighting:
-    
     // load envmap if necessary:
     if (_spec.envmapURL){ // see https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_gltf.html
       const pmremGenerator = new THREE.PMREMGenerator( renderer );

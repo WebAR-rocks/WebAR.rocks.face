@@ -3,47 +3,6 @@
 const WebARRocksFaceHelper = (function(){
   const _settings = {
     cameraMinVideoDimFov: 38, // min camera FoV in degrees (either horizontal or vertical depending on the camera)
-    
-    objPointsPositions: { // 3d positions, got using Blender in edit mode and opening dev/face.obj
-                          // the value added as comment is the point indice
-      'leftEyeCtr': [33.7,37.9,45.9], // 6022
-      'rightEyeCtr':[-33.7,37.9,45.9], // 5851
-
-      'leftEyeInt': [16,36,40], // 6026
-      'rightEyeInt':[-16,36,40], // 5855
-
-      'leftEyeExt': [46,37.9,38],  // 1808
-      'rightEyeExt':[-46,37.9,38], // 2214
-
-      'leftEyeBot': [33,31,45], // 2663
-      'rightEyeBot':[-33,31,45], // 4462
-
-      'leftEarBottom': [77,-18.6,-18], // 65
-      'rightEarBottom': [-77,-18.6,-18], // 245
-
-      'leftEarEarring': [81, -37, -24.8], // 3874
-      'rightEarEarring': [-81, -37, -24.8], // 5625
-      
-      'noseLeft': [21,-0.1,67], // 1791
-      'noseRight': [-21,-0.1,67], // 2198
-
-      'noseBottom': [0, -0.6, 82], // 468
-      'noseOuter': [0, 15.4, 93], // 707
-
-      "mouthLeft":  [27, -29.9, 70.8], // 32
-      "mouthRight": [-27, -29.9, 70.8], // 209
-
-      "upperLipBot": [0, -24, 83.5], // 3072
-      "upperLipTop": [0, -17.2, 86.3],// 595
-      "lowerLipTop": [0, -26, 84.3],// 627
-      "lowerLipBot": [0, -34, 89.6],// 2808
-
-      "leftEyeBrowInt": [15, 55.4, 51.2], // 3164
-      "rightEyeBrowInt": [-15, 55.4, 51.2], // 4928
-      
-      'chin':  [0, -71, 91] // 2395  //*/
-    },
-
     pointSize: 5, // when landmarks are displayed, their size in pixels
 
     // debug options:
@@ -51,9 +10,50 @@ const WebARRocksFaceHelper = (function(){
   };
 
 
-  const _deg2rad = Math.PI / 180;
+  const _defaultSolvePnPObjPointsPositions = { // 3d positions, got using Blender in edit mode and opening dev/face.obj
+                        // the value added as comment is the point indice
+    'leftEyeCtr': [33.7,37.9,45.9], // 6022
+    'rightEyeCtr':[-33.7,37.9,45.9], // 5851
 
+    'leftEyeInt': [16,36,40], // 6026
+    'rightEyeInt':[-16,36,40], // 5855
+
+    'leftEyeExt': [46,37.9,38],  // 1808
+    'rightEyeExt':[-46,37.9,38], // 2214
+
+    'leftEyeBot': [33,31,45], // 2663
+    'rightEyeBot':[-33,31,45], // 4462
+
+    'leftEarBottom': [77,-18.6,-18], // 65
+    'rightEarBottom': [-77,-18.6,-18], // 245
+
+    'leftEarEarring': [81, -37, -24.8], // 3874
+    'rightEarEarring': [-81, -37, -24.8], // 5625
+    
+    'noseLeft': [21,-0.1,67], // 1791
+    'noseRight': [-21,-0.1,67], // 2198
+
+    'noseBottom': [0, -0.6, 82], // 468
+    'noseOuter': [0, 15.4, 93], // 707
+
+    "mouthLeft":  [27, -29.9, 70.8], // 32
+    "mouthRight": [-27, -29.9, 70.8], // 209
+
+    "upperLipBot": [0, -24, 83.5], // 3072
+    "upperLipTop": [0, -17.2, 86.3],// 595
+    "lowerLipTop": [0, -26, 84.3],// 627
+    "lowerLipBot": [0, -34, 89.6],// 2808
+
+    "leftEyeBrowInt": [15, 55.4, 51.2], // 3164
+    "rightEyeBrowInt": [-15, 55.4, 51.2], // 4928
+    
+    'chin':  [0, -71, 91] // 2395  //*/
+  };
+  const _defaultSolvePnPImgPointsLabel = ['chin', 'leftEarBottom', 'rightEarBottom', 'noseOuter', 'leftEyeExt', 'rightEyeExt'];
+    
+  const _deg2rad = Math.PI / 180;
   let _cameraFoVY = -1;
+  let _spec = null;
 
   // features:
   const _defaultFeatures = {
@@ -61,13 +61,12 @@ const WebARRocksFaceHelper = (function(){
     landmarks: true,   // display landmarks
     threejs: false    // initialize THREE.JS
   };
-  let _features = null;
   const _shps = {
     drawPoints: null,
     copy: null
   };
 
-  let _gl = null, _cv = null, _glVideoTexture = null, _customCallbackReady = false, _customCallbackTrack = false;
+  let _gl = null, _cv = null, _glVideoTexture = null;
   let _videoElement = null;
   let _landmarksLabels = null, _landmarksIndices = {};
   const _focals = [0, 0];
@@ -78,42 +77,11 @@ const WebARRocksFaceHelper = (function(){
     glVerticesVBO: null
   };
 
-  const _featureSolvePnP = {
-    currentSolverIndex: 1,
-    solverChangeThresholds: [
-      -8 * _deg2rad,
-      8 * _deg2rad
-    ], //ry values (in radians) where to change the solver
+  const _featureSolvePnP = {    
     isCenterObjPoints: false,
-    solverChangeHysteresis: 5 * _deg2rad, //hysteresis in radian, to avoid solver switch instabilities
-
-    objPoints: [], //will be sorted by solver
+    objPoints: [], // will be sorted by solver
     objPointsMeans: [],
-    imgPointsLabels: [
-      // first parameter set: same solver for all sides::
-
-      // 1st solver: right side
-      ['chin', 'leftEarBottom', 'rightEarBottom', 'noseOuter', 'leftEyeExt', 'rightEyeExt'],
-
-      // 2nd solver: face 
-      ['chin', 'leftEarBottom', 'rightEarBottom', 'noseOuter', 'leftEyeExt', 'rightEyeExt'],
-
-      // 3rd solver: left side
-      ['chin', 'leftEarBottom', 'rightEarBottom', 'noseOuter', 'leftEyeExt', 'rightEyeExt'],
-
-
-      // second parameter set: change solver depending on face side:
-      // 1st solver: right side
-      /*['chin', 'leftEyeExt', 'noseOuter', 'leftEarBottom', 'rightEarBottom', 'noseLeft'],
-
-      // 2nd solver: face 
-      ['chin', 'noseOuter', 'leftEyeExt', 'rightEyeExt', 'rightEarBottom', 'leftEarBottom'],
-      
-      // 3rd solver: left side
-      ['chin', 'rightEyeExt', 'noseOuter', 'rightEarBottom', 'leftEarBottom', 'noseRight']
-      //*/
-    ],
-    imgPointsLMIndices: [], //will be sorted by solver
+    imgPointsLMIndices: [], // will be sorted by solver
     imgPointsPx: []
   };
   const _featureThree = {
@@ -203,30 +171,28 @@ const WebARRocksFaceHelper = (function(){
     const cotanHalfFovX = 1.0 / Math.tan(halfFovXRad);
     const fx = 0.5 * that.get_viewWidth() * cotanHalfFovX; //*/
 
-    console.log('INFO in WebARRocksFaceHelper - init_PnPSolver(): fy =', fy);
-    
-    _featureSolvePnP.imgPointsLabels.forEach(init_PnPSolverSide);
+    console.log('INFO in WebARRocksFaceHelper - focal_y =', fy);
     _focals[0] = fy, _focals[1] = fy;
   }
 
-  function init_PnPSolverSide(imgPointsLabels, solverIndex){
+  function init_PnPSolver(imgPointsLabels, objPointsPositions){
     const imgPointsPx = [];
     for (let i=0; i<imgPointsLabels.length; ++i){
       imgPointsPx.push([0, 0]);
     }
-    _featureSolvePnP.imgPointsPx[solverIndex] = imgPointsPx;
-    _featureSolvePnP.imgPointsLMIndices[solverIndex] = imgPointsLabels.map(
+    _featureSolvePnP.imgPointsPx = imgPointsPx;
+    _featureSolvePnP.imgPointsLMIndices = imgPointsLabels.map(
       function(label, ind){
         return _landmarksLabels.indexOf(label);
       });
-    _featureSolvePnP.objPoints[solverIndex] = imgPointsLabels.map(
+    _featureSolvePnP.objPoints = imgPointsLabels.map(
       function(label, ind){
-        return _settings.objPointsPositions[label].slice(0);
+        return objPointsPositions[label].slice(0);
       }); 
 
     if (_featureSolvePnP.isCenterObjPoints){
       // compute mean for each solver:
-      _featureSolvePnP.objPoints.forEach(function(objPoints, solverIndex){
+      _featureSolvePnP.objPoints.forEach(function(objPoints){
         // compute mean:
         const mean = [0, 0, 0];
         objPoints.forEach(function(pt){
@@ -234,7 +200,7 @@ const WebARRocksFaceHelper = (function(){
         });
         const n = objPoints.length;
         mean[0] /= n, mean[1] /= n, mean[2] /= n;
-        _featureSolvePnP.objPointsMeans[solverIndex] = mean;
+        _featureSolvePnP.objPointsMeans = mean;
 
         // substract mean:
         objPoints.forEach(function(pt){
@@ -246,6 +212,17 @@ const WebARRocksFaceHelper = (function(){
 
   function init_featureThreejs(){
     console.log('INFO in WebARRocksFaceHelper - init_featureThreejs()');
+
+    if (_spec.canvasThree){
+      _featureThree.canvas = _spec.canvasThree;
+      _featureThree.isUseSeparateCanvas = true;
+    }
+    _featureThree.isPostProcessing = _spec.isPostProcessing;
+    _featureThree.taaLevel = _spec.taaLevel;
+    if ( _featureThree.taaLevel > 0 ){
+      _featureThree.isPostProcessing = true;
+    }
+
     if (_featureThree.isUseSeparateCanvas){ // WebAR.rocks.face and THREE.js use 2 canvas with 2 different WebGL context
       _featureThree.renderer = new THREE.WebGLRenderer({
         canvas: _featureThree.canvas,
@@ -296,8 +273,9 @@ const WebARRocksFaceHelper = (function(){
 
     // debug solvePnP face objPoints:
     if (_settings.debugObjPoints){
-      Object.keys(_settings.objPointsPositions).forEach(function(objPointKey){
-        const objPoint = _settings.objPointsPositions[objPointKey];
+      const objPointsPositions = _spec.solvePnPObjPointsPositions;
+      Object.keys(objPointsPositions).forEach(function(objPointKey){
+        const objPoint = objPointsPositions[objPointKey];
         const s = 3;
         const debugCube = new THREE.Mesh(new THREE.BoxGeometry( s, s, s ), new THREE.MeshBasicMaterial({
           color: 0xff0000
@@ -323,8 +301,8 @@ const WebARRocksFaceHelper = (function(){
   function callbackReady(err, spec){
     if (err){
       console.log('ERROR in WebARRocksFaceHelper. ERR =', err);
-      if (_customCallbackReady){
-        _customCallbackReady(err, null);
+      if (_spec.callbackReady){
+        _spec.callbackReady(err, null);
       }
       return;
     }
@@ -344,18 +322,19 @@ const WebARRocksFaceHelper = (function(){
     });
 
     init_shps();
-    if (_features.landmarks){
+    if (_spec.features.landmarks){
       init_featureDrawPoints();
     }
-    if (_features.threejs){
+    if (_spec.features.threejs){
       init_featureThreejs();
     }
-    if (_features.solvePnP){
+    if (_spec.features.solvePnP){
       update_focals();
+      init_PnPSolver(_spec.solvePnPImgPointsLabels, _spec.solvePnPObjPointsPositions);
     }
     
-    if (_customCallbackReady){
-      if (_features.threejs){
+    if (_spec.callbackReady){
+      if (_spec.features.threejs){
         spec.threeFaceFollower = _featureThree.faceFollower;
         spec.threeScene = _featureThree.scene;
         spec.threeRenderer = _featureThree.renderer;
@@ -374,7 +353,7 @@ const WebARRocksFaceHelper = (function(){
           delete(spec.threeVideoTexture.onUpdate);
         }
       }
-      _customCallbackReady(err, spec);
+      _spec.callbackReady(err, spec);
     }
   } //end callbackReady()
 
@@ -382,29 +361,29 @@ const WebARRocksFaceHelper = (function(){
     _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
 
     // draw the video:
-    if (_features.video){
+    if (_spec.features.video){
       draw_video();
     }
 
     if (detectState.isDetected) {
       // draw landmarks:
-      if (_features.landmarks){
+      if (_spec.features.landmarks){
         draw_landmarks(detectState);
       }
 
-      if (_features.solvePnP){
+      if (_spec.features.solvePnP){
         draw_solvePnP(detectState);
       }
 
-      if (_features.threejs){
+      if (_spec.features.threejs){
         draw_threejs();
       }
     }
     
     _gl.flush();
 
-    if (_customCallbackTrack){
-      _customCallbackTrack(detectState);
+    if (_spec.callbackTrack){
+      _spec.callbackTrack(detectState);
     }
   } //end callbackTrack
   //END WEBARROCKSFACE CALLBACKS:
@@ -443,40 +422,19 @@ const WebARRocksFaceHelper = (function(){
   }
 
   function draw_solvePnP(detectState){
-    // update _featureSolvePnP.currentSolverIndex:
-    let newIndex = 0;
-    for (let i=0; i<_featureSolvePnP.solverChangeThresholds.length; ++i) {
-      if (detectState['ry'] > _featureSolvePnP.solverChangeThresholds[i]){
-        newIndex = i + 1;
-      } else {
-        break;
-      }
-    }
-
-    // apply hysteresis:
-    if (newIndex !== _featureSolvePnP.currentSolverIndex){
-      // get threshold ry value between newIndex and current index:
-      const thresholdIndex = Math.floor((newIndex + _featureSolvePnP.currentSolverIndex) / 2.0);
-      if (Math.abs(detectState['ry']-_featureSolvePnP.solverChangeThresholds[thresholdIndex]) > _featureSolvePnP.solverChangeHysteresis){
-        _featureSolvePnP.currentSolverIndex = newIndex;
-        console.log('solver index:', _featureSolvePnP.currentSolverIndex)
-      }
-    }
-
-    //_featureSolvePnP.currentSolverIndex = 3;
     const w2 = that.get_viewWidth() / 2;
     const h2 = that.get_viewHeight() / 2;
-    const imgPointsPx = _featureSolvePnP.imgPointsPx[_featureSolvePnP.currentSolverIndex];
-    _featureSolvePnP.imgPointsLMIndices[_featureSolvePnP.currentSolverIndex].forEach(function(ind, i){
+    const imgPointsPx = _featureSolvePnP.imgPointsPx;
+    _featureSolvePnP.imgPointsLMIndices.forEach(function(ind, i){
       const imgPointPx = imgPointsPx[i];
       imgPointPx[0] = - detectState.landmarks[ind][0] * w2,  // X in pixels
       imgPointPx[1] = - detectState.landmarks[ind][1] * h2;  // Y in pixels
     });
 
-    const objectPoints = _featureSolvePnP.objPoints[_featureSolvePnP.currentSolverIndex];
+    const objectPoints = _featureSolvePnP.objPoints;
     const solved = WEBARROCKSFACE.compute_pose(objectPoints, imgPointsPx, _focals[0], _focals[1]);
 
-    if (_features.threejs && solved){
+    if (_spec.features.threejs && solved){
       const m = _featureThree.matMov.elements;
       const r = solved.rotation, t = solved.translation;
 
@@ -495,7 +453,7 @@ const WebARRocksFaceHelper = (function(){
       if (vf.z > 0){
         _featureThree.faceFollowerParent.matrix.copy(_featureThree.matMov);
         if (_featureSolvePnP.isCenterObjPoints){
-          const mean = _featureSolvePnP.objPointsMeans[ _featureSolvePnP.currentSolverIndex];
+          const mean = _featureSolvePnP.objPointsMeans;
           _featureThree.faceFollower.position.fromArray(mean).multiplyScalar(-1);
         }
       }
@@ -548,7 +506,7 @@ const WebARRocksFaceHelper = (function(){
         gl_FragColor = vec4(0.,1.,0.,1.);\n\
       }";
 
-    if (_features.landmarks){
+    if (_spec.features.landmarks){
       _shps.drawPoints = build_shaderProgram(shaderVertexSource, shaderFragmentSource, 'DRAWPOINT');
     }
   }
@@ -558,41 +516,42 @@ const WebARRocksFaceHelper = (function(){
 
   const that = {
     init: function(spec){
-      const specLM = Object.assign({
+      _spec = Object.assign({
+        features: {},
+        spec: {},
+
+        // SolvePnP specifics:
+        solvePnPObjPointsPositions: _defaultSolvePnPObjPointsPositions,
+        solvePnPImgPointsLabels: _defaultSolvePnPImgPointsLabel,
+
+        // THREE specifics:
+        canvasThree: null,
+        isPostProcessing: false,
+        taaLevel: 0,
+
+        // callbacks:
+        callbackReady: null,
+        callbackTrack: null
+      }, spec);
+      _spec.features = Object.assign({}, _defaultFeatures, _spec.features);
+
+      // init WEBAR.rocks.face:WEBARROCKSFACE
+      const defaultSpecLM = {
         canvas: null,
+        canvasId: 'WebARRocksFaceCanvas',
         NNCpath: '../../dist/',
         callbackReady: callbackReady,
         callbackTrack: callbackTrack
-      }, spec.spec);
-      if (specLM.canvas === null){
-        const canvasId = specLM.canvasId ||  'WebARRocksFaceCanvas';
-        specLM.canvas = document.getElementById(canvasId);
+      };
+      _spec.spec = Object.assign({}, defaultSpecLM, _spec.spec);
+      if (_spec.spec.canvas === null){
+        _spec.spec.canvas = document.getElementById(_spec.spec.canvasId);
       }
-      WEBARROCKSFACE.init(specLM);
-
-      if (spec.canvasThree){
-        _featureThree.canvas = spec.canvasThree;
-        _featureThree.isUseSeparateCanvas = true;
-      }
-
-      if (typeof(spec.features)!=='undefined'){
-        _features = Object.assign(_defaultFeatures, spec.features);
-      }
-      if (typeof(spec.callbackReady)!=='undefined'){
-        _customCallbackReady = spec.callbackReady;
-      }
-      if (typeof(spec.callbackTrack)!=='undefined'){
-        _customCallbackTrack = spec.callbackTrack;
-      }
-      _featureThree.isPostProcessing = ( spec.isPostProcessing ) ? true : false;
-      _featureThree.taaLevel = ( spec.taaLevel ) ? spec.taaLevel : 0;
-      if ( _featureThree.taaLevel > 0 ){
-        _featureThree.isPostProcessing = true;
-      }
+      WEBARROCKSFACE.init(_spec.spec);
     },
 
     get_facePointPositions: function(){
-      return _settings.objPointsPositions;
+      return _spec.solvePnPObjPointsPositions;
     },
 
     resize: function(w, h){ //should be called after resize
@@ -602,10 +561,10 @@ const WebARRocksFaceHelper = (function(){
         _featureThree.canvas.height = h;
       }
       WEBARROCKSFACE.resize();
-      if (_features.threejs){
+      if (_spec.features.threejs){
         that.update_threeCamera();
       }
-      if (_features.solvePnP){
+      if (_spec.features.solvePnP){
         update_focals();
       }
     },
@@ -675,6 +634,14 @@ const WebARRocksFaceHelper = (function(){
 
     get_viewAspectRatio: function(){
       return that.get_viewWidth() / that.get_viewHeight();
+    },
+
+    update_solvePnP: function(objPointsPositions,imgPointsLabels){
+      if (objPointsPositions){
+        _spec.solvePnPObjPointsPositions = Object.assign(_spec.solvePnPObjPointsPositions, objPointsPositions);
+      }
+      _spec.solvePnPImgPointsLabels = imgPointsLabels || _spec.solvePnPImgPointsLabels;
+      init_PnPSolver(_spec.solvePnPImgPointsLabels, _spec.solvePnPObjPointsPositions);
     },
 
     update_threeCamera: function(){
