@@ -26,8 +26,8 @@ const WebARRocksFaceCanvas2DHelper = (function(){
     _gl.shaderSource(shader, source);
     _gl.compileShader(shader);
     if (!_gl.getShaderParameter(shader, _gl.COMPILE_STATUS)) {
-      alert("ERROR IN " + typeString + " SHADER : " + _gl.getShaderInfoLog(shader));
-      console.log('Buggy shader source : \n', source);
+      alert("ERROR IN " + typeString + " SHADER: " + _gl.getShaderInfoLog(shader));
+      console.log('Buggy shader source: \n', source);
       return false;
     }
     return shader;
@@ -163,14 +163,14 @@ const WebARRocksFaceCanvas2DHelper = (function(){
         callbackReady: callbackReady,
         callbackTrack: callbackTrack,
         stabilizationSettings: {
-          'translationFactorRange': [0.002, 0.005],//translation speed quality factor
-          'rotationFactorRange': [0.03, 0.05],     //rotation speed quality factor
-          'qualityFactorRange': [0.8, 0.9],        //compare detected state with these values
-          'alphaRange': [0.05, 0.92],              //for state stabilization : alpha min (when detection quality is good)
-          'LMmedianFilterLength': 10,              //Median filter window size
-          'LMmedianFilterSkip': 3,                 //Remove this number of value in median filter window size, then average the remaining values
-          'LMminDisplacement': 0.5,                //change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
-          'qualityGoodDetectionThreshold': 0.08,   //good detection considered if quality is above this value
+          'translationFactorRange': [0.002, 0.005],// translation speed quality factor
+          'rotationFactorRange': [0.03, 0.05],     // rotation speed quality factor
+          'qualityFactorRange': [0.8, 0.9],        // compare detected state with these values
+          'alphaRange': [0.05, 0.92],              // for state stabilization: alpha min (when detection quality is good)
+          'LMmedianFilterLength': 10,              // Median filter window size
+          'LMmedianFilterSkip': 3,                 // Remove this number of value in median filter window size, then average the remaining values
+          'LMminDisplacement': 0.5,                // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
+          'qualityGoodDetectionThreshold': 0.08,   // good detection considered if quality is above this value
         }
       }, _spec.spec));
     }

@@ -163,7 +163,7 @@ const WebARRocksResizer = (function(){
         // get display size of the canvas:
         const domRect = _domCanvas.getBoundingClientRect();
         if (domRect.width===0 || domRect.height===0){
-          console.log('WARNING in WebARRocksResize.size_canvas() : the canvas has its width or its height null, Retry a bit later...');
+          console.log('WARNING in WebARRocksResizer.size_canvas() : the canvas has its width or its height null, Retry a bit later...');
           if (++_resizeAttemptsCounter>20){
             options.callback('CANNOT_RESIZECANVAS');
             return;
@@ -231,3 +231,10 @@ const WebARRocksResizer = (function(){
   }; //end that
   return that;
 })();
+
+// Export ES6 module:
+try {
+  module.exports = WebARRocksResizer;
+} catch(e){
+  console.log('ES6 Module not exported');
+}

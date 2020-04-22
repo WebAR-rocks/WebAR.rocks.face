@@ -682,3 +682,10 @@ const WebARRocksFaceHelper = (function(){
   }; //end that
   return that;
 })();
+
+// Export ES6 module:
+try {
+  module.exports = WebARRocksFaceHelper;
+} catch(e){
+  console.log('ES6 Module not exported');
+}

@@ -863,3 +863,10 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
   }
   return that;
 })();
+
+// Export ES6 module:
+try {
+  module.exports = WebARRocksFaceFlexibleMaskHelper;
+} catch(e){
+  console.log('ES6 Module not exported');
+}
