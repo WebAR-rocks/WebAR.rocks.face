@@ -72,7 +72,7 @@ function build_scene(threeInstances){
   });
 
   // add the occluder:
-  WebARRocksFaceHelper.add_threejsOccluder('assets/occluder.glb', null, threeLoadingManager);
+  WebARRocksFaceHelper.add_threejsOccluderFromFile('assets/occluder.glb', null, threeLoadingManager);
 
   // add tone mapping:
   _threeInstances.threeRenderer.toneMapping = THREE.ACESFilmicToneMapping;

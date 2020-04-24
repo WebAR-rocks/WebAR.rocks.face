@@ -300,7 +300,7 @@ const WebARRocksMirror = (function(){
 
     // load occluder:
     if (_spec.occluderURL){
-      _threeInstances.occluder = WebARRocksFaceHelper.add_threejsOccluder(_spec.occluderURL, null, _threeInstances.loadingManager, _spec.debugOccluder);
+      _threeInstances.occluder = WebARRocksFaceHelper.add_threejsOccluderFromFile(_spec.occluderURL, null, _threeInstances.loadingManager, _spec.debugOccluder);
     }
 
     // load glasses:

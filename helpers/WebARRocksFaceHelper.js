@@ -569,7 +569,44 @@ const WebARRocksFaceHelper = (function(){
       }
     },
 
-    add_threejsOccluder: function(occluderURL, callback, threeLoadingManager, isDebug){
+    add_threejsOccluder: function(occluder, isDebug, occluderMesh){
+      if (!occluderMesh){
+        occluderMesh = new THREE.Mesh();
+      }
+      let occluderGeometry = null;
+      if (occluder.type === 'BufferGeometry'){
+        occluderGeometry = occluder;
+      } else if (occluder.scene){
+        occluder.scene.traverse(function(threeStuff){
+          if (threeStuff.type !== 'Mesh'){
+            return;
+          }
+          if (occluderGeometry !== null && occluderGeometry !== threeStuff.geometry){
+            throw new Error('The occluder should contain only one Geometry');
+          }
+          occluderGeometry = threeStuff.geometry;
+        });
+      } else {
+        throw new Error('Wrong occluder data format');
+      }
+      
+      let mat = new THREE.ShaderMaterial({
+        vertexShader: THREE.ShaderLib.basic.vertexShader,
+        fragmentShader: "precision lowp float;\n void main(void){\n gl_FragColor = vec4(1.,0.,0.,1.);\n }",
+        uniforms: THREE.ShaderLib.basic.uniforms,
+        side: THREE.DoubleSide,
+        colorWrite: false
+      });
+      if (isDebug){
+        occluderGeometry.computeVertexNormals(); mat = new THREE.MeshNormalMaterial({side: THREE.DoubleSide});
+      }
+      occluderMesh.renderOrder = -1e12; // render first
+      occluderMesh.material = mat;
+      occluderMesh.geometry = occluderGeometry;
+      _featureThree.faceFollower.add(occluderMesh);
+    },
+
+    add_threejsOccluderFromFile: function(occluderURL, callback, threeLoadingManager, isDebug){
       const occluderMesh = new THREE.Mesh();
       const extension = occluderURL.split('.').pop().toUpperCase();
       const loader = {
@@ -579,37 +616,7 @@ const WebARRocksFaceHelper = (function(){
       }[extension];
 
       new loader(threeLoadingManager).load(occluderURL, function(occluder){
-        let occluderGeometry = null;
-        if (occluder.type === 'BufferGeometry'){
-          occluderGeometry = occluder;
-        } else if (occluder.scene){
-          occluder.scene.traverse(function(threeStuff){
-            if (threeStuff.type !== 'Mesh'){
-              return;
-            }
-            if (occluderGeometry !== null && occluderGeometry !== threeStuff.geometry){
-              throw new Error('The occluder should contain only one Geometry');
-            }
-            occluderGeometry = threeStuff.geometry;
-          });
-        } else {
-          throw new Error('Wrong occluder data format');
-        }
-        
-        let mat = new THREE.ShaderMaterial({
-          vertexShader: THREE.ShaderLib.basic.vertexShader,
-          fragmentShader: "precision lowp float;\n void main(void){\n gl_FragColor=vec4(1.,0.,0.,1.);\n }",
-          uniforms: THREE.ShaderLib.basic.uniforms,
-          side: THREE.DoubleSide,
-          colorWrite: false
-        });
-        if (isDebug){
-          occluderGeometry.computeVertexNormals(); mat = new THREE.MeshNormalMaterial({side: THREE.DoubleSide});
-        }
-        occluderMesh.renderOrder = -1e12; // render first
-        occluderMesh.material = mat;
-        occluderMesh.geometry = occluderGeometry;
-        _featureThree.faceFollower.add(occluderMesh);
+        that.add_threejsOccluder(occluder, isDebug, occluderMesh);
         if (typeof(callback)!=='undefined' && callback) callback(occluderMesh);
       });
       return occluderMesh;
