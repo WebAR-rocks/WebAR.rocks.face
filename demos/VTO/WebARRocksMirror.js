@@ -19,12 +19,13 @@ const WebARRocksMirror = (function(){
       }*/
     },
 
-    glassesURL: null, // initial 3D model
+    isGlasses: true,
+    modelURL: null, // initial 3D model
     occluderURL: null, // occluder
     envmapURL: null,
 
     // lighting:
-    pointLightIntensity: 1.5,
+    pointLightIntensity: 0.8,
     pointLightY: 200, // larger -> move the pointLight to the top
     hemiLightIntensity: 0.8,
 
@@ -37,10 +38,10 @@ const WebARRocksMirror = (function(){
     // branch fading and bending:
     branchFadingZ: -0.9, // where to start branch fading. - -> to the back
     branchFadingTransition: 0.6, // 0 -> hard transition
-    branchBendingAngle: 5, //in degrees. 0 -> no bending
-    branchBendingZ: 0, //start brench bending at this position. - -> to the back
+    branchBendingAngle: 5, // in degrees. 0 -> no bending
+    branchBendingZ: 0, // start brench bending at this position. - -> to the back
 
-    resizeDelay: 50, // in milliseconds, min delay between 2 resizing
+    resizeDelay: 50, // in milliseconds, min delay between 2 canvas resizing
 
     debugLandmarks: false,
     debugOccluder: false
@@ -73,52 +74,60 @@ const WebARRocksMirror = (function(){
     return GLSLSource.replace(GLSLSearched, GLSLSearched + '\n' + GLSLInserted);
   }
 
-  function tweak_materialBranch(threeMat){
+  function tweak_material(threeMat, isGlassesBranch){
     const matBaseName = {
       "MeshStandardMaterial": "standard"
     }[threeMat.type];
 
     if (!matBaseName){
-      throw new Error('Cannot find the base material of the frame');
+      return threeMat;
     }
 
     const matBase = THREE.ShaderLib[matBaseName];
 
-    // custom material with fading at the end of the branches:
-    const uniforms = Object.assign({}, matBase.uniforms,
-      {
-        uBranchFading: {value: new THREE.Vector2(_spec.branchFadingZ, _spec.branchFadingTransition)}, //first value: position (lower -> to the back), second: transition brutality
+    const glassesBranchUniforms = (isGlassesBranch) ? {
+        uBranchFading: {value: new THREE.Vector2(_spec.branchFadingZ, _spec.branchFadingTransition)}, // first value: position (lower -> to the back), second: transition brutality
         uBranchBendingAngle: {value: _spec.branchBendingAngle * _d2r},
         uBranchBendingZ: {value: _spec.branchBendingZ}
-      });
+      } : {};
+
+    // custom material with fading at the end of the branches:
+    const uniforms = Object.assign({}, matBase.uniforms, glassesBranchUniforms);
 
     let vertexShaderSource = matBase.vertexShader;
-    // tweak vertex shader to bend the branches:
-    vertexShaderSource = "uniform float uBranchBendingAngle, uBranchBendingZ;\n" + vertexShaderSource;
-    let GLSLBendBranch = 'float zBranch = max(0.0, uBranchBendingZ-position.z);\n';
-    GLSLBendBranch += 'float bendBranchDx = tan(uBranchBendingAngle) * zBranch;\n';
-    GLSLBendBranch += 'transformed.x += sign(transformed.x) * bendBranchDx;\n';
-    GLSLBendBranch += 'transformed.z *= (1.0 - bendBranchDx);\n';
-    vertexShaderSource = insert_GLSLAfter(vertexShaderSource, '#include <begin_vertex>', GLSLBendBranch);
+    let fragmentShaderSource = matBase.fragmentShader;
 
-    // tweak vertex shader to give the Z of the current point. It will be used for branch fading:
-    vertexShaderSource = "varying float vPosZ;\n" + vertexShaderSource;
-    vertexShaderSource = insert_GLSLAfter(vertexShaderSource, '#include <fog_vertex>', 'vPosZ = position.z;');
+    if (isGlassesBranch){
+      // tweak vertex shader to bend the branches:
+      vertexShaderSource = "uniform float uBranchBendingAngle, uBranchBendingZ;\n" + vertexShaderSource;
+      let GLSLBendBranch = 'float zBranch = max(0.0, uBranchBendingZ-position.z);\n';
+      GLSLBendBranch += 'float bendBranchDx = tan(uBranchBendingAngle) * zBranch;\n';
+      GLSLBendBranch += 'transformed.x += sign(transformed.x) * bendBranchDx;\n';
+      GLSLBendBranch += 'transformed.z *= (1.0 - bendBranchDx);\n';
+      vertexShaderSource = insert_GLSLAfter(vertexShaderSource, '#include <begin_vertex>', GLSLBendBranch);
 
-    // tweak fragment shader to apply transparency at the end of the branches:
-    let fragmentShaderSource = "uniform vec2 uBranchFading;\n varying float vPosZ;\n" + matBase.fragmentShader;
-    const GLSLcomputeAlpha = 'gl_FragColor.a = smoothstep(uBranchFading.x - uBranchFading.y * 0.5, uBranchFading.x + uBranchFading.y * 0.5, vPosZ);'
-    fragmentShaderSource = insert_GLSLAfter(fragmentShaderSource, '#include <dithering_fragment>', GLSLcomputeAlpha);
+      // tweak vertex shader to give the Z of the current point. It will be used for branch fading:
+      vertexShaderSource = "varying float vPosZ;\n" + vertexShaderSource;
+      vertexShaderSource = insert_GLSLAfter(vertexShaderSource, '#include <fog_vertex>', 'vPosZ = position.z;');
+
+      // tweak fragment shader to apply transparency at the end of the branches:
+      fragmentShaderSource = "uniform vec2 uBranchFading;\n varying float vPosZ;\n" + fragmentShaderSource;
+      const GLSLcomputeAlpha = 'gl_FragColor.a = smoothstep(uBranchFading.x - uBranchFading.y * 0.5, uBranchFading.x + uBranchFading.y * 0.5, vPosZ);'
+      fragmentShaderSource = insert_GLSLAfter(fragmentShaderSource, '#include <dithering_fragment>', GLSLcomputeAlpha);
+    }
 
     // create a new, tweaked material:
     const materialSpec = {
       name: threeMat.name + '_tweaked',
-      defines: threeMat.defines,
+      defines: Object.assign({
+        STANDARD: ''
+      }, threeMat.defines),
 
       vertexShader: vertexShaderSource,
       fragmentShader: fragmentShaderSource,
       uniforms: uniforms,
       transparent: true,
+      opacity: threeMat.opacity,
       
       // params:
       fog: false,
@@ -141,13 +150,15 @@ const WebARRocksMirror = (function(){
       'diffuse',
       ['color', 'diffuse'],
       'opacity',
-      'emissive',
       'reflectivity',
 
       // PBR parameters (for standardMaterial):
       'metalness',
       'roughness',
-      'refractionRatio'
+      'refractionRatio',
+
+      // misc
+      'normalScale'
     ];
     
     // transfer uniform values:
@@ -164,8 +175,12 @@ const WebARRocksMirror = (function(){
       }
 
       const valSrc = threeMat[uniformSrc];
+      const val = (valSrc && typeof(valSrc.clone) === 'function') ? valSrc.clone() : valSrc;
       newMat.uniforms[uniformDst] = {
-        value: (valSrc && typeof(valSrc.clone) === 'function') ? valSrc.clone() : valSrc
+        value: val
+      }
+      if (typeof(newMat[uniformSrc]) === 'undefined'){
+        newMat[uniformSrc] = threeMat[uniformSrc];
       }
     });
     
@@ -173,28 +188,17 @@ const WebARRocksMirror = (function(){
       derivatives: true
     };
 
-    return newMat;
-  } //end tweak_materialBranch()
-
-  
-  function load_glasses(glassesURL, callback){
-    if (!glassesURL){
-      remove_glasses();
-      if (callback) callback(null);
-      return;
+    // otherwise scene envmap won't be applied properly:
+    if (threeMat.isMeshStandardMaterial){
+      newMat.isMeshStandardMaterial = true;
     }
 
-    new THREE.GLTFLoader(_threeInstances.loadingManager).load(glassesURL, function(model){
-      const scene = model.scene;
-      const threeGlasses = new THREE.Object3D();
+    return newMat;
+  } //end tweak_material()
 
-      const sceneObjects = scene.children.slice(0);
-      sceneObjects.forEach(function(child){
-        if (child.type === 'Object3D' || child.type === 'Mesh'){
-          threeGlasses.add(child);
-        }
-      });
 
+  function tweak_glassesModel(threeGlasses){
+    if (_spec.isGlasses){
       // the width of the head in the glasses 3D model is 2
       // and the width of the face in dev/face.obj is 154
       // so we need to scale the 3D model to 154/2 = 70
@@ -210,36 +214,53 @@ const WebARRocksMirror = (function(){
       // whereas in the glasses model the branches are parallel to the ground
       // so we need to rotate the glasses 3D model to look upward
       threeGlasses.rotation.set(-0.38,0,0); //X neg -> rotate branches down
+    }
 
-      // Tweak materials:
-      threeGlasses.traverse(function(threeStuff){
-        if (!threeStuff.material){
-          return;
+    // Tweak materials:
+    threeGlasses.traverse(function(threeStuff){
+      if (!threeStuff.material){
+        return;
+      }
+      let mat = threeStuff.material;
+
+      // take account of Blender custom properties added to materials
+      // and exported to GLTF/GLB by checking the "Export extras" exporter option
+      // the roughness for example can be exported using this:
+      if (mat.userData){
+        const threeJsCustomProperties = mat.userData;
+        for (let key in threeJsCustomProperties){
+          mat[key] = threeJsCustomProperties[key];
         }
-        let mat = threeStuff.material;
+      }
 
-        // take account of Blender custom properties added to materials
-        // and exported to GLTF/GLB by checking the "Export extras" exporter option
-        // the roughness for example can be exported using this:
-        if (mat.userData){
-          const threeJsCustomProperties = mat.userData;
-          for (let key in threeJsCustomProperties){
-            mat[key] = threeJsCustomProperties[key];
-          }
+      let isGlassesBranch = _spec.isGlasses;
+      isGlassesBranch = isGlassesBranch && mat.name && ( mat.name.indexOf('frame') !== -1 );
+
+      // Tweak material:
+      threeStuff.material = tweak_material(threeStuff.material, isGlassesBranch);
+    }); //end traverse objects with material
+  }
+  
+  function load_glasses(modelURL, callback){
+    if (!modelURL){
+      remove_glasses();
+      if (callback) callback(null);
+      return;
+    }
+
+    new THREE.GLTFLoader(_threeInstances.loadingManager).load(modelURL, function(model){
+      const scene = model.scene;
+      const threeGlasses = new THREE.Object3D();
+
+      const sceneObjects = scene.children.slice(0);
+      sceneObjects.forEach(function(child){
+        if (child.type === 'Object3D' || child.type === 'Mesh'){
+          threeGlasses.add(child);
         }
+      });
 
-        if (!mat.name){
-          return;
-        }
-
-        // Tweak by material name:
-        // add branch fading to all materials called 'frame':
-        if (mat.name.indexOf('frame') !== -1){
-          threeStuff.material = tweak_materialBranch(threeStuff.material);
-          mat = threeStuff.material;
-        }
-      }); //end traverse objects with material
-
+      tweak_glassesModel(threeGlasses);
+      
       // remove previous model:
       remove_glasses();
 
@@ -304,8 +325,8 @@ const WebARRocksMirror = (function(){
     }
 
     // load glasses:
-    if (_spec.glassesURL){
-      _threeInstances.glasses = load_glasses(_spec.glassesURL, null);
+    if (_spec.modelURL){
+      _threeInstances.glasses = load_glasses(_spec.modelURL, null);
     }
 
     // bloom:
@@ -360,7 +381,7 @@ const WebARRocksMirror = (function(){
 
 
         // Init WebAR.rocks.face through the helper:
-        WebARRocksFaceHelper.init({
+        const webARRocksSpec = {
           spec: _spec.specWebARRocksFace,
           canvas: _spec.canvasFace,
           canvasThree: _spec.canvasThree,
@@ -384,7 +405,14 @@ const WebARRocksMirror = (function(){
             _state = _states.idle;
             resolve();
           }
-        }); //end WebARRocksFaceHelper.init()
+        };
+        if (spec.solvePnPObjPointsPositions){
+          webARRocksSpec.solvePnPObjPointsPositions = spec.solvePnPObjPointsPositions;
+        }
+        if (spec.solvePnPImgPointsLabels){
+          webARRocksSpec.solvePnPImgPointsLabels = spec.solvePnPImgPointsLabels;
+        }
+        WebARRocksFaceHelper.init(webARRocksSpec);
       }); //end returned promise
     }, //end init()
 

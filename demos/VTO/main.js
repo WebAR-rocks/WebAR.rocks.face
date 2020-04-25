@@ -25,11 +25,11 @@ function main(){
     // (only the depth buffer is updated).
     // It is useful to hide the left glasses branch when the head turns on the left.
     occluderURL: "assets/models3D/occluder.glb",
-    glassesURL: "assets/models3D/glasses1.glb", //initial model loaded. false or null -> no model
+    modelURL: "assets/models3D/glasses1.glb", //initial model loaded. false or null -> no model
     envmapURL: "assets/envmaps/venice_sunset_1k.hdr",
 
     // lighting:
-    pointLightIntensity: 1.5, //intensity of the point light. Set to 0 to disable
+    pointLightIntensity: 0.8, //intensity of the point light. Set to 0 to disable
     pointLightY: 200, // larger -> move the pointLight to the top
     hemiLightIntensity: 0, // intensity of the hemispheric light. Set to 0 to disable (not really useful if we use an envmap)
 
@@ -45,7 +45,7 @@ function main(){
 
     // debug flags - all should be false for production:
     debugLandmarks: false,
-    debugOccluder: false,
+    debugOccluder: false
 
   }).then(function(){
     console.log('WebARRocksMirror initialized successfully');
