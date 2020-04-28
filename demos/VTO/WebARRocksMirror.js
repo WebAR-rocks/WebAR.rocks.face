@@ -13,10 +13,10 @@ const WebARRocksMirror = (function(){
 
     specWebARRocksFace: {
       NNCpath: '../../dist/NN_VTO.json',
-      /*scanSettings: { // harden detection:
-        threshold: 0.9,
+      scanSettings: { // harden detection:
+        threshold: 0.92,
         dThreshold: 1.5
-      }*/
+      }
     },
 
     isGlasses: true,

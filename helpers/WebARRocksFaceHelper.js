@@ -376,10 +376,14 @@ const WebARRocksFaceHelper = (function(){
       }
 
       if (_spec.features.threejs){
+        _featureThree.faceFollowerParent.visible = true;
         draw_threejs();
       }
+    } else if (_spec.features.threejs && _featureThree.faceFollowerParent.visible){
+      _featureThree.faceFollowerParent.visible = false;
+      draw_threejs();
     }
-    
+
     _gl.flush();
 
     if (_spec.callbackTrack){
