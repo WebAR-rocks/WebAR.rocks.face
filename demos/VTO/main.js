@@ -9,6 +9,8 @@ function main(){
     canvasFace: canvasFace,
     canvasThree: canvasThree,
 
+    maxFacesDetected: 2,
+
     // initial canvas dimensions:
     width: window.innerWidth,
     height: window.innerHeight,

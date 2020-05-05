@@ -14,9 +14,10 @@ const WebARRocksMirror = (function(){
     specWebARRocksFace: {
       NNCpath: '../../dist/NN_VTO.json',
       scanSettings: { // harden detection:
-        threshold: 0.92,
-        dThreshold: 1.5
+        threshold: 0.9,
+        dThreshold: 1.0
       }
+      //,maxFacesDetected: 2 // Experimental: add glasses on multiple detected faces
     },
 
     isGlasses: true,
@@ -49,7 +50,6 @@ const WebARRocksMirror = (function(){
   const _threeInstances = {
     glasses: new THREE.Object3D(),
     envMap: null,
-    occluder: null,
     loadingManager: null
   };
   let _spec = null, _WARFObjects = null;
@@ -266,8 +266,10 @@ const WebARRocksMirror = (function(){
 
       // add new model to face follower object:
       _threeInstances.glasses = threeGlasses;
-      if (_WARFObjects.threeFaceFollower){
-        _WARFObjects.threeFaceFollower.add(threeGlasses);
+      if (_WARFObjects.threeFaceFollowers){
+        _WARFObjects.threeFaceFollowers.forEach(function(threeFaceFollower){
+          threeFaceFollower.add(threeGlasses.clone());
+        });
       }
 
       if (callback){
@@ -278,8 +280,16 @@ const WebARRocksMirror = (function(){
 
   function remove_glasses(){
     // remove previous model:
-    if (_WARFObjects.threeFaceFollower && _threeInstances.glasses){
-      _WARFObjects.threeFaceFollower.remove(_threeInstances.glasses);
+    if (_WARFObjects.threeFaceFollowers && _threeInstances.glasses){
+      _WARFObjects.threeFaceFollowers.forEach(function(threeFaceFollower){
+        if (threeFaceFollower.children.length){
+          for (let i = threeFaceFollower.children.length-1; i >= 0; --i){
+            const child = threeFaceFollower.children[i];
+            if (child.userData.isOccluder) continue;
+            threeFaceFollower.remove(child);
+          }
+        }
+      });
       _threeInstances.glasses = null;
     }
   }
@@ -321,12 +331,12 @@ const WebARRocksMirror = (function(){
 
     // load occluder:
     if (_spec.occluderURL){
-      _threeInstances.occluder = WebARRocksFaceHelper.add_threejsOccluderFromFile(_spec.occluderURL, null, _threeInstances.loadingManager, _spec.debugOccluder);
+      WebARRocksFaceHelper.add_threejsOccluderFromFile(_spec.occluderURL, null, _threeInstances.loadingManager, _spec.debugOccluder);
     }
 
     // load glasses:
     if (_spec.modelURL){
-      _threeInstances.glasses = load_glasses(_spec.modelURL, null);
+      load_glasses(_spec.modelURL, null);
     }
 
     // bloom:

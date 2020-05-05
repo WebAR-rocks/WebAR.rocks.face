@@ -847,7 +847,13 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
     },
 
 
-    update_flexibleMask: function(camera, mesh, detectState){
+    update_flexibleMask: function(camera, mesh, detectStates){
+      if (detectStates.length){
+        throw new Error('Flexible mask currently only works for single face detection');
+      }
+
+      const detectState = detectStates;
+
       if (!detectState.isDetected || _settings.debugKeypointInfluencesRendering){
         return;
       }

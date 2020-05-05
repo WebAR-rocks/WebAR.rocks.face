@@ -103,11 +103,11 @@ function main(){
       threejs: true
     },
 
-    callbackTrack: function(detectState){
+    callbackTrack: function(detectStates){
       if (_flexibleMaskMesh === null){
         return;
       }
-      _flexibleMaskHelper.update_flexibleMask(_threeInstances.threeCamera, _flexibleMaskMesh, detectState);
+      _flexibleMaskHelper.update_flexibleMask(_threeInstances.threeCamera, _flexibleMaskMesh, detectStates);
     },
 
     callbackReady: function(err, threeInstances){
@@ -134,7 +134,7 @@ function build_scene(threeInstances){
     const debugMat = new THREE.MeshNormalMaterial({side: THREE.DoubleSide});
     const debugCubeMesh = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), debugMat);
     debugCubeMesh.scale.multiplyScalar(180);
-    _threeInstances.threeFaceFollower.add(debugCubeMesh);
+    _threeInstances.threeFaceFollowers[0].add(debugCubeMesh);
   }
 
   // build and add the flexible mask:
@@ -145,7 +145,7 @@ function build_scene(threeInstances){
     });
     //window.debugFlexibleMaskMesh = _flexibleMaskMesh; // for debugging in the JS console
     tweak_maskMaterial(_flexibleMaskMesh.material);
-    _threeInstances.threeFaceFollower.add(_flexibleMaskMesh);
+    _threeInstances.threeFaceFollowers[0].add(_flexibleMaskMesh);
   }).catch(function(err){
     console.log(err);
   });

@@ -93,8 +93,7 @@ const WebARRocksFaceHelper = (function(){
     composer: null,
     scene: null,
     camera: null,
-    faceFollower: null,
-    faceFollowerParent: null,
+    faceSlots: [],
     matMov: null,
     vecForward: null
   };
@@ -210,8 +209,8 @@ const WebARRocksFaceHelper = (function(){
     } //end if center obj points
   }
 
-  function init_featureThreejs(){
-    console.log('INFO in WebARRocksFaceHelper - init_featureThreejs()');
+  function init_featureThreejs(maxFacesDetected){
+    console.log('INFO in WebARRocksFaceHelper - init_featureThreejs(). Max faces detected = ', maxFacesDetected);
 
     if (_spec.canvasThree){
       _featureThree.canvas = _spec.canvasThree;
@@ -264,12 +263,22 @@ const WebARRocksFaceHelper = (function(){
 
     } // end if postprocessing
 
-    // create composite object (which follow the head):
-    _featureThree.faceFollowerParent = new THREE.Object3D();
-    _featureThree.faceFollower = new THREE.Object3D();
-    _featureThree.faceFollowerParent.frustumCulled = false;
-    _featureThree.faceFollowerParent.matrixAutoUpdate = false;
-    _featureThree.faceFollowerParent.add(_featureThree.faceFollower);
+    // create face slots objects:
+    _featureThree.faceSlots = [];
+    for (let i=0; i<maxFacesDetected; ++i){
+      // create composite object (which follow the head):
+      const faceFollowerParent = new THREE.Object3D();
+      const faceFollower = new THREE.Object3D();
+      faceFollowerParent.frustumCulled = false;
+      faceFollowerParent.visible = false;
+      faceFollowerParent.matrixAutoUpdate = false;
+      faceFollowerParent.add(faceFollower);
+      _featureThree.faceSlots.push({
+        faceFollower: faceFollower,
+        faceFollowerParent: faceFollowerParent
+      });
+      _featureThree.scene.add(faceFollowerParent);
+    }
 
     // debug solvePnP face objPoints:
     if (_settings.debugObjPoints){
@@ -281,15 +290,13 @@ const WebARRocksFaceHelper = (function(){
           color: 0xff0000
         }));
         debugCube.position.fromArray(objPoint);
-        _featureThree.faceFollower.add(debugCube);
+        _featureThree.faceSlots[0].faceFollower.add(debugCube);
       });
     }
 
     _featureThree.matMov = new THREE.Matrix4();
     _featureThree.vecForward = new THREE.Vector4();
       
-    _featureThree.scene.add(_featureThree.faceFollowerParent);
-
     that.update_threeCamera();
     window.debugT = _featureThree;
   }
@@ -326,7 +333,7 @@ const WebARRocksFaceHelper = (function(){
       init_featureDrawPoints();
     }
     if (_spec.features.threejs){
-      init_featureThreejs();
+      init_featureThreejs(spec.maxFacesDetected);
     }
     if (_spec.features.solvePnP){
       update_focals();
@@ -335,7 +342,9 @@ const WebARRocksFaceHelper = (function(){
     
     if (_spec.callbackReady){
       if (_spec.features.threejs){
-        spec.threeFaceFollower = _featureThree.faceFollower;
+        spec.threeFaceFollowers = _featureThree.faceSlots.map(function(faceSlot){
+          return faceSlot.faceFollower;
+        });
         spec.threeScene = _featureThree.scene;
         spec.threeRenderer = _featureThree.renderer;
         spec.threeComposer = _featureThree.composer;
@@ -357,37 +366,26 @@ const WebARRocksFaceHelper = (function(){
     }
   } //end callbackReady()
 
-  function callbackTrack(detectState){
+  function callbackTrack(detectStates){
     _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
-
+   
     // draw the video:
     if (_spec.features.video){
       draw_video();
     }
 
-    if (detectState.isDetected) {
-      // draw landmarks:
-      if (_spec.features.landmarks){
-        draw_landmarks(detectState);
-      }
-
-      if (_spec.features.solvePnP){
-        draw_solvePnP(detectState);
-      }
-
-      if (_spec.features.threejs){
-        _featureThree.faceFollowerParent.visible = true;
-        draw_threejs();
-      }
-    } else if (_spec.features.threejs && _featureThree.faceFollowerParent.visible){
-      _featureThree.faceFollowerParent.visible = false;
+    if (detectStates.length){ // multiface detection:
+      detectStates.forEach(draw_faceSlot);
+    } else { // only 1 face detected
+      draw_faceSlot(detectStates, 0);
+    }
+    
+    if (_spec.features.threejs){
       draw_threejs();
     }
 
-    _gl.flush();
-
     if (_spec.callbackTrack){
-      _spec.callbackTrack(detectState);
+      _spec.callbackTrack(detectStates);
     }
   } //end callbackTrack
   //END WEBARROCKSFACE CALLBACKS:
@@ -403,6 +401,27 @@ const WebARRocksFaceHelper = (function(){
     // the VBO filling the whole screen is still bound to the context
     // fill the viewPort
     _gl.drawElements(_gl.TRIANGLES, 3, _gl.UNSIGNED_SHORT, 0);
+  }
+
+  function draw_faceSlot(detectState, slotIndex){
+    const faceSlot = _featureThree.faceSlots[slotIndex];
+    if (detectState.isDetected) {
+      
+      // draw landmarks:
+      if (_spec.features.landmarks){
+        draw_landmarks(detectState);
+      }
+
+      if (_spec.features.solvePnP){
+        draw_solvePnP(detectState, faceSlot);
+      }
+
+      if (_spec.features.threejs){
+        faceSlot.faceFollowerParent.visible = true;
+      }
+    } else if (_spec.features.threejs && faceSlot.faceFollowerParent.visible){
+      faceSlot.faceFollowerParent.visible = false;
+    }
   }
 
   function draw_landmarks(detectState){
@@ -425,7 +444,7 @@ const WebARRocksFaceHelper = (function(){
     _featureDrawLandmarks.vertices[lmIndex*2 + 1] = lm[1]; // Y
   }
 
-  function draw_solvePnP(detectState){
+  function draw_solvePnP(detectState, faceSlot){
     const w2 = that.get_viewWidth() / 2;
     const h2 = that.get_viewHeight() / 2;
     const imgPointsPx = _featureSolvePnP.imgPointsPx;
@@ -455,10 +474,10 @@ const WebARRocksFaceHelper = (function(){
       vf.set(0, 0, 1, 0); // look forward;
       vf.applyMatrix4(_featureThree.matMov);
       if (vf.z > 0){
-        _featureThree.faceFollowerParent.matrix.copy(_featureThree.matMov);
+        faceSlot.faceFollowerParent.matrix.copy(_featureThree.matMov);
         if (_featureSolvePnP.isCenterObjPoints){
           const mean = _featureSolvePnP.objPointsMeans;
-          _featureThree.faceFollower.position.fromArray(mean).multiplyScalar(-1);
+          faceSlot.faceFollower.position.fromArray(mean).multiplyScalar(-1);
         }
       }
     }
@@ -547,7 +566,7 @@ const WebARRocksFaceHelper = (function(){
         callbackReady: callbackReady,
         callbackTrack: callbackTrack
       };
-      _spec.spec = Object.assign({}, defaultSpecLM, _spec.spec);
+      _spec.spec = Object.assign({}, defaultSpecLM, spec.spec);
       if (_spec.spec.canvas === null){
         _spec.spec.canvas = document.getElementById(_spec.spec.canvasId);
       }
@@ -607,7 +626,11 @@ const WebARRocksFaceHelper = (function(){
       occluderMesh.renderOrder = -1e12; // render first
       occluderMesh.material = mat;
       occluderMesh.geometry = occluderGeometry;
-      _featureThree.faceFollower.add(occluderMesh);
+      occluderMesh.userData.isOccluder = true;
+
+      _featureThree.faceSlots.forEach(function(faceSlot){
+        faceSlot.faceFollower.add(occluderMesh.clone());
+      });
     },
 
     add_threejsOccluderFromFile: function(occluderURL, callback, threeLoadingManager, isDebug){
