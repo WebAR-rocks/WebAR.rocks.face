@@ -66,132 +66,50 @@ const WebARRocksMirror = (function(){
 
   let _timerResize = null;
 
-  // for debugging in the console:
-  window.debugEZThree = _threeInstances;
-
   // private functions:
   function insert_GLSLAfter(GLSLSource, GLSLSearched, GLSLInserted){
     return GLSLSource.replace(GLSLSearched, GLSLSearched + '\n' + GLSLInserted);
   }
-
+ 
   function tweak_material(threeMat, isGlassesBranch){
-    const matBaseName = {
-      "MeshStandardMaterial": "standard"
-    }[threeMat.type];
 
-    if (!matBaseName){
-      return threeMat;
-    }
-
-    const matBase = THREE.ShaderLib[matBaseName];
-
-    const glassesBranchUniforms = (isGlassesBranch) ? {
-        uBranchFading: {value: new THREE.Vector2(_spec.branchFadingZ, _spec.branchFadingTransition)}, // first value: position (lower -> to the back), second: transition brutality
-        uBranchBendingAngle: {value: _spec.branchBendingAngle * _d2r},
-        uBranchBendingZ: {value: _spec.branchBendingZ}
-      } : {};
-
-    // custom material with fading at the end of the branches:
-    const uniforms = Object.assign({}, matBase.uniforms, glassesBranchUniforms);
-
-    let vertexShaderSource = matBase.vertexShader;
-    let fragmentShaderSource = matBase.fragmentShader;
-
-    if (isGlassesBranch){
-      // tweak vertex shader to bend the branches:
-      vertexShaderSource = "uniform float uBranchBendingAngle, uBranchBendingZ;\n" + vertexShaderSource;
-      let GLSLBendBranch = 'float zBranch = max(0.0, uBranchBendingZ-position.z);\n';
-      GLSLBendBranch += 'float bendBranchDx = tan(uBranchBendingAngle) * zBranch;\n';
-      GLSLBendBranch += 'transformed.x += sign(transformed.x) * bendBranchDx;\n';
-      GLSLBendBranch += 'transformed.z *= (1.0 - bendBranchDx);\n';
-      vertexShaderSource = insert_GLSLAfter(vertexShaderSource, '#include <begin_vertex>', GLSLBendBranch);
-
-      // tweak vertex shader to give the Z of the current point. It will be used for branch fading:
-      vertexShaderSource = "varying float vPosZ;\n" + vertexShaderSource;
-      vertexShaderSource = insert_GLSLAfter(vertexShaderSource, '#include <fog_vertex>', 'vPosZ = position.z;');
-
-      // tweak fragment shader to apply transparency at the end of the branches:
-      fragmentShaderSource = "uniform vec2 uBranchFading;\n varying float vPosZ;\n" + fragmentShaderSource;
-      const GLSLcomputeAlpha = 'gl_FragColor.a = smoothstep(uBranchFading.x - uBranchFading.y * 0.5, uBranchFading.x + uBranchFading.y * 0.5, vPosZ);'
-      fragmentShaderSource = insert_GLSLAfter(fragmentShaderSource, '#include <dithering_fragment>', GLSLcomputeAlpha);
-    }
-
-    // create a new, tweaked material:
-    const materialSpec = {
-      name: threeMat.name + '_tweaked',
-      defines: Object.assign({
-        STANDARD: ''
-      }, threeMat.defines),
-
-      vertexShader: vertexShaderSource,
-      fragmentShader: fragmentShaderSource,
-      uniforms: uniforms,
-      transparent: true,
-      opacity: threeMat.opacity,
-      
-      // params:
-      fog: false,
-      flatShading: threeMat.flatShading,
-      vertexTangents: threeMat.vertexTangents,
-      vertexColors: threeMat.vertexColors,
-      lights: true
-    };
-    const newMat = new THREE.ShaderMaterial(materialSpec);
-    const uniformsTransfert = [
-      // textures:
-      'map', 'alphaMap', 'envMap', 'aoMap', 'metalnessMap', 'normalMap', 'bumpMap',
-      'lightMap', 'roughnessMap', 'diffuseMap',
-
-      // texture params:
-      'envMapIntensity',
-
-      // parameters:
-      'color',
-      'diffuse',
-      ['color', 'diffuse'],
-      'opacity',
-      'reflectivity',
-
-      // PBR parameters (for standardMaterial):
-      'metalness',
-      'roughness',
-      'refractionRatio',
-
-      // misc
-      'normalScale'
-    ];
+    const newMat = threeMat.clone();
+    newMat.fog = false;
     
-    // transfer uniform values:
-    uniformsTransfert.forEach(function(uniformSrcDst){
-      let uniformSrc = '', uniformDst = '';
-      if (typeof(uniformSrcDst) === 'string'){
-        uniformSrc = uniformSrcDst, uniformDst = uniformSrcDst;
-      } else {
-        uniformSrc = uniformSrcDst[0];
-        uniformDst = uniformSrcDst[1];
-      }
-      if (!(uniformSrc in threeMat) || !(uniformDst in newMat.uniforms)){
-        return;
+    newMat.onBeforeCompile = function(shaders){
+
+      let vertexShaderSource = shaders.vertexShader;
+      let fragmentShaderSource = shaders.fragmentShader;
+
+      if (isGlassesBranch){
+        const glassesBranchUniforms = {
+          uBranchFading: {value: new THREE.Vector2(_spec.branchFadingZ, _spec.branchFadingTransition)}, // first value: position (lower -> to the back), second: transition brutality
+          uBranchBendingAngle: {value: _spec.branchBendingAngle * _d2r},
+          uBranchBendingZ: {value: _spec.branchBendingZ}
+        };
+        Object.assign(shaders.uniforms, glassesBranchUniforms);
+
+        // tweak vertex shader to bend the branches:
+        vertexShaderSource = "uniform float uBranchBendingAngle, uBranchBendingZ;\n" + vertexShaderSource;
+        let GLSLBendBranch = 'float zBranch = max(0.0, uBranchBendingZ-position.z);\n';
+        GLSLBendBranch += 'float bendBranchDx = tan(uBranchBendingAngle) * zBranch;\n';
+        GLSLBendBranch += 'transformed.x += sign(transformed.x) * bendBranchDx;\n';
+        GLSLBendBranch += 'transformed.z *= (1.0 - bendBranchDx);\n';
+        vertexShaderSource = insert_GLSLAfter(vertexShaderSource, '#include <begin_vertex>', GLSLBendBranch);
+
+        // tweak vertex shader to give the Z of the current point. It will be used for branch fading:
+        vertexShaderSource = "varying float vPosZ;\n" + vertexShaderSource;
+        vertexShaderSource = insert_GLSLAfter(vertexShaderSource, '#include <fog_vertex>', 'vPosZ = position.z;');
+
+        // tweak fragment shader to apply transparency at the end of the branches:
+        fragmentShaderSource = "uniform vec2 uBranchFading;\n varying float vPosZ;\n" + fragmentShaderSource;
+        const GLSLcomputeAlpha = 'gl_FragColor *= smoothstep(uBranchFading.x - uBranchFading.y * 0.5, uBranchFading.x + uBranchFading.y * 0.5, vPosZ);'
+        fragmentShaderSource = insert_GLSLAfter(fragmentShaderSource, '#include <dithering_fragment>', GLSLcomputeAlpha);
       }
 
-      const valSrc = threeMat[uniformSrc];
-      const val = (valSrc && typeof(valSrc.clone) === 'function') ? valSrc.clone() : valSrc;
-      newMat.uniforms[uniformDst] = {
-        value: val
-      }
-      if (typeof(newMat[uniformSrc]) === 'undefined'){
-        newMat[uniformSrc] = threeMat[uniformSrc];
-      }
-    });
-    
-    newMat.extensions = {
-      derivatives: true
-    };
-
-    // otherwise scene envmap won't be applied properly:
-    if (threeMat.isMeshStandardMaterial){
-      newMat.isMeshStandardMaterial = true;
-    }
+      shaders.vertexShader = vertexShaderSource;
+      shaders.fragmentShader = fragmentShaderSource;
+    } // end newMat.onBeforeCompile
 
     return newMat;
   } //end tweak_material()

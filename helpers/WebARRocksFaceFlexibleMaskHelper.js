@@ -676,44 +676,22 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
         kpDisplacements.push(new THREE.Vector3());
       }
 
-      // build material parameters:
-      const baseMat = THREE.ShaderLib.standard;
-      const uniforms = Object.assign({
-        'kpDisplacements': { value: kpDisplacements }
-      }, baseMat.uniforms);
-      let vertexShader = baseMat.vertexShader;
-
-      // tweak vertex shader:
-      const GLSLDeclareVars = "attribute vec3 kpIndices, kpMorphInfluences;\n\
-        uniform vec3 kpDisplacements[" + keypointsCount.toString() + "];\n";
-      vertexShader = tweak_threeShaderAdd(vertexShader, '#include <common>', GLSLDeclareVars);
-      const GLSLDisplace = "vec3 displaced = vec3(0.0, 0.0, 0.0);\n\
-        displaced += kpMorphInfluences.x * kpDisplacements[int(kpIndices.x + 0.1)];\n\
-        displaced += kpMorphInfluences.y * kpDisplacements[int(kpIndices.y + 0.1)];\n\
-        displaced += kpMorphInfluences.z * kpDisplacements[int(kpIndices.z + 0.1)];\n\
-        transformed += displaced;";
-      vertexShader = tweak_threeShaderAdd(vertexShader, '#include <begin_vertex>', GLSLDisplace);
-      
       // instantiate material:
-      const mat = new THREE.ShaderMaterial({
-        uniforms: uniforms,
-        vertexShader: vertexShader,
-        fragmentShader: baseMat.fragmentShader,
-        lights: true,
-        fog: false,
-        extensions: {
-          derivatives: true
-        }
-      });
-
-      // copy texture if necessary:
-      if (originalMaterial){
-        if (originalMaterial.map){
-          uniforms.map = {
-            value: originalMaterial.map
-          };
-          mat.map = originalMaterial.map;
-        }
+      const mat = originalMaterial.clone();
+      mat.onBeforeCompile = function(shaders){
+        shaders.uniforms['kpDisplacements'] = { value: kpDisplacements };
+        mat.userData.kpDisplacements = kpDisplacements;
+        
+         // tweak vertex shader:
+        const GLSLDeclareVars = "attribute vec3 kpIndices, kpMorphInfluences;\n\
+          uniform vec3 kpDisplacements[" + keypointsCount.toString() + "];\n";
+        shaders.vertexShader = tweak_threeShaderAdd(shaders.vertexShader, '#include <common>', GLSLDeclareVars);
+        const GLSLDisplace = "vec3 displaced = vec3(0.0, 0.0, 0.0);\n\
+          displaced += kpMorphInfluences.x * kpDisplacements[int(kpIndices.x + 0.1)];\n\
+          displaced += kpMorphInfluences.y * kpDisplacements[int(kpIndices.y + 0.1)];\n\
+          displaced += kpMorphInfluences.z * kpDisplacements[int(kpIndices.z + 0.1)];\n\
+          transformed += displaced;";
+        shaders.vertexShader = tweak_threeShaderAdd(shaders.vertexShader, '#include <begin_vertex>', GLSLDisplace);
       }
 
       return mat;
@@ -840,7 +818,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
 
     apply_keypointsDisplacements: function(mesh){
       const keypoints = mesh.userData.keypoints;
-      const kpDisplacementUniform = mesh.material.uniforms.kpDisplacements.value;
+      const kpDisplacementUniform = mesh.material.userData.kpDisplacements;// mesh.material.uniforms.kpDisplacements.value;
       keypoints.forEach(function(kp, kpIndice){
         kpDisplacementUniform[kpIndice].copy(kp.displacementObj);
       });

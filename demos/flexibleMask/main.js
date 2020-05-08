@@ -161,9 +161,9 @@ function build_scene(threeInstances){
 }
 
 function tweak_maskMaterial(mat){
-  //mat.uniforms.opacity.value = 0.6; // make the mask half transparent, for debug
-  mat.uniforms.metalness.value = 0;
-  mat.uniforms.roughness.value = 1; 
+  //mat.opacity.value = 0.6; // make the mask half transparent, for debug
+  mat.metalness.value = 0;
+  mat.roughness.value = 1; 
 }
 
 function start(){

@@ -79,7 +79,7 @@ function build_scene(threeInstances){
   _threeInstances.threeRenderer.outputEncoding = THREE.sRGBEncoding;
 
   // add lighting:
-  const pointLight = new THREE.PointLight(0xffffff, 2);
+  const pointLight = new THREE.PointLight(0xffffff, 1);
   _threeInstances.threeScene.add(pointLight);
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
   _threeInstances.threeScene.add(ambientLight);
