@@ -361,6 +361,8 @@ const WebARRocksEarrings3DHelper = (function(){
     },
 
     update_threeCamera: function(){
+      if (!_videoElement) return;
+      
       // compute aspectRatio:
       const cvw = that.get_viewWidth();
       const cvh = that.get_viewHeight();
