@@ -1,3 +1,16 @@
+/**
+ * Copyright 2020 WebAR.rocks ( https://webar.rocks )
+ * 
+ * WARNING: YOU SHOULD NOT MODIFY THIS FILE OTHERWISE WEBAR.ROCKS
+ * WON'T BE RESPONSIBLE TO MAINTAIN AND KEEP YOUR ADDED FEATURES
+ * WEBAR.ROCKS WON'T BE LIABLE FOR BREAKS IN YOUR ADDED FUNCTIONNALITIES
+ *
+ * WEBAR.ROCKS KEEP THE RIGHT TO WORK ON AN UNMODIFIED VERSION OF THIS SCRIPT.
+ * 
+ * THIS FILE IS A HELPER AND SHOULD NOT BE USED TO IMPLEMENT A SPECIFIC USER SCENARIO
+ * OR TO ADDRESS A SPECIFIC USE CASE.
+ */
+
 /*
  * Helper to use canvas2D with WebAR.rocks.face
  *
@@ -9,16 +22,19 @@ const WebARRocksFaceCanvas2DHelper = (function(){
 
   // private variables:
   let _spec = null;
-  let _gl, _cv, _glVideoTexture, _landmarksLabels;
+  let _gl = null, _cv = null, _glVideoTexture = null, _landmarksLabels = null;
 
   const _shps = {};
   const _friendlyData = {
-    detected: false,
+    isDetected: false,
     faceCrop: [[0,0],[0,0],[0,0],[0,0]],
     ry: 0,
     faceWidth: 0,
     landmarks: {}
   };
+
+  // degrees to radians:
+  const _deg2rad = Math.PI / 180;
 
   // private functions:
   function compile_shader(source, type, typeString) {
@@ -36,11 +52,11 @@ const WebARRocksFaceCanvas2DHelper = (function(){
   // build the shader program:
   function build_shaderProgram(shaderVertexSource, shaderFragmentSource, id) {
     // compile both shader separately:
-    const GLSLprecision='precision lowp float;';
-    const shaderVertex=compile_shader(shaderVertexSource, _gl.VERTEX_SHADER, "VERTEX " + id);
-    const shaderFragment=compile_shader(GLSLprecision + shaderFragmentSource, _gl.FRAGMENT_SHADER, "FRAGMENT " + id);
+    const GLSLprecision = 'precision lowp float;';
+    const shaderVertex = compile_shader(shaderVertexSource, _gl.VERTEX_SHADER, "VERTEX " + id);
+    const shaderFragment = compile_shader(GLSLprecision + shaderFragmentSource, _gl.FRAGMENT_SHADER, "FRAGMENT " + id);
 
-    const shaderProgram=_gl.createProgram();
+    const shaderProgram = _gl.createProgram();
     _gl.attachShader(shaderProgram, shaderVertex);
     _gl.attachShader(shaderProgram, shaderFragment);
 
@@ -112,9 +128,9 @@ const WebARRocksFaceCanvas2DHelper = (function(){
     draw_video();
 
     // compute friendly data:
-    _friendlyData.detected = detectState.detected > 0.5;
+    _friendlyData.isDetected = detectState.isDetected;
     
-    if (_friendlyData.detected){
+    if (_friendlyData.isDetected){
       // get canvas dimensions:
       const cvw = _cv.width;
       const cvh = _cv.height;
@@ -139,7 +155,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
       _friendlyData.faceWidth = w;
 
       // copy Y rotation:
-      _friendlyData.ry = detectState.ry * 180/Math.PI;
+      _friendlyData.ry = detectState.ry / _deg2rad;
 
       // compute landmarks pixel positions:
       const landmarks = _friendlyData.landmarks;
@@ -170,7 +186,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
           'LMmedianFilterLength': 10,              // Median filter window size
           'LMmedianFilterSkip': 3,                 // Remove this number of value in median filter window size, then average the remaining values
           'LMminDisplacement': 0.5,                // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
-          'qualityGoodDetectionThreshold': 0.08,   // good detection considered if quality is above this value
+          'qualityGoodDetectionThreshold': 0.08    // good detection considered if quality is above this value
         }
       }, _spec.spec));
     }

@@ -38,9 +38,9 @@ const WebARRocksResizer = (function(){
   // compute overlap between 2 rectangles A and B
   // characterized by their width and their height in pixels
   // the rectangles are centered
-  // return the ratio (pixels overlaped)/(total pixels)
+  // return the ratio (pixels overlaped) / (total pixels)
   function compute_overlap(whA, whB){ 
-    const aspectRatioA = whA[0] / whA[1]; //higher aspectRatio -> more landscape
+    const aspectRatioA = whA[0] / whA[1]; // higher aspectRatio -> more landscape
     const aspectRatioB = whB[0] / whB[1];
     let whLandscape = -1, whPortrait = -1;
     if (aspectRatioA > aspectRatioB){ 
@@ -101,7 +101,7 @@ const WebARRocksResizer = (function(){
     WEBARROCKSFACE.resize();
     _timerFullScreen = false;
     if (_callbackResize) {
-      _callbackResize();
+      _callbackResize(_whCanvasPx[0], _whCanvasPx[1]);
     }
   }
 
@@ -210,7 +210,7 @@ const WebARRocksResizer = (function(){
       setTimeout(options.callback.bind(null, false, bestCameraResolution), 1);
     }, //end size_canvas()
 
-    resize_canvas: function(){ //should be called if the canvas is resized to update the canvas resolution
+    resize_canvas: function(){ // should be called if the canvas is resized to update the canvas resolution
       if (_isFullScreen){
         return;
       }

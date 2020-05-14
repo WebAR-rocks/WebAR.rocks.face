@@ -1,12 +1,15 @@
 "use strict";
 
-let _canvasFace = null, _canvasOverlay = null, _ctx = null;
-let _earringImage = null;
+const _canvases = {
+  face: null, 
+  overlay:null
+};
+let _ctx = null, _earringImage = null;
 
 const _earringSettings = {
   image: 'images/earring.png',
-  angleHide: 5, //head rotation angle in degrees from which we should hide the earrings
-  angleHysteresis: 0.5, //add hysteresis to angleHide value, in degrees
+  angleHide: 5, // head rotation angle in degrees from which we should hide the earrings
+  angleHysteresis: 0.5, // add hysteresis to angleHide value, in degrees
   scale: 0.08,    // width of the earring compared to the face width (1 -> 100% of the face width)
   pullUp: 0.05,   // 0 -> earring are displayed at the bottom of the spotted position
                   // 1 -> earring are displaed above the spotted position 
@@ -14,13 +17,16 @@ const _earringSettings = {
            // 0-> earrings are at the bottom of the ear, 1-> earrings are further back
 }
 
-let _isRightEarringVisible = true, _isLeftEarringVisible = true;
+const _earringsVisibility = {
+  right: false,
+  left: false
+};
 
 function start(){
   WebARRocksFaceCanvas2DHelper.init({
     spec: {
       NNCpath: '../../dist/NN_EARS.json', // neural network model file
-      canvas: _canvasFace
+      canvas: _canvases.face
     },
 
     callbackReady: function(err, spec){ // called when everything is ready
@@ -34,12 +40,12 @@ function start(){
 
     callbackTrack: function(data){
       clear_canvas();
-      if (data.detected){
+      if (data.isDetected){
         draw_faceCrop(data.faceCrop);
         draw_earrings(data.landmarks, data.faceWidth, data.ry);
       } else {
-        _isRightEarringVisible = true;
-        _isLeftEarringVisible = true;
+        _earringsVisibility.right = true;
+        _earringsVisibility.left = true;
       }
     }
   });
@@ -67,23 +73,23 @@ function draw_earrings(landmarks, faceWidth, ry){
   const scale = _earringSettings.scale * faceWidth / _earringImage.width
   
   // right earring:
-  const rightEarringAngleHide = -_earringSettings.angleHide - _earringSettings.angleHysteresis * ((_isRightEarringVisible) ? 1 : -1);
+  const rightEarringAngleHide = -_earringSettings.angleHide - _earringSettings.angleHysteresis * ((_earringsVisibility.right) ? 1 : -1);
   if (ry > rightEarringAngleHide){
     const pos = mix_landmarks(landmarks.rightEarBottom, landmarks.rightEarEarring, _earringSettings.k);
     draw_earring(pos, scale);
-    _isRightEarringVisible = true;
+    _earringsVisibility.right = true;
   } else {
-    _isRightEarringVisible = false;
+    _earringsVisibility.right = false;
   }
 
   // left earring:
-  const leftEarringAngleHide = _earringSettings.angleHide + _earringSettings.angleHysteresis * ((_isLeftEarringVisible) ? 1 : -1);
-  if (ry < leftEarringAngleHide){
+  const leftEarringAngleHide = -_earringSettings.angleHide - _earringSettings.angleHysteresis * ((_earringsVisibility.left) ? 1 : -1);
+  if (-ry > leftEarringAngleHide){
     const pos = mix_landmarks(landmarks.leftEarBottom, landmarks.leftEarEarring, _earringSettings.k);
     draw_earring(pos, scale); 
-    _isLeftEarringVisible = true;
+    _earringsVisibility.left = true;
   } else {
-    _isLeftEarringVisible = false;
+    _earringsVisibility.left = false;
   }
 }
 
@@ -96,7 +102,7 @@ function draw_earring(pos, scale){
 }
 
 function clear_canvas(){
-  _ctx.clearRect(0, 0, _canvasOverlay.width, _canvasOverlay.height);
+  _ctx.clearRect(0, 0, _canvases.overlay.width, _canvases.overlay.height);
 }
 
 function main(){
@@ -105,18 +111,18 @@ function main(){
   _earringImage.src = _earringSettings.image;
 
   // Get canvas from the DOM:
-  _canvasFace = document.getElementById('WebARRocksFaceCanvas');
-  _canvasOverlay = document.getElementById('overlayCanvas');
+  _canvases.face = document.getElementById('WebARRocksFaceCanvas');
+  _canvases.overlay = document.getElementById('overlayCanvas');
 
   // Create 2D context for the overlay canvas (where the earring are drawn):
-  _ctx = _canvasOverlay.getContext('2d'); 
+  _ctx = _canvases.overlay.getContext('2d'); 
 
   // Set the canvas to fullscreen
   // and add an event handler to capture window resize:
   WebARRocksResizer.size_canvas({
     isFullScreen: true,
-    canvas: _canvasFace,     // WebARRocksFace main canvas
-    overlayCanvas: [_canvasOverlay], // other canvas which should be resized at the same size of the main canvas
+    canvas: _canvases.face,     // WebARRocksFace main canvas
+    overlayCanvas: [_canvases.overlay], // other canvas which should be resized at the same size of the main canvas
     callback: start
   })
 }

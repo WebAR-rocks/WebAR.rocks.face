@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-language" content="en-EN" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>WebAR.rocks.face 3D earrings demo</title>
+    
+    <!-- INCLUDE WebAR.rocks.face MAIN SCRIPT -->
+    <script src="../../dist/WebARRocksFace.js"></script>
+
+    <!-- INCLUDE EARRINGS3D HELPER -->
+    <script src="../../helpers/WebARRocksEarrings3DHelper.js"></script>
+
+    <!-- THREE.JS, FOR THE RENDERING -->
+    <!-- WARNING: for production you should replace three.js by three.min.js -->
+    <script src="../../libs/threejs/v112/three.js"></script>
+    <script src="../../libs/threejs/v112/GLTFLoader.js"></script>
+
+    <!-- INCLUDE RESIZER HELPER -->
+    <script src="../../helpers/WebARRocksResizer.js"></script>
+
+    <!-- INCLUDE DEMO SCRIPT -->
+    <script src="./main.js"></script>
+
+    <style type="text/css">
+      body {
+        margin: 0;
+      }
+      #WebARRocksFaceCanvas, #threeCanvas {
+        position: fixed;
+        max-width: 100vw;
+        top: 0;
+        left: 0;
+        /* mirror the canvas: */
+        transform: rotateY(180deg);
+      }
+      #WebARRocksFaceCanvas {
+        z-index: 0;
+      }
+      #threeCanvas {
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body onload="main()">
+    <!-- canvas where the earring will be displayed: -->
+    <canvas width="600" height="600" id='threeCanvas'></canvas>
+
+    <!-- canvas where the video will be displayed: -->
+    <canvas width="600" height="600" id='WebARRocksFaceCanvas'></canvas>
+  </body>
+</html>
+ 
