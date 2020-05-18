@@ -82,7 +82,8 @@ const WebARRocksResizer = (function(){
   }
 
   function resize_canvasToFullScreen(){
-    _whCanvasPx = [window['innerWidth'], window['innerHeight']];
+    const s = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
+    _whCanvasPx = [s*window['innerWidth'], s*window['innerHeight']];
     if (_isInvFullscreenWH){
       _whCanvasPx.reverse();
     }

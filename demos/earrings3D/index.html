@@ -15,8 +15,25 @@
 
     <!-- THREE.JS, FOR THE RENDERING -->
     <!-- WARNING: for production you should replace three.js by three.min.js -->
-    <script src="../../libs/threejs/v112/three.js"></script>
-    <script src="../../libs/threejs/v112/GLTFLoader.js"></script>
+    <script src="../../libs/threejs/v116/three.js"></script>
+    <script src="../../libs/threejs/v116/GLTFLoader.js"></script>
+
+    <!-- THREE.JS RGBE loader - you can remove it if you don't use envmap: -->
+    <script src="../../libs/threejs/v116/RGBELoader.js"></script>
+
+    <!-- THREE.JS postprocessing - you can remove it if you don't use bloom or temporal anti aliasing : -->
+    <script src="../../libs/threejs/v116/EffectComposer.js"></script>
+    <script src="../../libs/threejs/v116/ShaderPass.js"></script>
+    <script src="../../libs/threejs/v116/RenderPass.js"></script>
+    <script src="../../libs/threejs/v116/CopyShader.js"></script>
+
+    <!-- Bloom postprocessing: -->
+    <script src="../../libs/threejs/v112/UnrealBloomPassTweaked.js"></script>
+    <script src="../../libs/threejs/v116/LuminosityHighPassShader.js"></script>
+    
+    <!-- TAA specifics: -->
+    <script src="../../libs/threejs/v116/SSAARenderPass.js"></script>
+    <script src="../../libs/threejs/v116/TAARenderPass.js"></script>
 
     <!-- INCLUDE RESIZER HELPER -->
     <script src="../../helpers/WebARRocksResizer.js"></script>

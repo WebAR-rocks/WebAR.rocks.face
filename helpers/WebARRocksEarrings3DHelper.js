@@ -26,10 +26,13 @@ const WebARRocksEarrings3DHelper = (function(){
 
     earringsScale: 1,
     earsDistance: 22, // in cm, mean distance between the 2 ears
+
+    // camera parameters:
     cameraFovRange: [30, 90],
     cameraMinVideoDimFov: 40,
     cameraZoom: 1,
 
+    // ears occlusion:
     angleHide: 5, // head rotation angle in degrees from which we should hide the earrings
     angleHysteresis: 0.5, // add hysteresis to angleHide value, in degrees
     scale: 0.08,    // width of the earring compared to the face width (1 -> 100% of the face width)
@@ -38,11 +41,19 @@ const WebARRocksEarrings3DHelper = (function(){
     k: 0.7,  // position is interpolated between 2 keypoints. this is the interpolation coefficient
              // 0-> earrings are at the bottom of the ear, 1-> earrings are further back
     stabilizationSettings: {
-      'LMmedianFilterLength': 10,              // Median filter window size
-      'LMmedianFilterSkip': 3,                 // Remove this number of value in median filter window size, then average the remaining values
-      'LMminDisplacement': 0.7,                // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
-      'qualityGoodDetectionThreshold': 0.2    // good detection considered if quality is above this value
+      LMmedianFilterLength: 10,              // Median filter window size
+      LMmedianFilterSkip: 3,                 // Remove this number of value in median filter window size, then average the remaining values
+      LMminDisplacement: 0.7,                // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
+      qualityGoodDetectionThreshold: 0.2    // good detection considered if quality is above this value
     },
+
+    scanSettings: {
+      threshold: 0.7,
+      dThreshold: 0.9
+    },
+
+    // postprocessing:
+    taaLevel: 0,
 
     // debug flag:
     debugOccluder: false
@@ -52,6 +63,8 @@ const WebARRocksEarrings3DHelper = (function(){
   let _spec = null;
   const _three = {
     renderer: null,
+    renderSize: null,
+    composer: null,
     scene: null,
     loadingManager: null,
     camera: null,
@@ -140,6 +153,9 @@ const WebARRocksEarrings3DHelper = (function(){
     });
     _three.renderer.setClearAlpha(0);
 
+    // init composer (for postprocessing):
+    _three.composer = new THREE.EffectComposer( _three.renderer );
+
     // init scene:
     _three.scene = new THREE.Scene();
 
@@ -150,6 +166,22 @@ const WebARRocksEarrings3DHelper = (function(){
     const viewAspectRatio = _spec.canvasThree.width / _spec.canvasThree.height;
     _three.camera = new THREE.PerspectiveCamera(_cameraFoVY, viewAspectRatio, 0.1, 5000);
     that.update_threeCamera();
+
+    // set postprocessing:
+    const renderScenePass = new THREE.RenderPass( _three.scene, _three.camera );
+    if (_spec.taaLevel > 0){
+      // add temporal anti-aliasing pass:
+      const taaRenderPass = new THREE.TAARenderPass( _three.scene, _three.camera );
+      taaRenderPass.unbiased = false;
+      _three.composer.addPass( taaRenderPass );
+      taaRenderPass.sampleLevel = _spec.taaLevel;
+    }
+    _three.composer.addPass( renderScenePass );
+    if (_spec.taaLevel > 0){
+      renderScenePass.enabled = false;
+      const copyPass = new THREE.ShaderPass( THREE.CopyShader );
+      _three.composer.addPass( copyPass );
+    }
 
     // init earrings and hide them:
     const create_threeEarringContainer = function(){
@@ -283,7 +315,8 @@ const WebARRocksEarrings3DHelper = (function(){
       _three.earringLeft.visible = false;
     }
 
-    _three.renderer.render(_three.scene, _three.camera);
+    //_three.renderer.render(_three.scene, _three.camera);
+    _three.composer.render();
   } //end callbackTrack()
 
 
@@ -297,6 +330,7 @@ const WebARRocksEarrings3DHelper = (function(){
           canvas: _spec.canvasFace,
           NNCpath: _spec.NN,
           stabilizationSettings: _spec.stabilizationSettings,
+          scanSettings: _spec.scanSettings,
           callbackReady: function(err, spec){
             if (err){
               reject(err);
@@ -393,6 +427,8 @@ const WebARRocksEarrings3DHelper = (function(){
       // update drawing area:
       _three.renderer.setSize(cvw, cvh, false);
       _three.renderer.setViewport(0, 0, cvw, cvh);
+      _three.composer.setSize(cvw, cvh);
+
     }
   }; //end that
   return that;
