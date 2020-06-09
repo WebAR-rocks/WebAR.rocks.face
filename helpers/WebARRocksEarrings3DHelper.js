@@ -433,3 +433,10 @@ const WebARRocksEarrings3DHelper = (function(){
   }; //end that
   return that;
 })();
+
+// Export ES6 module:
+try {
+  module.exports = WebARRocksEarrings3DHelper;
+} catch(e){
+  console.log('ES6 Module not exported');
+}

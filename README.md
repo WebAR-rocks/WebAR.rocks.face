@@ -62,6 +62,7 @@ Here are the main features of the library:
 * glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTO/), [source code](/demos/VTO/)
 * 3D flexible mask: [live demo](https://webar.rocks/demos/face/demos/flexibleMask/), [source code](/demos/flexibleMask/)
 * 3D flexible mask 2: [live demo](https://webar.rocks/demos/face/demos/flexibleMask2/), [source code](/demos/flexibleMask2/)
+* lipstick VTO: [live demo](https://webar.rocks/demos/face/demos/lipstick/), [source code](/demos/lipstick/)
 * GIF Face replacement: [live demo](https://webar.rocks/demos/face/demos/faceReplacement/gif), [source code](/demos/faceReplacement/gif/)
 
 

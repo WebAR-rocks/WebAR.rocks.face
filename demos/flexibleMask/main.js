@@ -73,7 +73,7 @@ const _spec = {
   }, //*/
 
   // debug flags:
-  debugCube: false //display a cube tracking the head
+  debugCube: false // display a cube tracking the head
 }
 
 let _threeInstances = null;
@@ -137,13 +137,16 @@ function build_scene(threeInstances){
     _threeInstances.threeFaceFollowers[0].add(debugCubeMesh);
   }
 
+  // add the occluder:
+  //WebARRocksFaceHelper.add_threejsOccluderFromFile('assets/occluder.glb', null, threeLoadingManager);
+
   // build and add the flexible mask:
   _flexibleMaskHelper.load_geometryFromGLTF(threeLoadingManager, _spec.flexibleMaskURL).then(function(geom){
     const face3DKeypoints = (_spec.flexibleMaskPoints) ? _spec.flexibleMaskPoints : WebARRocksFaceHelper.get_facePointPositions();
     _flexibleMaskMesh = _flexibleMaskHelper.build_flexibleMask(geom, face3DKeypoints, {
       kpInfluenceDecay: _spec.kpInfluenceDecay // [ distance from the keypoint where decay start, distance from the keypoint where decay ends ]
     });
-    //window.debugFlexibleMaskMesh = _flexibleMaskMesh; // for debugging in the JS console
+    
     tweak_maskMaterial(_flexibleMaskMesh.material);
     _threeInstances.threeFaceFollowers[0].add(_flexibleMaskMesh);
   }).catch(function(err){

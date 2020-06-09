@@ -86,17 +86,15 @@ function start(){
 function set_postprocessing(){
   // bloom:
   if (_settings.bloom){ // see https://threejs.org/examples/#webgl_postprocessing_unreal_bloom
-
     // create the bloom postprocessing pass:
     const bloom = _settings.bloom;
-    const bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( _canvases.three.width, _canvases.three.height ),
+    const bloomPass = new THREE.UnrealBloomPass( _three.renderer.getSize(),
        bloom.strength,
        bloom.radius,
        bloom.threshold);
 
     _three.composer.addPass( bloomPass );
   }
-
 }
 
 function set_lighting(){

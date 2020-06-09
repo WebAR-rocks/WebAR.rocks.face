@@ -14,6 +14,77 @@
  * 
 */
 
+// BEGIN EMULATE DOM
+
+// import some usefull stuffs
+try {
+  var Buffer = require('buffer').Buffer;
+} catch(err) {
+  console.log('Cannot import Buffer package');
+}
+
+// emulate global variables:
+const navigator = {  
+  platform: "Linux x86_64",
+  userAgent: "forceWebGL1_noAntialiasing_noDOM"
+};
+
+const window = {
+  canvas: null,
+  innnerWidth: -1,
+  innerHeight: -1,
+  URL: {
+    createObjectURL: function() {
+      return null
+    }
+  },
+  addEventListener: function() {},
+  removeEventListener: function() {},
+  requestAnimationFrame: function(step) {
+    if (window.canvas === null){
+      setTimeout(step, 1);
+      return;
+    }
+    window.canvas.requestAnimationFrame(step)
+  },
+  cancelAnimationFrame: function(step) {
+    if (window.canvas === null){
+      return;
+    }
+    window.canvas.cancelAnimationFrame(step)
+  },
+  setCanvas: function(c) {
+    window.canvas = c;
+  }
+};
+
+const document = {
+  createElement: function(elementType){
+    switch(elementType){
+      case 'canvas':
+        return null; // return a real canvas
+    }
+  },
+  getElementById: function(elementId){
+    return null;
+  },
+  body: { appendChild: function(element){ return null; }}
+};
+
+if(typeof(wx) !== 'undefined'){ //WECHAT
+  const systemInfo = wx.getSystemInfoSync()
+  window.innnerWidth = systemInfo.windowWidth;
+  window.innnerHeight = systemInfo.windowHeight;
+}
+
+const FAKEDOM = {
+  window: window,
+  document: document,
+  navigator: navigator
+};
+// END EMULATE DOM
+
+
 window.WEBARROCKSFACE=function(){function rb(){var a=null,c=null,d=null,e=0;this.zd=function(g){return a[g]};this.ae=function(g){var h=null;e=g.length;a=g.map(function(k,p){k=Object.assign({},k,{index:p,parent:this,Ra:h,Jd:p===e-1});return h=p=0===p?Db.instance(k):Eb.instance(k)});c=a[0];d=a[e-1];a.forEach(function(k,p){0!==p&&k.Wd()})};this.N=function(g,h){var k=h;a.forEach(function(p){k=p.N(k,g)});return k};this.fc=function(){return c.B()};this.Bd=function(){return d.B()};this.ic=function(){return d.Ad()};
 this.ce=function(g){d.jd(g)};this.ec=function(){return d.ec()};this.h=function(){a&&(a.forEach(function(g){g.h()}),d=c=a=null,e=0)}}function eb(a,c){var d=c%8;return a[(c-d)/8]>>7-d&1}function Fb(a){var c=JSON.parse(a);a=c.ne;var d=c.nf,e=c.n;var g="undefined"===typeof btoa?Buffer.from(c.data,"base64").toString("latin1"):atob(c.data);var h=g.length;c=new Uint8Array(h);for(var k=0;k<h;++k)c[k]=g.charCodeAt(k);g=new Float32Array(e);h=new Float32Array(d);k=a+d+1;for(var p=0;p<e;++p){for(var q=k*p,z=
 0===eb(c,q)?1:-1,l=q+1,n=1,t=0,u=l+a-1;u>=l;--u)t+=n*eb(c,u),n*=2;l=t;q=q+1+a;n=h.length;t=0;for(u=q;u<q+n;++u)h[t]=eb(c,u,!0),++t;for(n=q=0;n<d;++n)q+=h[n]*Math.pow(2,-n-1);g[p]=0===q&&0===l?0:z*(1+q)*Math.pow(2,1+l-Math.pow(2,a-1))}return g}function Gb(a){if(da!==Z.pause){var c=da===Z.play?K.Aa:S.Rc;0===c?fb(a):Wa=setTimeout(fb.bind(null,a),c)}}function sb(){if(da===Z.play)return!1;da=Z.play;T.timestamp=Date.now();Oa&&window.cancelAnimationFrame(Oa);fb(0)}function Da(a,c,d,e,g){a=4*(c*Ea+a)+d;return e+
@@ -155,3 +226,4 @@ width:wa.fc()});Jb();lb();kb();c()});return!0},destroy:function(){return new Pro
 w.fa.O();b.activeTexture(b.TEXTURE0);b.bindTexture(b.TEXTURE_2D,a);Q.g(!0,!0)},reset_inputTexture:function(){mb();w.vb=!1;Ta();Za()},get_videoDevices:function(a){return U.Cd(a)},set_scanSettings:function(a){Object.assign(qa,a);a.nDetectsPerLoop&&(T.H=a.nDetectsPerLoop);lb();kb()},set_stabilizationSettings:function(a){Object.assign(X,a)},update_videoElement:function(a,c){nb(a,function(){zb();Ta();c&&c()})},capture_image:function(a){return xa.xd(a)},get_LMLabels:function(){return aa.labels},compute_pose:function(a,
 c,d,e){null===db&&(Ja[0]=d,Ja[1]=e,db=new ob.zypSolver({cameraFocals:Ja,zyp15:S.je}));if(Ja[0]!==d||Ja[1]!==e)Ja[0]=d,Ja[1]=e,db.zyp14(Ja);a=db.solve(a,c,!1);return{ok:a.zyp13,repError:a.repError,rotation:a.R,translation:a.t}}};return Cb}();
 ;if(typeof(module)!=='undefined'){module.exports=window.WEBARROCKSFACE;}
+window.WEBARROCKSFACE.FAKEDOM=FAKEDOM;
