@@ -19,7 +19,7 @@ Facial landmarks positions are also among the neuron network outputs. There is s
   * [Miscellaneous methods](#miscellaneous-methods)
   * [Multiple faces](#multiple-faces)
   * [Optimization](#optimization)
-  * [Using ES6](#using-es6)
+  * [Using Module](#using-module)
 * [Hosting](#hosting)
 * [About the tech](#about-the-tech)
   * [Under the hood](#under-the-hood)
@@ -47,7 +47,7 @@ Here are the main features of the library:
 * `/demos/`: source code of the demonstrations, sorted by 2D/3D engine used,
 * `/dist/`: heart of the library: 
   * `WebARRocksFace.js`: main minified script,
-  * `WebARRocksFaceES6.js`: main minified script for ES6 use (with `import` or `require`),
+  * `WebARRocksFace.module.js`: main minified script for module use (with `import` or `require`),
   * `NN_<xxx>.json`: neural networks models,
 * `/helpers/`: scripts which can help you to use this library in some specific use cases,
 * `/libs/`: 3rd party libraries and 3D engines used in the demos.
@@ -222,11 +222,11 @@ It is possible to detect and track several faces at the same time. To enable thi
 If multiple face tracking is enabled, the `callbackTrack` function is called with an array of detection states (instead of being executed with a simple detection state). The detection state format is still the same.
 
 
-### Using ES6
-`/dist/WebARRocksFaceES6.js` is exactly the same than `/dist/WebARRocksFace.js` except that it works with ES6, so you can import it directly using:
+### Using module
+`/dist/WebARRocksFace.module.js` is exactly the same as `/dist/WebARRocksFace.js` except that it works as a module, so you can import it directly using:
 
 ```javascript
-import 'dist/WebARRocksFaceES6.js'
+import 'dist/WebARRocksFace.module.js'
 ```
 
 or using `require`.
