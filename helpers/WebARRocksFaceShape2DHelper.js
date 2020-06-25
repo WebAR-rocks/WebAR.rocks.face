@@ -8,9 +8,9 @@ const WebARRocksFaceShape2DHelper = (function(){
   let _spec = null;
   let _shapes = null;
 
-  let _gl = null; // gl context is for the AR canvas
-  let _points = null, _pointsCount = -1;
-  let _glv = null, _glvVideoTexture = null, _glvVBOPoints = null;
+  let _videoElement = null, _videoElementPreviousTime = -1;
+  let _gl = null, _glVideoTexture = null;  // gl context is for the AR canvas
+  let _glv = null, _glvVideoTexture = null; // glv is for video and computation
 
   const _shps = {};
 
@@ -22,17 +22,18 @@ const WebARRocksFaceShape2DHelper = (function(){
     // draw the AR overlay:
     _gl.viewport(0, 0, _spec.canvasAR.width, _spec.canvasAR.height);
     _gl.clear(_gl.COLOR_BUFFER_BIT);
+
+    // draw shapes:
+    // bind and update video texture if necessary
+    if (_videoElement.currenTime === _videoElementPreviousTime){
+      _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
+    } else {
+      update_glVideoTexture();
+    }
+
+    // draw shapes:
     if (detectState.isDetected){
-      for (let i=0; i<_pointsCount; ++i){
-        _points[2*i] = detectState.landmarks[i][0];
-        _points[2*i + 1] = detectState.landmarks[i][1];
-      }
-
-      _gl.bindBuffer(_gl.ARRAY_BUFFER, _glvVBOPoints);
-      _gl.bufferData(_gl.ARRAY_BUFFER, _points, _gl.DYNAMIC_DRAW);
-      _gl.vertexAttribPointer(0, 2, _gl.FLOAT, false, 8, 0);
-
-      _shapes.forEach(draw_shape);
+      _shapes.forEach(draw_shape.bind(null, detectState.landmarks));
     } 
 
     _gl.flush();
@@ -50,13 +51,21 @@ const WebARRocksFaceShape2DHelper = (function(){
     _gl.blendFunc(_gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA);
   }
 
-  function init_kpVBO(lmLabels){
-    _pointsCount = lmLabels.length;
-    _points = new Float32Array(_pointsCount * 2);
+  function create_glVideoTexture(){
+    const glTexture = _gl.createTexture();
+    _gl.bindTexture(_gl.TEXTURE_2D, glTexture);
+    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
+    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
+    _gl.texParameteri( _gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE );
+    _gl.texParameteri( _gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE );
+    update_glVideoTexture();    
+    _gl.bindTexture(_gl.TEXTURE_2D, null);
+    return glTexture;
+  }
 
-    _glvVBOPoints = _gl.createBuffer ();
-    _gl.bindBuffer(_gl.ARRAY_BUFFER, _glvVBOPoints);
-    _gl.bufferData(_gl.ARRAY_BUFFER, _points, _gl.DYNAMIC_DRAW);
+  function update_glVideoTexture(){
+    _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
+    _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _gl.RGBA, _gl.UNSIGNED_BYTE, _videoElement);
   }
 
   function compile_shader(gl, source, type, typeString) {
@@ -89,7 +98,10 @@ const WebARRocksFaceShape2DHelper = (function(){
 
     return {
       program: shaderProgram,
-      uniforms:{}
+      uniforms:{},
+      attributes: {
+        position: aPos
+      }
     };
   }
 
@@ -111,29 +123,120 @@ const WebARRocksFaceShape2DHelper = (function(){
       'DRAW VIDEO');
   }
 
-  function build_shape(shapeSpecs, shapeIndex){
+  function build_shape(landmarkLabels, shapeSpecs, shapeIndex){
     const n = shapeSpecs.tesselation.length / 3;
+    const isIVals = ( shapeSpecs.iVals && shapeSpecs.iVals.length );
+
+    // interpolated values (iVals):
+    const iValsShaderSources = {
+      vertexPars: "",
+      vertex: "",
+      fragmentPars: ""
+    };
+    let iValCCount = 0;
+    if (isIVals){
+      
+      // get GLSL type of interpolated vals:
+      iValCCount = shapeSpecs.iVals[0].length;
+      const GLSLType = [
+        "float", "vec2", "vec3", "vec4"
+      ][iValCCount-1];
+
+      iValsShaderSources.vertexPars = 'attribute ' + GLSLType + ' aiVal;\n';
+      iValsShaderSources.vertexPars += 'varying ' + GLSLType + ' iVal;\n';
+      iValsShaderSources.vertex = 'iVal = aiVal;\n';
+      iValsShaderSources.fragmentPars += 'varying ' + GLSLType + ' iVal;\n';
+    }
 
     // build shader program:
     const vertexShaderSource = 'attribute vec2 position;\n\
+      varying vec2 vUV;\n\
+      uniform mat2 videoUVScale;\n\
+      ' + iValsShaderSources.vertexPars + '\n\
       void main(void){\n\
         gl_Position = vec4(position, 0., 1.);\n\
+        vec2 uvCentered = videoUVScale * position;\n\
+        vUV = 0.5 + vec2(1., -1.) * uvCentered;\n\
+        ' + iValsShaderSources.vertex + '\n\
       }';
-    const fragmentShaderSource = 'void main(void){\n\
-      ' + shapeSpecs.GLSLFragmentSource + '\n\
-    }';
+    const fragmentShaderSource = iValsShaderSources.fragmentPars + '\n'
+      +'varying vec2 vUV;\n'
+      +'uniform sampler2D samplerVideo;\n'
+      + shapeSpecs.GLSLFragmentSource;
     const shp = build_shaderProgram(_gl, vertexShaderSource, fragmentShaderSource, 'SHAPE_' + shapeIndex.toString());
+    if (isIVals){
+      shp.attributes.aiVal =  _gl.getAttribLocation(shp.program, "aiVal");      
+    }
+    shp.uniforms.samplerVideo = _gl.getUniformLocation(shp.program, "samplerVideo");
+    shp.uniforms.videoUVScale = _gl.getUniformLocation(shp.program, "videoUVScale");
 
-    // build vbo:
-    const glVBOFaces = _gl.createBuffer ();
+    // build points VBO:
+    const pointsCount = shapeSpecs.points.length;
+    const points = new Float32Array(pointsCount * 2);
+    const glvVBOPoints = _gl.createBuffer ();
+
+    // compute mapping between shapeSpecs.points and neural network landmarks:
+    const mapPointIndexToNNLandmark = new Uint8Array(pointsCount);
+    shapeSpecs.points.forEach(function(label, ind){
+      const lmInd = landmarkLabels.indexOf(label);
+      if (lmInd === -1){
+        throw new Error('The neural network does not outputs this landmark' + label);
+      }
+      mapPointIndexToNNLandmark[ind] = lmInd;
+    });
+
+    // build faces VBO:
+    const glVBOFaces = _gl.createBuffer();
     _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, glVBOFaces);
     _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(shapeSpecs.tesselation), _gl.STATIC_DRAW);
 
+    // build interpolated vals VBO:
+    let glVBOIVals = null;
+    if (isIVals){
+      const iValsFlatten = [].concat.apply([], shapeSpecs.iVals);
+      glVBOIVals = _gl.createBuffer();
+      _gl.bindBuffer(_gl.ARRAY_BUFFER, glVBOIVals);
+      _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(iValsFlatten), _gl.STATIC_DRAW);
+    }
+
     return {
+      outlines: shapeSpecs.outlines ? shapeSpecs.outlines.map(build_outline) : [],
+
+      // points:
+      pointsCount: pointsCount,
+      points: points,
+      glvVBOPoints: glvVBOPoints,
+
+      // interpolated vals:
+      iValCCount: iValCCount,
+      glVBOIVals: glVBOIVals,
       glVBOFaces: glVBOFaces,
+
+      mapPointIndexToNNLandmark: mapPointIndexToNNLandmark,
       trianglesCount: n,
       shp: shp
     };
+  }
+
+  function build_outline(outlineSpecs){
+    const pointsCount = outlineSpecs.points.length;
+    
+    // preallocate bisectors and side vectors::
+    const bisectors = [], sides = [], points = [];
+    for (let i = 0; i< pointsCount; ++i){
+      bisectors.push([0, 0]);
+      sides.push([0, 0]);
+      points.push([0, 0]);
+    }
+
+    return {
+      pointsCount: pointsCount,
+      bisectors: bisectors,
+      sides: sides,
+      points: points,
+      pointsInd: new Uint8Array(outlineSpecs.points),
+      displacements: new Float32Array(outlineSpecs.displacements)
+    }
   }
 
   function draw_video(){
@@ -152,11 +255,141 @@ const WebARRocksFaceShape2DHelper = (function(){
     _glv.flush();
   }
 
-  function draw_shape(shape){
+  function draw_shape(landmarksPositions, shape){
     _gl.useProgram(shape.shp.program);
+
+    // send video UVScale:
+    _gl.uniformMatrix2fv(shape.shp.uniforms.videoUVScale, false, WEBARROCKSFACE.get_videoUVScaleMat2());
+
+    // extract positions:
+    for (let i=0; i<shape.pointsCount; ++i){
+      const lmInd = shape.mapPointIndexToNNLandmark[i];
+      shape.points[2*i] = landmarksPositions[lmInd][0];
+      shape.points[2*i + 1] = landmarksPositions[lmInd][1];
+    }
+
+    // compute displacements using outlines:
+    shape.outlines.forEach(apply_outline.bind(null, shape.points));
+    
+    // send positions to GPU;
+    _gl.bindBuffer(_gl.ARRAY_BUFFER, shape.glvVBOPoints);
+    _gl.bufferData(_gl.ARRAY_BUFFER, shape.points, _gl.DYNAMIC_DRAW);
+    _gl.vertexAttribPointer(0, 2, _gl.FLOAT, false, 8, 0);
+
+    // interpolated values:
+    if (shape.glVBOIVals){
+      _gl.enableVertexAttribArray(shape.shp.attributes.aiVal);
+      _gl.bindBuffer(_gl.ARRAY_BUFFER, shape.glVBOIVals);
+      _gl.vertexAttribPointer(shape.shp.attributes.aiVal, shape.iValCCount, _gl.FLOAT, false, 4*shape.iValCCount, 0) ;
+    }
 
     _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, shape.glVBOFaces);
     _gl.drawElements(_gl.TRIANGLES, shape.trianglesCount * 3, _gl.UNSIGNED_SHORT, 0);
+
+    if (shape.glVBOIVals){
+      _gl.disableVertexAttribArray(shape.shp.attributes.aiVal);
+    }
+  }
+
+
+  // PiP from http://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
+  function is_pointInPolygon(p, polygon){
+    let counter = 0;
+    let p1 = polygon[0];
+    const N = polygon.length;
+
+    for (let i=1;i<=N;i++) {
+      const p2 = polygon[i % N];
+      if (p[1] > Math.min(p1[1], p2[1])) {
+        if (p[1] <= Math.max(p1[1], p2[1])) {
+          if (p[0] <= Math.max(p1[0], p2[0])) {
+            if (p1[1] !== p2[1]) {
+              xinters = (p[1]-p1[1]) * (p2[0]-p1[0]) / (p2[1]-p1[1]) + p1[0];
+              if (p1.x === p2[0] || p[0] <= xinters)
+                ++counter;
+            }
+          }
+        }
+      }
+      p1 = p2;
+    }
+
+    return (counter % 2 !== 0);
+  }
+
+
+  // apply outline displacement to pointPositions:
+  function apply_outline(pointPositions, outline){ 
+    // compute pixel points position:
+    const w = _spec.canvasAR.width, h = _spec.canvasAR.height;
+    for (let i=0; i<outline.pointsCount; ++i){
+      const ip = outline.pointsInd[i];
+      const point = outline.points[i];
+      point[0] = w * pointPositions[2 * ip];
+      point[1] = h * pointPositions[2 * ip + 1];
+    }
+
+    // compute side vectors and perimeter:
+    let perimeter = 0;
+    for (let i=0; i<outline.pointsCount; ++i){      
+      const j = (i + 1) % outline.pointsCount; // next outline point indice
+      
+      const dx = outline.points[j][0] - outline.points[i][0];
+      const dy = outline.points[j][1] - outline.points[i][1];
+
+      // size of the side;
+      const l = Math.sqrt(dx*dx + dy*dy);
+      perimeter += l;
+
+      outline.sides[i][0] = dx / l;
+      outline.sides[i][1] = dy / l;
+    }
+    
+    // compute bisectors:
+    for (let i=0; i<outline.pointsCount; ++i){
+      const thisToNext = outline.sides[i];
+      const prevToThis = outline.sides[(i === 0) ? outline.pointsCount-1 : i-1];
+
+      let bx = -thisToNext[0] + prevToThis[0];
+      let by = -thisToNext[1] + prevToThis[1];
+      const bl = Math.sqrt(bx*bx + by*by);
+      bx /= bl, by /= bl;
+
+      const bisector = outline.bisectors[i];
+      bisector[0] = bx;
+      bisector[1] = by;
+    }
+
+    // force bisectors to point outward:
+    for (let i=0; i<outline.pointsCount; ++i){
+      const point = outline.points[i];
+      const bisector = outline.bisectors[i];
+
+      // q is a point such that q = point + epsilon * bisector
+      const qx = point[0] + 1e-6 * bisector[0];
+      const qy = point[1] + 1e-6 * bisector[1];
+
+      // if the point is inside the contour, we invert the bisector:
+      if (is_pointInPolygon([qx, qy], outline.points)){
+        bisector[0] *= -1;
+        bisector[1] *= -1;
+      }      
+    }
+    
+    // apply displacements along bisectors:
+    for (let i=0; i<outline.pointsCount; ++i){
+      const amplitude = outline.displacements[i] * perimeter;
+      const bisector = outline.bisectors[i];
+
+      // compute displacement in the viewport:
+      const dx = amplitude * bisector[0] / w;
+      const dy = amplitude * bisector[1] / h;
+
+      // apply displacement:
+      const pi = outline.pointsInd[i];
+      pointPositions[2*pi] += dx;
+      pointPositions[2*pi + 1] += dy;
+    }
   }
 
 
@@ -171,6 +404,13 @@ const WebARRocksFaceShape2DHelper = (function(){
         WEBARROCKSFACE.init({
           canvas: _spec.canvasVideo,
           NNCpath: _spec.NNCpath,
+          scanSettings: {
+            'threshold': 0.7,  // absolute treshold for positive face detection
+            'dThreshold': 0.9
+          },
+          stabilizationSettings: {
+            LMDisplacementRange: [0, 3]
+          },
           callbackReady: function(err, objs){
             if (err){
               reject(err);
@@ -181,9 +421,11 @@ const WebARRocksFaceShape2DHelper = (function(){
             _glv = objs.GL;
             _glvVideoTexture = objs.videoTexture;
 
+            _videoElement = objs.video;
+            _glVideoTexture = create_glVideoTexture();
+
             init_shps();
-            init_kpVBO(objs.landmarksLabels);
-            _shapes = _spec.shapes.map(build_shape);
+            _shapes = _spec.shapes.map(build_shape.bind(null, objs.landmarksLabels));
 
             accept();
           },
