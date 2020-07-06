@@ -7,32 +7,32 @@ function start(){
     canvasAR:_canvasAR,
     shapes: [{
       points: [
-        "lipsExt0",
-        "lipsExtTop1",
-        "lipsExtTop2",
-        "lipsExtTop3",
-        "lipsExtTop4",
-        "lipsExtTop5",
+        "lipsExt0", // 0
+        "lipsExtTop1", // 1
+        "lipsExtTop2", // 2
+        "lipsExtTop3", // 3
+        "lipsExtTop4", // 4
+        "lipsExtTop5", // 5
         
-        "lipsExt6",
+        "lipsExt6", // 6
  
-        "lipsExtBot7",
-        "lipsExtBot8",
-        "lipsExtBot9",
-        "lipsExtBot10",
-        "lipsExtBot11",
+        "lipsExtBot7", // 7
+        "lipsExtBot8", // 8
+        "lipsExtBot9", // 9
+        "lipsExtBot10", // 10
+        "lipsExtBot11", // 11
         
-        "lipsInt12",
+        "lipsInt12", // 12
   
-        "lipsIntTop13",
-        "lipsIntTop14",
-        "lipsIntTop15",
+        "lipsIntTop13", // 13
+        "lipsIntTop14", // 14
+        "lipsIntTop15", // 15
         
-        "lipsInt16",
+        "lipsInt16", // 16
 
-        "lipsIntBot17",
-        "lipsIntBot18",
-        "lipsIntBot19"
+        "lipsIntBot17", // 17
+        "lipsIntBot18", // 18
+        "lipsIntBot19" // 19
       ],
       iVals: [ // interpolated values
         [1], // lipsExt0
@@ -88,6 +88,30 @@ function start(){
         6,17,16 //*/
       ],
 
+      // interpolated points:
+      interpolations: [
+        { // upper lip sides:
+          tangentInfluences: [2, 2, 2],
+          points: [1, 2, 3],
+          ks: [-0.25, 0.25] // between -1 and 1
+        },
+        {
+          tangentInfluences: [2, 2, 2],
+          points: [3, 4, 5],
+          ks: [-0.25, 0.25] // between -1 and 1
+        },
+        { // upper lip middle
+          tangentInfluences: [2, 2, 2],
+          points: [2, 3, 4],
+          ks: [-0.25, 0.25] // between -1 and 1
+        },
+        { // lower lip middle:
+          tangentInfluences: [2, 2, 2],
+          points: [10, 9, 8],
+          ks: [-0.25, 0.25] // between -1 and 1
+        }
+      ],
+
       // contours:
       outlines: [
         { // upper lip. Indices of points in points array:
@@ -105,7 +129,7 @@ function start(){
             0.03, 0.03, 0.03, // interior
             0*/
             0.02,
-            0.0, 0.0, -0.02, 0.0, 0.0, // exterior
+            0.0, 0.0, -0.015, 0.0, 0.0, // exterior
             0.02, 0,
             0.03, 0.03, 0.03, // interior
             0
@@ -178,6 +202,7 @@ function start(){
           gl_FragColor = vec4(color*alpha, alphaClamped);\n\
           \n\
           //gl_FragColor = vec4(alpha, alpha, alphaClamped, 1.0); // for debugging\n\
+          //gl_FragColor = vec4(0., 1., 0., 1.); // for debugging\n\
         }" //*/
     }]
 

@@ -14,6 +14,7 @@ const WebARRocksFaceShape2DHelper = (function(){
 
   const _shps = {};
 
+
   // private functions:
   function callbackTrack(detectState){
     // draw the video:
@@ -39,6 +40,7 @@ const WebARRocksFaceShape2DHelper = (function(){
     _gl.flush();
   }
 
+
   function init_gl(){
     _gl = _spec.canvasAR.getContext('webgl', {
       antialias: true,
@@ -50,6 +52,7 @@ const WebARRocksFaceShape2DHelper = (function(){
     _gl.clearColor(0, 0, 0, 0);
     _gl.blendFunc(_gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA);
   }
+
 
   function create_glVideoTexture(){
     const glTexture = _gl.createTexture();
@@ -63,10 +66,12 @@ const WebARRocksFaceShape2DHelper = (function(){
     return glTexture;
   }
 
+
   function update_glVideoTexture(){
     _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
     _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _gl.RGBA, _gl.UNSIGNED_BYTE, _videoElement);
   }
+
 
   function compile_shader(gl, source, type, typeString) {
     const shader = gl.createShader(type);
@@ -79,6 +84,7 @@ const WebARRocksFaceShape2DHelper = (function(){
     }
     return shader;
   };
+
 
   // build the shader program:
   function build_shaderProgram(gl, shaderVertexSource, shaderFragmentSource, id) {
@@ -105,6 +111,7 @@ const WebARRocksFaceShape2DHelper = (function(){
     };
   }
 
+
   // build shader programs:
   function init_shps(){
     // create video shp, used to display the video on the canvas:
@@ -122,6 +129,7 @@ const WebARRocksFaceShape2DHelper = (function(){
       }',
       'DRAW VIDEO');
   }
+
 
   function build_shape(landmarkLabels, shapeSpecs, shapeIndex){
     const n = shapeSpecs.tesselation.length / 3;
@@ -170,9 +178,26 @@ const WebARRocksFaceShape2DHelper = (function(){
     shp.uniforms.samplerVideo = _gl.getUniformLocation(shp.program, "samplerVideo");
     shp.uniforms.videoUVScale = _gl.getUniformLocation(shp.program, "videoUVScale");
 
+    // build interpolations:
+    let interpolatedPoints = [];    
+    let interpolatedPointsCount = 0;
+    if (shapeSpecs.interpolations){
+      // split between positive and negative ks and sort them:
+      const interpolationsSplitted = split_interpolations(shapeSpecs.interpolations);
+
+      // build interpolated points:
+      let interpInd = 0;
+      for (let i=0; i<interpolationsSplitted.length; ++i){
+        const interpPoints = build_interpolation(shapeSpecs, interpolationsSplitted[i], interpInd);
+        interpolatedPoints = interpolatedPoints.concat(interpPoints);
+        interpInd += interpPoints.length;
+      }
+      interpolatedPointsCount = interpInd;      
+    }
+
     // build points VBO:
     const pointsCount = shapeSpecs.points.length;
-    const points = new Float32Array(pointsCount * 2);
+    const points = new Float32Array((pointsCount + interpolatedPointsCount) * 2);
     const glvVBOPoints = _gl.createBuffer ();
 
     // compute mapping between shapeSpecs.points and neural network landmarks:
@@ -201,9 +226,11 @@ const WebARRocksFaceShape2DHelper = (function(){
 
     return {
       outlines: shapeSpecs.outlines ? shapeSpecs.outlines.map(build_outline) : [],
+      interpolatedPoints: interpolatedPoints,
 
       // points:
       pointsCount: pointsCount,
+      interpolatedPointsCount: interpolatedPointsCount,
       points: points,
       glvVBOPoints: glvVBOPoints,
 
@@ -213,10 +240,11 @@ const WebARRocksFaceShape2DHelper = (function(){
       glVBOFaces: glVBOFaces,
 
       mapPointIndexToNNLandmark: mapPointIndexToNNLandmark,
-      trianglesCount: n,
+      trianglesCount: shapeSpecs.tesselation.length / 3,
       shp: shp
     };
   }
+
 
   function build_outline(outlineSpecs){
     const pointsCount = outlineSpecs.points.length;
@@ -239,6 +267,120 @@ const WebARRocksFaceShape2DHelper = (function(){
     }
   }
 
+
+  function split_interpolations(interpolationSpecs){
+    const outInterpolations = [];
+    const sortByAbs = function(a, b){ // sort from smaller to larger in abs value
+      return Math.abs(a) - Math.abs(b);
+    };
+
+    interpolationSpecs.forEach(function(interpolation){
+      const ks = interpolation.ks;
+      const ksPos = ks.filter(function(k){
+        return ( k > 0 );
+      }).sort(sortByAbs);
+      const ksNeg = ks.filter(function(k){
+        return ( k < 0 );
+      }).sort(sortByAbs);
+      if (ksPos.length > 0){
+        outInterpolations.push(Object.assign({}, interpolation, {
+          ks: ksPos
+        }));
+      }
+      if (ksNeg.length > 0){
+        outInterpolations.push(Object.assign({}, interpolation, {
+          ks: ksNeg
+        }));
+      }
+    });
+
+    return outInterpolations;
+  }
+
+
+  function build_interpolation(shapeSpecs, interpolationSpecs, interpolationInd){
+    // for each interpolation, we add a point in the points array
+    // and we change the tesselation to include this point
+    
+    const firstInterpolatedPointInd = shapeSpecs.points.length + interpolationInd;
+    const points = interpolationSpecs.points;
+    const ks = interpolationSpecs.ks;
+
+    // [pt0, pt1] is the edge to split in the tesselation (to insert the interpolated point):
+    const pt0 = points[1];
+    const pt1 = (ks[0] >= 0) ? points[2]: points[0];
+
+    let iVal0 = null, iVal1 = null, iVals = null;
+    if (shapeSpecs.iVals){
+      iVals = shapeSpecs.iVals;
+      iVal0 = iVals[points[1]];
+      iVal1 = (ks[0] >= 0) ? iVals[2]: iVals[0];
+    }
+
+    // loop over face and split faces including [pt0, pt1] edge:
+    const tess = shapeSpecs.tesselation;
+    for (let i=0; i<tess.length; i+=3){
+      const ptsFace = [tess[i], tess[i+1], tess[i+2]];
+      if (ptsFace.indexOf(pt0) === -1 || ptsFace.indexOf(pt1) === -1){
+        continue;
+      }
+
+      // the edge is included in the face
+      // get the index of the third point, pt3:
+      let pt3 = -1;
+      if (ptsFace[0] !== pt0 && ptsFace[0] !== pt1){
+        pt3 = ptsFace[0];
+      } else if (ptsFace[1] !== pt0 && ptsFace[1] !== pt1){
+        pt3 = ptsFace[1];
+      } else  {
+        pt3 = ptsFace[2];
+      }
+
+      // get index in tess of pt1:
+      const pt1TessInd = i + ptsFace.indexOf(pt1);
+     
+      // replace pt1 by the first interpolated point in the current face:
+      tess[pt1TessInd] = firstInterpolatedPointInd;
+
+      // loop over interpolated point, starting by the closer to pt0:
+      for (let i=0; i<ks.length; ++i){        
+        // Add a new face: pt3, I, (nextI|pt1) as a new face:
+        const nextPt = (i === ks.length - 1) ? pt1 : (firstInterpolatedPointInd + i + 1);
+        tess.push(firstInterpolatedPointInd + i, pt3, nextPt);
+      }  
+    }
+
+    const interpolatedPoints = [];
+    for (let i=0; i<ks.length; ++i){
+
+      // create interpolated point:
+      const interpolatedPointInd = shapeSpecs.points.length + interpolationInd + i;
+      interpolatedPoints.push(
+        Object.assign({
+          ind: interpolatedPointInd,
+          m0: [1, 0],
+          m1: [1, 0],
+          k: ks[i]
+        }, interpolationSpecs)
+      );
+
+       // add new iVals:
+      if (shapeSpecs.iVals){      
+        const iValInterpolated = iVal0.map(function(v0, vInd){
+          const v1 = iVal1[vInd];
+          const kAbs = Math.abs(ks[i]);
+          return v0 * (1-kAbs) + v1 * kAbs;
+        });
+
+        iVals.push(iValInterpolated);
+      }
+
+    } // end loop on interpolated points:
+   
+    return interpolatedPoints;
+  } //end build_interpolation()
+
+
   function draw_video(){
     _glv.viewport(0, 0, _spec.canvasVideo.width, _spec.canvasVideo.height);
     
@@ -254,6 +396,7 @@ const WebARRocksFaceShape2DHelper = (function(){
 
     _glv.flush();
   }
+
 
   function draw_shape(landmarksPositions, shape){
     _gl.useProgram(shape.shp.program);
@@ -271,6 +414,9 @@ const WebARRocksFaceShape2DHelper = (function(){
     // compute displacements using outlines:
     shape.outlines.forEach(apply_outline.bind(null, shape.points));
     
+    // compute interpolated points:
+    shape.interpolatedPoints.forEach(compute_interpolation.bind(null, shape.points));
+
     // send positions to GPU;
     _gl.bindBuffer(_gl.ARRAY_BUFFER, shape.glvVBOPoints);
     _gl.bufferData(_gl.ARRAY_BUFFER, shape.points, _gl.DYNAMIC_DRAW);
@@ -390,6 +536,65 @@ const WebARRocksFaceShape2DHelper = (function(){
       pointPositions[2*pi] += dx;
       pointPositions[2*pi + 1] += dy;
     }
+  } // end apply_outline()
+
+
+  function compute_interpolation(pointPositions, interpolation){
+    const pt0Ind = interpolation.points[1];
+    const otherPointInd = (interpolation.k >= 0 ) ? 2 : 0;
+    const pt1Ind = interpolation.points[otherPointInd];
+
+    const p0x = pointPositions[ pt0Ind * 2 ];
+    const p0y = pointPositions[ pt0Ind * 2 + 1];
+
+    // compute tangent vectors
+    // m0 and m1 are tangent vectors associated to p0 and p1    
+    const m0 = interpolation.m0, m1 = interpolation.m1;
+    m0[0] = pointPositions[2*interpolation.points[2]] - pointPositions[2*interpolation.points[0]];
+    m0[1] = pointPositions[2*interpolation.points[2]+1] - pointPositions[2*interpolation.points[0]+1];
+    
+    m1[0] = pointPositions[2*pt1Ind] - pointPositions[2*pt0Ind];
+    m1[1] = pointPositions[2*pt1Ind+1] - pointPositions[2*pt0Ind+1];
+   
+
+    // normalize m0 and m1:
+    const l0 = Math.sqrt(m0[0]*m0[0] + m0[1]*m0[1]);
+    const l1 = Math.sqrt(m1[0]*m1[0] + m1[1]*m1[1]);    
+    if (l0 === 0 || l1 === 0){
+      pointPositions[interpolation.ind * 2] = p0x;
+      pointPositions[interpolation.ind * 2 + 1] = p0y;
+      return;
+    }
+
+    const sizeRef = l1;
+    const s0 = Math.sign(interpolation.k) * sizeRef*interpolation.tangentInfluences[1] / l0;
+    const s1 = sizeRef*interpolation.tangentInfluences[otherPointInd] / l1;
+    m0[0] *= s0, m0[1] *= s0;
+    m1[0] *= s1, m1[1] *= s1;
+
+    // compute cubic Hermite interpolation
+    // cf book Real-time rendering - 4th edition - page 729
+    const t = Math.abs(interpolation.k);
+    const tt = t * t;
+    const ttt = tt * t;
+
+    const p1x = pointPositions[ pt1Ind * 2 ];
+    const p1y = pointPositions[ pt1Ind * 2 + 1 ];
+    const m0x = m0[0], m0y = m0[1];
+    const m1x = m1[0], m1y = m1[1];
+
+    // compute Hermite coefficients:
+    const p0k = 2*ttt - 3*tt + 1;
+    const m0k = ttt - 2*tt + t;
+    const m1k = ttt - tt;
+    const p1k = -2*ttt + 3*tt;
+
+    // do Hermite interpolation:
+    pointPositions[interpolation.ind * 2] = p0k*p0x + m0k*m0x + m1k*m1x + p1k*p1x;
+    pointPositions[interpolation.ind * 2 + 1] = p0k*p0y + m0k*m0y + m1k*m1y + p1k*p1y;
+
+    //pointPositions[interpolation.ind * 2] = p0x * 0.5 + p1x * 0.5;
+    //pointPositions[interpolation.ind * 2 + 1] = 0 ;
   }
 
 
