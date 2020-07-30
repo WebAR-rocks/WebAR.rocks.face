@@ -48,15 +48,16 @@ Here are the main features of the library:
 * `/dist/`: heart of the library: 
   * `WebARRocksFace.js`: main minified script,
   * `WebARRocksFace.module.js`: main minified script for module use (with `import` or `require`),
-  * `NN_<xxx>.json`: neural networks models,
 * `/helpers/`: scripts which can help you to use this library in some specific use cases,
+* `/neuralNets/`: neural networks models,
 * `/libs/`: 3rd party libraries and 3D engines used in the demos.
 
 
 
 ## Demonstrations
 
-* debug view (displays the face landmarks): [live demo](https://webar.rocks/demos/face/demos/basic/), [source code](/demos/basic/)
+* basic debug view (displays the face landmarks): [live demo](https://webar.rocks/demos/face/demos/basic/), [source code](/demos/basic/)
+* advanced debug view: [live demo](https://webar.rocks/demos/face/demos/debug/), [source code](/demos/debug/)
 * earrings VTO 2D: [live demo](https://webar.rocks/demos/face/demos/earrings/), [source code](/demos/earrings/)
 * earrings VTO 3D: [live demo](https://webar.rocks/demos/face/demos/earrings3D/), [source code](/demos/earrings3D/)
 * glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTO/), [source code](/demos/VTO/)
@@ -88,7 +89,7 @@ This canvas will be used by WebGL both for the computation and the 3D rendering.
 ```javascript
 WEBARROCKSFACE.init({
   canvasId: 'WebARRocksFaceCanvas',
-  NNCpath: '../../../dist/NN_FACE.json', // neural network model
+  NNCpath: '../../../neuralNets/NN_FACE.json', // neural network model
   callbackReady: function(errCode, spec){
     if (errCode){
       console.log('AN ERROR HAPPENS. ERROR CODE =', errCode);
@@ -236,9 +237,9 @@ or using `require`.
 ## Hosting
 You should host the content of this repository using a HTTPS static server.
 
-Be careful to enable gzip HTTP/HTTPS compression for JSON and JS files. Indeed, the neuron network JSON file, `dist/NN_<xxx>.json` is quite heavy, but very well compressed with GZIP. You can check the gzip compression of your server [here](https://checkgzipcompression.com/).
+Be careful to enable gzip HTTP/HTTPS compression for JSON and JS files. Indeed, the neuron network JSON file, `neuralNets/NN_<xxx>.json` is quite heavy, but very well compressed with GZIP. You can check the gzip compression of your server [here](https://checkgzipcompression.com/).
 
-The neuron network file, `dist/NN_<xxx>.json` is loaded using an ajax `XMLHttpRequest` after calling `WEBARROCKSFACE.init()`. This loading is proceeded after the user has accepted to share its camera. So we won't load this quite heavy file if the user refuses to share it or if there is no webcam available. The loading can be faster if you systematically preload `dist/NN_<xxx>.json` using a service worker or a simple raw `XMLHttpRequest` just after the HTML page loading. Then the file will be already in the browser cache when WebAR.rocks.face will request it.
+The neuron network file, `neuralNets/NN_<xxx>.json` is loaded using an ajax `XMLHttpRequest` after calling `WEBARROCKSFACE.init()`. This loading is proceeded after the user has accepted to share its camera. So we won't load this quite heavy file if the user refuses to share it or if there is no webcam available. The loading can be faster if you systematically preload `neuralNets/NN_<xxx>.json` using a service worker or a simple raw `XMLHttpRequest` just after the HTML page loading. Then the file will be already in the browser cache when WebAR.rocks.face will request it.
 
 Some directories of the latest version of this library are hosted on `https://cdn.webar.rocks/face/` and served through a content delivery network (CDN):
 

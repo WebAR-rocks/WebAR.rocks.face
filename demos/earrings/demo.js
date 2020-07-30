@@ -25,7 +25,7 @@ const _earringsVisibility = {
 function start(){
   WebARRocksFaceCanvas2DHelper.init({
     spec: {
-      NNCpath: '../../dist/NN_EARS.json', // neural network model file
+      NNCpath: '../../neuralNets/NN_EARS.json', // neural network model file
       canvas: _canvases.face
     },
 

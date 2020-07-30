@@ -88,7 +88,7 @@ function main(){
   // Init WebAR.rocks.face through the helper:
   WebARRocksFaceHelper.init({
     spec:  {
-      NNCpath: '../../dist/NN_FACE.json'
+      NNCpath: '../../neuralNets/NN_FACE.json'
       /*,videoSettings: {
         idealWidth: 1280,
         idealHeight: 800

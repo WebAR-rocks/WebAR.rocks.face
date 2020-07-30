@@ -72,17 +72,21 @@ const WebARRocksFaceHelper = (function(){
   const _defaultFeatures = {
     video: true,       // display the video texture as background
     landmarks: true,   // display landmarks
-    threejs: false    // initialize THREE.JS
+    threejs: false     // initialize THREE.JS
   };
-  const _shps = {
+  const _shps = { // shader programs
     drawPoints: null,
     copy: null
   };
 
   let _gl = null, _cv = null, _glVideoTexture = null;
   let _videoElement = null;
-  let _landmarksLabels = null, _landmarksIndices = {};
   const _focals = [0, 0];
+
+  const _landmarks = {
+    labels: null,
+    indices: {}
+  };
 
   const _featureDrawLandmarks = {
     vertices: null,
@@ -150,7 +154,7 @@ const WebARRocksFaceHelper = (function(){
 
   //BEGIN FEATURES SPECIFIC
   function init_featureDrawPoints(){
-    _featureDrawLandmarks.vertices = new Float32Array(_landmarksLabels.length*2);
+    _featureDrawLandmarks.vertices = new Float32Array(_landmarks.labels.length*2);
 
     // create vertex buffer objects:
     // VBO to draw only 1 point
@@ -158,8 +162,8 @@ const WebARRocksFaceHelper = (function(){
     _gl.bindBuffer(_gl.ARRAY_BUFFER, _featureDrawLandmarks.glVerticesVBO);
     _gl.bufferData(_gl.ARRAY_BUFFER, _featureDrawLandmarks.vertices, _gl.DYNAMIC_DRAW);
 
-    const indices = new Uint16Array(_landmarksLabels.length);
-    for (let i=0; i<_landmarksLabels.length; ++i){
+    const indices = new Uint16Array(_landmarks.labels.length);
+    for (let i=0; i<_landmarks.labels.length; ++i){
       indices[i] = i;
     }
     _featureDrawLandmarks.glIndicesVBO = _gl.createBuffer();
@@ -195,7 +199,7 @@ const WebARRocksFaceHelper = (function(){
     _featureSolvePnP.imgPointsPx = imgPointsPx;
     _featureSolvePnP.imgPointsLMIndices = imgPointsLabels.map(
       function(label, ind){
-        return _landmarksLabels.indexOf(label);
+        return _landmarks.labels.indexOf(label);
       });
     _featureSolvePnP.objPoints = imgPointsLabels.map(
       function(label, ind){
@@ -332,13 +336,13 @@ const WebARRocksFaceHelper = (function(){
     _gl = spec.GL;
     _cv = spec.canvasElement;
     _glVideoTexture = spec.videoTexture;
-    _landmarksLabels = spec.landmarksLabels;
+    _landmarks.labels = spec.landmarksLabels;
     _videoElement = spec.video;
 
     console.log('INFO in WebARRocksFaceHelper: video resolution =', _videoElement.videoWidth, 'x', _videoElement.videoHeight);
 
-    _landmarksLabels.forEach(function(label, ind){
-      _landmarksIndices[label] = ind;
+    _landmarks.labels.forEach(function(label, ind){
+      _landmarks.indices[label] = ind;
     });
 
     init_shps();
@@ -449,7 +453,7 @@ const WebARRocksFaceHelper = (function(){
     _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, _featureDrawLandmarks.glIndicesVBO);
     _gl.vertexAttribPointer(0, 2, _gl.FLOAT, false, 8,0);
 
-    _gl.drawElements(_gl.POINTS, _landmarksLabels.length, _gl.UNSIGNED_SHORT, 0);
+    _gl.drawElements(_gl.POINTS, _landmarks.labels.length, _gl.UNSIGNED_SHORT, 0);
   }
 
   function copy_landmark(lm, lmIndex){
@@ -575,7 +579,7 @@ const WebARRocksFaceHelper = (function(){
       const defaultSpecLM = {
         canvas: null,
         canvasId: 'WebARRocksFaceCanvas',
-        NNCpath: '../../dist/',
+        NNCpath: '../../neuralNets/',
         callbackReady: callbackReady,
         callbackTrack: callbackTrack
       };
@@ -723,8 +727,29 @@ const WebARRocksFaceHelper = (function(){
       // update drawing area:
       threeRenderer.setSize(cvw, cvh, false);
       threeRenderer.setViewport(0, 0, cvw, cvh);
-    }
+    },
 
+    change_NN: function(NNUrl){
+      return WEBARROCKSFACE.update({
+        NNCpath: NNUrl
+      }).then(function(){
+        _landmarks.labels = WEBARROCKSFACE.get_LMLabels();
+        if (_spec.features.landmarks){
+          init_featureDrawPoints();
+        }
+
+        //TODO: reinitialize THREE.js feature
+      });
+    },
+
+    update_video: function(video){
+      return new Promise(function(accept, reject){
+        WEBARROCKSFACE.update_videoElement(video, function(){
+          WEBARROCKSFACE.resize();
+          accept();
+        });
+      });      
+    }
 
   }; //end that
   return that;

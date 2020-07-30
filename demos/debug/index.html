@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-language" content="en-EN" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>WebAR.rocks.face advanced debug view</title>
+    
+    <!-- INCLUDE WebAR.rocks.face MAIN SCRIPT -->
+    <script src="../../dist/WebARRocksFace.js"></script>
+
+    <!-- INCLUDE MAIN HELPER -->
+    <script src="../../helpers/WebARRocksFaceHelper.js"></script>
+
+    <!-- INCLUDE RESIZER HELPER -->
+    <script src="../../helpers/WebARRocksResizer.js"></script>
+
+    <!-- INCLUDE DEMO SCRIPT -->
+    <script src="./main.js"></script>
+
+    <link rel="stylesheet" href="../appearance/style.css" type="text/css" />
+    <style type='text/css'>
+      .controls {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        box-sizing: border-box;
+        padding: 12px;
+        outline: 1px solid white;
+        z-index: 1000;
+      }
+
+      select, input, button {
+        cursor: pointer;
+      }
+    </style>
+
+  </head>
+  <body onload="main()">
+    <canvas width="600" height="600" id='WebARRocksFaceCanvas'></canvas>
+
+    <div class='controls'>
+      Neural network model: <br/>
+      <select id='NNSelector' onchange='change_NN(event)'>
+        <option value='NN_FACE.json' selected="true">NN_FACE</option>
+        <option value='NN_EARS.json'>NN_EARS</option>
+        <option value='NN_VTO.json'>NN_VTO</option>
+        <option value='NN_HEADPHONES_1.json'>NN_HEADPHONES_1</option>
+        <option value='NN_LIPSTICK_1.json'>NN_LIPSTICK_1</option>
+      </select><br/>
+
+      <hr/>
+      Update video: <br/>
+      <input type='file' accept="video/*" onchange='change_video(event)' />
+
+      <hr/>
+      <button onclick='play_video()'>PLAY</button>
+      <button onclick='pause_video()'>PAUSE</button>
+
+    </div>
+  </body>
+</html>
+ 

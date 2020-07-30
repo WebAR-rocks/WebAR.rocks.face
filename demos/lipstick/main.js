@@ -2,7 +2,7 @@ let _canvasVideo = null, _canvasAR = null;
 
 function start(){
   WebARRocksFaceShape2DHelper.init({
-    NNCpath: '../../dist/NN_LIPSTICK_1.json',
+    NNCpath: '../../neuralNets/NN_LIPSTICK_1.json',
     canvasVideo: _canvasVideo,
     canvasAR:_canvasAR,
     shapes: [{

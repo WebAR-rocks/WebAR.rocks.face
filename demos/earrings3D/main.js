@@ -42,7 +42,7 @@ let _three = null;
 function start(){
   // Init WebAR.rocks.face through the earrings 3D helper:
   WebARRocksEarrings3DHelper.init({
-    NN: '../../dist/NN_EARS.json',
+    NN: '../../neuralNets/NN_EARS.json',
     taaLevel: _settings.taaLevel,
     canvasFace: _canvases.face,
     canvasThree: _canvases.three,

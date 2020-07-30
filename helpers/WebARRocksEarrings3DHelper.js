@@ -22,7 +22,7 @@ const WebARRocksEarrings3DHelper = (function(){
   const _defaultSpec = {
     canvasFace: null,
     canvasThree: null,
-    NN: '../../dist/NN_EARS.json',
+    NN: '../../neuralNets/NN_EARS.json',
 
     earringsScale: 1,
     earsDistance: 22, // in cm, mean distance between the 2 ears
