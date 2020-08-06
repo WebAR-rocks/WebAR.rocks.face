@@ -14,6 +14,8 @@ const SETTINGS = {
   nMaxTestsGif: 300, // maximum nomber of detection trial, after that abandon
 
   detectGifThreshold: 0.9,
+
+  // hole parameters:
   gifMaskScale: [1.3, 1.5],
   gifMaskOffset: [0.01,0.10], // relative. 1-> 100% scale mask width of the image (or height)
                               // 2nd value: + -> move GIF hole upward
@@ -141,7 +143,7 @@ function start(){
 function set_gifFrameAsInput(frameIndex){
   console.log('INFO: set_gifFrameAsInput() - frameIndex =', frameIndex);
   GL.bindTexture(GL.TEXTURE_2D, GIF.baseTexture);
-  GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, true);
+  GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, false);
   GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, GL.RGBA, GL.UNSIGNED_BYTE, GIF.frames[frameIndex]);
   GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
   GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
@@ -465,9 +467,9 @@ function build_gifFrameMask(detectState, frameIndex){
   // BUILD THE FACE MASK:
 
   // cut the face with webgl and put a fading
-  // console.log('INFO : build_gifFrameMask() from frame n°', frameIndex);
+  // console.log('INFO: build_gifFrameMask() from frame n°', frameIndex);
 
-  if (GIF.hueTextures.length<=frameIndex){
+  if (GIF.hueTextures.length <= frameIndex){
     GIF.hueTextures.push(create_hueTexture());
     GIF.positionsFace.push([0,0]);
     GIF.scalesFace.push([1,1]);
@@ -487,7 +489,7 @@ function build_gifFrameMask(detectState, frameIndex){
   const syn = s*SETTINGS.gifMaskScale[1]*GIF.image.width/GIF.image.height;
 
   // correction due to the rotation along z axis:
-  xn += SETTINGS.rzDriftDx*sxn*Math.sin(rz);
+  xn += SETTINGS.rzDriftDx * sxn * Math.sin(rz);
 
   GIF.positionsFace[frameIndex][0] = xn;
   GIF.positionsFace[frameIndex][1] = yn;
@@ -504,8 +506,8 @@ function build_gifFrameMask(detectState, frameIndex){
 
   GL.activeTexture(GL.TEXTURE0);
   GL.bindTexture(GL.TEXTURE_2D, GIF.baseTexture);
+  GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, true);
   GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, GL.RGBA, GL.UNSIGNED_BYTE, GIF.frames[frameIndex]);
-  
   
   // FILL VIEWPORT:
   GL.enable(GL.BLEND);
@@ -558,6 +560,7 @@ function build_gifFrameMask(detectState, frameIndex){
   GL.drawElements(GL.TRIANGLES, 3, GL.UNSIGNED_SHORT, 0); // FILL VIEWPORT
 
   GL.bindFramebuffer(GLDRAWTARGET, null);  
+  GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, false);  
   
 } //end build_gifFrameMask()
 
@@ -574,7 +577,7 @@ function build_shps(){
     varying vec2 vUV;\n\
     \n\
     void main(void){\n\
-      gl_FragColor=texture2D(samplerImage, vUV);\n\
+      gl_FragColor = texture2D(samplerImage, vUV);\n\
     }";
 
   // build the search SHP:
@@ -585,14 +588,14 @@ function build_shps(){
       uniform vec4 uxysw;\n\
       \n\
       void main(void) {\n\
-        vec3 colorVideo=texture2D(samplerVideo, vUV).rgb;\n\
-        vec2 pos=vUV*2.-vec2(1.,1.);\n\
-        vec2 isInside=step(uxysw.xy-uxysw.zw, pos);\n\
-        isInside*=step(pos, uxysw.xy+uxysw.zw);\n\
-        vec2 blendCenterFactor=abs(pos-uxysw.xy)/uxysw.zw;\n\
-        float alpha=isInside.x*isInside.y*pow(max(blendCenterFactor.x, blendCenterFactor.y), 3.);\n\
-        vec3 color=mix(colorVideo, vec3(0.,0.6,1.), alpha);\n\
-        gl_FragColor=vec4(color,1.);\n\
+        vec3 colorVideo = texture2D(samplerVideo, vUV).rgb;\n\
+        vec2 pos = vUV * 2. - vec2(1.,1.);\n\
+        vec2 isInside = step(uxysw.xy-uxysw.zw, pos);\n\
+        isInside *= step(pos, uxysw.xy+uxysw.zw);\n\
+        vec2 blendCenterFactor = abs(pos-uxysw.xy) / uxysw.zw;\n\
+        float alpha = isInside.x * isInside.y * pow(max(blendCenterFactor.x, blendCenterFactor.y), 3.);\n\
+        vec3 color = mix(colorVideo, vec3(0.,0.6,1.), alpha);\n\
+        gl_FragColor = vec4(color,1.);\n\
       }",
       "SEARCH FACE"
     );
@@ -621,38 +624,38 @@ function build_shps(){
   };
 
   let alphaShaderChunk = "float alpha=0.;\n\
-      vec2 uv=(vUV-offset+s2)/(2.*s2); //uv normalized in the face\n\
+      vec2 uv = (vUV-offset+s2)/(2.*s2); //uv normalized in the face\n\
       if (uv.y>UPPERHEADY){ // upper head: circle arc\n\
-        vec2 uvc=(uv-vec2(0.5,UPPERHEADY))*vec2(1., 0.5/(1.-UPPERHEADY));\n\
-        float alphaBorder=smoothstep(0.5-SMOOTHEDGE, 0.5, length(uvc));\n\
-        float alphaCenter=pow(smoothstep(UPPERHEADY, 1., uv.y), 0.5);\n\
+        vec2 uvc = (uv-vec2(0.5,UPPERHEADY))*vec2(1., 0.5/(1.-UPPERHEADY));\n\
+        float alphaBorder = smoothstep(0.5-SMOOTHEDGE, 0.5, length(uvc));\n\
+        float alphaCenter = pow(smoothstep(UPPERHEADY, 1., uv.y), 0.5);\n\
         //float alphaCenter=pow(1.-(1.-uv.y)/(1.-UPPERHEADY), 0.5);\n\
-        alpha=mix(alphaCenter, alphaBorder, smoothstep(0.3, 0.4, abs(uv.x-0.5)));\n\
+        alpha = mix(alphaCenter, alphaBorder, smoothstep(0.3, 0.4, abs(uv.x-0.5)));\n\
       } else if (uv.y<LOWERHEADY){ // lower head: circle arc \n\
-        vec2 uvc=(uv-vec2(0.5, LOWERHEADY))*vec2(1., 0.5/LOWERHEADY);\n\
-        alpha=smoothstep(0.5-SMOOTHEDGE, 0.5, length(uvc));\n\
+        vec2 uvc = (uv-vec2(0.5, LOWERHEADY))*vec2(1., 0.5/LOWERHEADY);\n\
+        alpha = smoothstep(0.5-SMOOTHEDGE, 0.5, length(uvc));\n\
       } else { // middle head: straight\n\
-        vec2 uvc=vec2(uv.x-0.5, 0.);\n\
-        alpha=smoothstep(0.5-SMOOTHEDGE, 0.5,length(uvc));\n\
+        vec2 uvc = vec2(uv.x-0.5, 0.);\n\
+        alpha = smoothstep(0.5-SMOOTHEDGE, 0.5,length(uvc));\n\
       }\n\
-     //alpha=0.0;\n";
+     //alpha = 0.0;\n";
 
   // set more alpha where it is dark on the side of the face:
-  alphaShaderChunk += "float grayScale=dot(color, vec3(0.33,0.33,0.33));\n\
+  alphaShaderChunk += "float grayScale = dot(color, vec3(0.33,0.33,0.33));\n\
        if (alpha>0.01){\n\
-         alpha=mix(pow(alpha, 0.5), pow(alpha, 1.5), smoothstep(0.1,0.5,grayScale));\n\
+         alpha = mix(pow(alpha, 0.5), pow(alpha, 1.5), smoothstep(0.1,0.5,grayScale));\n\
        }";
 
   const shpBuildMask = build_shaderProgram(
     "attribute vec2 position;\n\
      uniform float rz;\n\
      varying vec2 vUV;\n\
-     const float PIVOTY=0.0;\n\
+     const float PIVOTY = 0.0;\n\
      void main(void){\n\
-       float cz=cos(rz),sz=sin(rz);\n\
-       vec2 posRz=vec2(0., -PIVOTY)+mat2(cz, sz, -sz, cz)*(position+vec2(0., PIVOTY));\n\
-      gl_Position=vec4(posRz, 0., 1.);\n\
-      vUV=0.5+0.5*posRz;\n\
+       float cz = cos(rz), sz = sin(rz);\n\
+       vec2 posRz = vec2(0., -PIVOTY)+mat2(cz, sz, -sz, cz)*(position+vec2(0., PIVOTY));\n\
+       gl_Position = vec4(posRz, 0., 1.);\n\
+       vUV = 0.5 + 0.5 * posRz;\n\
      }",
     
     "precision highp float;\n\
@@ -660,22 +663,22 @@ function build_shps(){
      uniform sampler2D samplerImage;\n\
      varying vec2 vUV;\n\
      \n\
-     const float UPPERHEADY=" + SETTINGS.gifHeadForheadY.toFixed(2)+";\n\
-     const float LOWERHEADY=" + SETTINGS.gifHeadJawY.toFixed(2)+";\n\
-     const float SMOOTHEDGE=" + SETTINGS.gifCropSmoothEdge.toFixed(2)+";\n\
+     const float UPPERHEADY =" + SETTINGS.gifHeadForheadY.toFixed(2) + ";\n\
+     const float LOWERHEADY =" + SETTINGS.gifHeadJawY.toFixed(2) + ";\n\
+     const float SMOOTHEDGE =" + SETTINGS.gifCropSmoothEdge.toFixed(2) + ";\n\
      \n\
      \n\
      void main(void){\n\
-       vec2 s2=0.5*scale;\n\
-       vec2 isFace=step(vUV, offset+s2)*step(offset-s2, vUV);\n\
-       float isNotFace=1.-isFace.x*isFace.y;\n\
+       vec2 s2 = 0.5 * scale;\n\
+       vec2 isFace = step(vUV, offset+s2)*step(offset-s2, vUV);\n\
+       float isNotFace = 1. - isFace.x * isFace.y;\n\
        if (isNotFace>0.01){\n\
-         gl_FragColor=texture2D(samplerImage, vUV); return;\n\
+         gl_FragColor = texture2D(samplerImage, vUV); return;\n\
        }\n\
-       vec3 color=texture2D(samplerImage, vUV).rgb;\n\
+       vec3 color = texture2D(samplerImage, vUV).rgb;\n\
        " + alphaShaderChunk + "\
-       gl_FragColor=vec4(color, alpha);\n\
-       " + ((SETTINGS.debugGifCrop) ? "gl_FragColor=vec4(1.,0.,0.,1.);" : "")+"\n\
+       gl_FragColor = vec4(color, alpha);\n\
+       " + ((SETTINGS.debugGifCrop) ? "gl_FragColor = vec4(1.,0.,0.,1.);" : "")+"\n\
      }",
 
     'BUILD GIF MASK');
@@ -688,22 +691,22 @@ function build_shps(){
     uniform vec2 offset, scale;\n\
     varying vec2 vUV;\n\
     void main(void){\n\
-      gl_Position=vec4(position, 0., 1.);\n\
-      vUV=offset+0.5*position*scale;\n\
+      gl_Position = vec4(position, 0., 1.);\n\
+      vUV = offset + 0.5 * position * scale;\n\
     }",
     "precision lowp float;\n\
     uniform sampler2D samplerImage;\n\
     varying vec2 vUV;\n\
-    const float BORDER=0.2;\n\
+    const float BORDER = 0.2;\n\
     \n\
     void main(void){\n\
-      vec2 uvCentered=2.0*vUV-vec2(1.,1.);\n\
-      float ruv=length(uvCentered);\n\
-      vec2 uvn=uvCentered/ruv;\n\
-      vec2 uvBorder=uvn*(1.-BORDER);\n\
-      float isOutside=step(1.-BORDER, ruv);\n\
-      uvCentered=mix(uvCentered, uvBorder, isOutside);\n\
-      gl_FragColor=texture2D(samplerImage, uvCentered*0.5+vec2(0.5,0.5));\n\
+      vec2 uvCentered = 2.0 * vUV - vec2(1.,1.);\n\
+      float ruv = length(uvCentered);\n\
+      vec2 uvn = uvCentered / ruv;\n\
+      vec2 uvBorder = uvn*(1.-BORDER);\n\
+      float isOutside = step(1.-BORDER, ruv);\n\
+      uvCentered = mix(uvCentered, uvBorder, isOutside);\n\
+      gl_FragColor = texture2D(samplerImage, uvCentered*0.5+vec2(0.5,0.5));\n\
     }",
     'CUT GIF FACE');
   SHPS.cropUserFace = set_apShp(shpCutFace);
@@ -731,8 +734,8 @@ function build_shps(){
   const shpRender = build_shaderProgram("attribute vec2 position;\n\
     varying vec2 vUV;\n\
     void main(void){\n\
-      gl_Position=vec4(position, 0., 1.);\n\
-      vUV=position;\n\
+      gl_Position = vec4(position, 0., 1.);\n\
+      vUV = position;\n\
     }",
 
    "precision highp float;\n\
@@ -760,7 +763,7 @@ function build_shps(){
     \n\
     void main(void){\n\
       // flip left-right:\n\
-      vec2 uv=vec2(0.5,0.5)+vec2(-0.5,0.5)*vUV;\n\
+      vec2 uv = vec2(0.5,0.5)+vec2(-0.5,0.5)*vUV;\n\
       float cTheta = cos(rz), sTheta=sin(rz);\n\
       float aspectRatio = scale.y / scale.x;\n\
       vec2 uvRot = vec2(0.5,0.5)+vec2(-0.5,0.5)*(mat2(cTheta, -sTheta/aspectRatio, sTheta*aspectRatio, cTheta)*vUV);\n\
@@ -787,6 +790,9 @@ function build_shps(){
       // reconvert to RGB and output the color:\n\
       colorRGB = hsv2rgb(colorHSVout);\n\
       gl_FragColor = vec4(colorRGB, 1.);\n\
+      // DEBUG ZONE:\n\
+      //gl_FragColor = vec4(1., 0., 0., 1.);\n\
+      //gl_FragColor = texture2D(samplerImage, uvCut);\n\
     }",
     'FINAL RENDER FACE'
   );
@@ -916,6 +922,7 @@ function draw_search(detectState){
 function draw_render(detectState){ //detectState is the detectState of the USER (not the GIF)
   // do RTT:
   GL.bindFramebuffer(GLDRAWTARGET, FBO);
+  GL.activeTexture(GL.TEXTURE0);
 
   // crop the user's face and put the result to USERCROP.potFaceCutTexture:
   const s = detectState.s / SETTINGS.zoomFactor;
@@ -928,7 +935,7 @@ function draw_render(detectState){ //detectState is the detectState of the USER 
   GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, USERCROP.potFaceCutTexture, 0);
   GL.uniform2f(SHPS.cropUserFace.offset, xn, yn);
   GL.uniform2f(SHPS.cropUserFace.scale, sxn, syn);
-  GL.viewport(0,0,SETTINGS.faceRenderSizePx, SETTINGS.faceRenderSizePx);
+  GL.viewport(0, 0, SETTINGS.faceRenderSizePx, SETTINGS.faceRenderSizePx);
   GL.bindTexture(GL.TEXTURE_2D, FFSPECS.videoTexture);
   GL.drawElements(GL.TRIANGLES, 3, GL.UNSIGNED_SHORT, 0);
   
@@ -936,7 +943,7 @@ function draw_render(detectState){ //detectState is the detectState of the USER 
   //shrink the userface to a SETTINGS.hueTextureSizePx texture:
   GL.useProgram(SHPS.copy.program);
   GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, USERCROP.hueTexture, 0);
-  GL.viewport(0,0,SETTINGS.hueTextureSizePx, SETTINGS.hueTextureSizePx);
+  GL.viewport(0, 0, SETTINGS.hueTextureSizePx, SETTINGS.hueTextureSizePx);
   GL.bindTexture(GL.TEXTURE_2D, USERCROP.potFaceCutTexture);
   GL.generateMipmap(GL.TEXTURE_2D);
   GL.drawElements(GL.TRIANGLES, 3, GL.UNSIGNED_SHORT, 0);
