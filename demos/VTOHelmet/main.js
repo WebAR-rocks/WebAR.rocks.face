@@ -53,7 +53,6 @@ function main(){
 
     // The occluder is a placeholder for the head. It is rendered with a transparent color
     // (only the depth buffer is updated).
-    // It is useful to hide the left glasses branch when the head turns on the left.
     occluderURL: "assets/models3D/occluder.glb",
     modelURL: "assets/models3D/headphones.glb", //initial model loaded. false or null -> no model
     envmapURL: "assets/envmaps/venice_sunset_1k.hdr",

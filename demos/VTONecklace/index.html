@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-language" content="en-EN" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Necklace VTO Demo</title>
+    
+    <!-- INCLUDE WebAR.rocks.face MAIN SCRIPT -->
+    <script src="../../dist/WebARRocksFace.js"></script>
+    
+    <!-- INCLUDE MAIN HELPER -->
+    <script src="../../helpers/WebARRocksFaceHelper.js"></script>
+
+    <!-- THREE.JS, FOR THE RENDERING -->
+    <!-- WARNING: for production you should replace three.js by three.min.js -->
+    <script src="../../libs/threejs/v112/three.js"></script>
+    <script src="../../libs/threejs/v112/GLTFLoader.js"></script>
+
+    <!-- THREE.JS RGBE loader - you can remove it if you don't use envmap: -->
+    <script src="../../libs/threejs/v112/RGBELoader.js"></script>
+
+    <!-- THREE.JS postprocessing - you can remove it if you don't use bloom or temporal anti aliasing : -->
+    <script src="../../libs/threejs/v112/EffectComposer.js"></script>
+    <script src="../../libs/threejs/v112/ShaderPass.js"></script>
+    <script src="../../libs/threejs/v112/RenderPass.js"></script>
+    <script src="../../libs/threejs/v112/CopyShader.js"></script>
+
+    <!-- Bloom postprocessing: -->
+    <script src="../../libs/threejs/v112/UnrealBloomPassTweaked.js"></script>
+    <script src="../../libs/threejs/v112/LuminosityHighPassShader.js"></script>
+    
+    <!-- TAA specifics: -->
+    <script src="../../libs/threejs/v112/SSAARenderPass.js"></script>
+    <script src="../../libs/threejs/v112/TAARenderPass.js"></script>
+
+    <!-- INCLUDE WebAR.rocks.mirror main helper -->
+    <script src="../VTO/WebARRocksMirror.js"></script>
+    
+    <!-- INCLUDE MAIN DEMO SCRIPT: -->
+    <script src="./main.js"></script>
+
+    <style type='text/css'>
+      body {
+        margin: 0;
+        background-color: silver;
+      }
+      #WebARRocksFaceCanvas, #threeCanvas {
+        position: absolute;
+        width: 100vw;
+        top: 0;
+        left: 0;
+
+        /* mirror the canvas: */
+        transform: rotateY(180deg);
+      }
+
+      #WebARRocksFaceCanvas {
+        z-index: 0;
+      }
+      #threeCanvas {
+        z-index: 1;
+      }
+
+      #controls {
+        display: none;
+        position: fixed;
+        z-index: 2;
+        width: 100vw;
+        bottom: 0;
+        left: 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      #controls > div {
+        cursor: pointer;
+        flex-grow: 1;
+        font-variant: small-caps;
+        font-size: 14pt;
+        text-align: center;
+        min-width: 110px;
+        box-sizing: border-box;
+        padding-top: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        height: 40px;
+        color: #eee;
+      }
+
+      #controls > div:hover {
+        background: rgba(50, 50, 50, 0.5);
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body onload="main()">
+     <!--
+      The first canvas is used by WebAR.rocks.mirror
+      It is linked to a WebGL context used by the deep learning engine
+      And it displays the video of the webcam.
+      
+      Since we need to transfer the video to a texture for face detection,
+      it is not costly at all to use this texture for display.
+
+      You can tweak the rendering of the video in WebARRocksFaceHelper.js,
+      by editing the fragment shader of _shps.copy
+    -->
+    <canvas id='WebARRocksFaceCanvas'></canvas>
+
+
+    <!--
+      The second canvas is used by THREE.js for 3D rendering:
+    -->
+    <canvas id='threeCanvas'></canvas>
+
+    <div id='controls'>
+      <div onclick = 'WebARRocksMirror.load("assets/models3D/blackPanther.glb")'>Black Panther</div>
+      <div onclick = 'WebARRocksMirror.load("assets/models3D/nativeAmerican.glb")'>Native American</div>
+      <div onclick = 'WebARRocksMirror.load(false)'>Video only</div>
+      <div onclick = 'WebARRocksMirror.pause(true)'>Pause</div>
+      <div onclick = 'WebARRocksMirror.resume(true)'>Resume</div>
+      <div onclick = 'WebARRocksMirror.resize(400, 400)'>Resize</div>
+      <div onclick = 'capture_image()'>Capture</div>
+    </div>
+
+  </body>
+</html>
+ 

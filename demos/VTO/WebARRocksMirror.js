@@ -125,8 +125,8 @@ const WebARRocksMirror = (function(){
       // the origin of the glasses 3D model is the point supporting the glasses
       // (on the base of the nose)
       // its position in dev/face.obj is [0, 47, 53]
-      threeGlasses.position.set(0, 47, 53);
-      //threeGlasses.position.set(0, 60, 40);
+      // move a bit up (+Y)
+      threeGlasses.position.set(0, 47+2, 53);
 
       // in dev/face.obj the face is looking upward,
       // whereas in the glasses model the branches are parallel to the ground
