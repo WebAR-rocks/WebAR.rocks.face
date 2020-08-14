@@ -95,9 +95,9 @@ const WebARRocksFaceHelper = (function(){
   };
 
   const _featureSolvePnP = {    
-    isCenterObjPoints: false,
+    isCenterObjPoints: true,
     objPoints: [], // will be sorted by solver
-    objPointsMeans: [],
+    objPointsMean: null,
     imgPointsLMIndices: [], // will be sorted by solver
     imgPointsPx: []
   };
@@ -177,10 +177,9 @@ const WebARRocksFaceHelper = (function(){
     // and http://ksimek.github.io/2013/08/13/intrinsic/
 
     const halfFovYRad = 0.5 * _cameraFoVY * _deg2rad;
-    const cotanHalfFovY = 1.0 / Math.tan(halfFovYRad);
-
+    
     // settings with EPnP:
-    const fy = 0.5 * that.get_viewHeight() * cotanHalfFovY;
+    const fy = 0.5 * that.get_viewHeight() / Math.tan(halfFovYRad);
     const fx = fy;
 
     /*const halfFovXRad =halfFovYRad * that.get_viewAspectRatio();
@@ -207,22 +206,19 @@ const WebARRocksFaceHelper = (function(){
       }); 
 
     if (_featureSolvePnP.isCenterObjPoints){
-      // compute mean for each solver:
-      _featureSolvePnP.objPoints.forEach(function(objPoints){
-        // compute mean:
-        const mean = [0, 0, 0];
-        objPoints.forEach(function(pt){
-          mean[0] += pt[0], mean[1] += pt[1], mean[2] += pt[2];
-        });
-        const n = objPoints.length;
-        mean[0] /= n, mean[1] /= n, mean[2] /= n;
-        _featureSolvePnP.objPointsMeans = mean;
+      // compute mean:
+      const mean = [0, 0, 0];        
+      _featureSolvePnP.objPoints.forEach(function(pt){
+        mean[0] += pt[0], mean[1] += pt[1], mean[2] += pt[2];
+      });
+      const n = _featureSolvePnP.objPoints.length;
+      mean[0] /= n, mean[1] /= n, mean[2] /= n;
+      _featureSolvePnP.objPointsMean = mean;
 
-        // substract mean:
-        objPoints.forEach(function(pt){
-          pt[0] -= mean[0], pt[1] -= mean[1], pt[2] -= mean[2];
-        });
-      }); // end loop on objPoints groups
+      // substract mean:
+      _featureSolvePnP.objPoints.forEach(function(pt){
+        pt[0] -= mean[0], pt[1] -= mean[1], pt[2] -= mean[2];
+      });      
     } //end if center obj points
   }
 
@@ -493,7 +489,7 @@ const WebARRocksFaceHelper = (function(){
       if (vf.z > 0){
         faceSlot.faceFollowerParent.matrix.copy(_featureThree.matMov);
         if (_featureSolvePnP.isCenterObjPoints){
-          const mean = _featureSolvePnP.objPointsMeans;
+          const mean = _featureSolvePnP.objPointsMean;
           faceSlot.faceFollower.position.fromArray(mean).multiplyScalar(-1);
         }
       }
