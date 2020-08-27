@@ -2,7 +2,7 @@ let _canvasVideo = null, _canvasAR = null;
 
 function start(){
   WebARRocksFaceShape2DHelper.init({
-    NNCpath: '../../neuralNets/NN_LIPSTICK_1.json',
+    NNCpath: '../../neuralNets/NN_LIPSTICK_3.json',
     canvasVideo: _canvasVideo,
     canvasAR:_canvasAR,
     shapes: [{
@@ -123,15 +123,10 @@ function start(){
             12
           ],
           displacements: [ // displacements, relative to perimeter:
-           /*0.02,
-            0.005, 0.01, 0.005, 0.01, 0.005, // exterior
-            0.02, 0,
-            0.03, 0.03, 0.03, // interior
-            0*/
             0.02,
             0.0, 0.0, -0.015, 0.0, 0.0, // exterior
             0.02, 0,
-            0.03, 0.03, 0.03, // interior
+            0.01, 0.015, 0.01, // interior
             0
           ]
         },
@@ -144,13 +139,8 @@ function start(){
             0
           ],
           displacements: [
-            /*0,
-            0.025, 0.03, 0.025,
-            0, 0.02,
-            0.01, 0.02, 0.015, 0.02, 0.01,            
-            0.02*/
             0,
-            0.025, 0.03, 0.025,
+            0.015, 0.02, 0.015,
             0, 0.02,
             0,0,0,0,0,
             0.02

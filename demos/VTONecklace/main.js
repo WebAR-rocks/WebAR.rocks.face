@@ -9,7 +9,7 @@ function main(){
     isGlasses: false,
 
     specWebARRocksFace: {
-      NNCpath: '../../neuralNets/NN_NECKLACE_0.json',
+      NNCpath: '../../neuralNets/NN_NECKLACE_1.json',
       scanSettings: { // harden detection:
         threshold: 0.9,
         dThreshold: 1.0
@@ -32,10 +32,10 @@ function main(){
       "torsoNeckBackDown": [0.000007,-47.934677,-127.748184]// ind: 2
     },
     solvePnPImgPointsLabels: [
-      /*"torsoNeckCenterUp",
+      "torsoNeckCenterUp",
       "torsoNeckLeftUp",
       "torsoNeckRightUp",
-      "torsoNeckBackUp",*/
+      "torsoNeckBackUp",
       "torsoNeckCenterDown",
       "torsoNeckLeftDown",
       "torsoNeckRightDown",
