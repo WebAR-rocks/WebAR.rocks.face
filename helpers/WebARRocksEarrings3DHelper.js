@@ -52,6 +52,9 @@ const WebARRocksEarrings3DHelper = (function(){
       dThreshold: 0.9
     },
 
+    // callbacks
+    callbackTrack: null,
+
     // postprocessing:
     taaLevel: 0,
 
@@ -317,6 +320,10 @@ const WebARRocksEarrings3DHelper = (function(){
 
     //_three.renderer.render(_three.scene, _three.camera);
     _three.composer.render();
+
+    if (_spec.callbackTrack !== null){
+      _spec.callbackTrack(detectState);
+    }
   } //end callbackTrack()
 
 
