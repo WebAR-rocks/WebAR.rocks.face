@@ -145,10 +145,10 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
   // END MISC HELPERS
 
   const that = {
-    load_geometryFromGLTF: function(loadingManager, GLTFUrl){
+    load_geometryFromGLTF: function(loadingManager, GLTFUrl, flexibleGeometryName){
       return new Promise(function(resolve, reject){
         new THREE.GLTFLoader(loadingManager).load(GLTFUrl, function(model){
-          const geom = that.extract_flexibleMaskGeometry(model.scene, null);
+          const geom = that.extract_flexibleMaskGeometry(model.scene, flexibleGeometryName);
           resolve(geom);
         }); //end GLTF loading
       }); //end return new Promise

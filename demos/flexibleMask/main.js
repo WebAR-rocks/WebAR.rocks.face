@@ -141,7 +141,7 @@ function build_scene(threeInstances){
   //WebARRocksFaceHelper.add_threejsOccluderFromFile('assets/occluder.glb', null, threeLoadingManager);
 
   // build and add the flexible mask:
-  _flexibleMaskHelper.load_geometryFromGLTF(threeLoadingManager, _spec.flexibleMaskURL).then(function(geom){
+  _flexibleMaskHelper.load_geometryFromGLTF(threeLoadingManager, _spec.flexibleMaskURL, null).then(function(geom){
     const face3DKeypoints = (_spec.flexibleMaskPoints) ? _spec.flexibleMaskPoints : WebARRocksFaceHelper.get_facePointPositions();
     _flexibleMaskMesh = _flexibleMaskHelper.build_flexibleMask(geom, face3DKeypoints, {
       kpInfluenceDecay: _spec.kpInfluenceDecay // [ distance from the keypoint where decay start, distance from the keypoint where decay ends ]
