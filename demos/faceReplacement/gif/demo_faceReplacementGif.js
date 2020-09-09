@@ -46,7 +46,7 @@ const GIF = {
   },
   mirroredLoop: SETTINGS.mirroredLoop,
   hideIfNotDetectedDuringNframes: SETTINGS.hideIfNotDetectedDuringNframes,
-  baseTexture: false,
+  baseTexture: null,
   info: null,
   potFaceCutTexture: null,
   potFaceCutTextureSizePx: 0,
@@ -55,8 +55,8 @@ const GIF = {
   testCounter: 0,
   image: null,
   frames: [],
-  canvasMask: false,
-  canvasMaskCtx: false,
+  canvasMask: null,
+  canvasMaskCtx: null,
   frameMasks: [],
   url: -1,
   positionsFace: [],
@@ -170,18 +170,17 @@ function update_gif(detectedStates){ //called both at start (start()) and when u
   FFSPECS.canvasElement.classList.remove('canvasNotDetected');
   FFSPECS.canvasElement.classList.add('gif');
 
-  FFSPECS.canvasElement.style.top='';
-  FFSPECS.canvasElement.style.left='';
-  FFSPECS.canvasElement.style.width='';
+  FFSPECS.canvasElement.style.top = '';
+  FFSPECS.canvasElement.style.left = '';
+  FFSPECS.canvasElement.style.width = '';
 
   toggle_carousel(true);
 
   if (detectedStates){
     // repair detectedState:
-    while (detectedStates.length<GIF.frames.length){ // complete lacking frames with false
-      detectedStates.push(false);
+    while (detectedStates.length < GIF.frames.length){ // complete lacking frames with false
+      detectedStates.push(null);
     }
-
 
     STATE = STATES.GIFFACEDETECTPROVIDED;
     GIF.detectedStates = detectedStates;
@@ -246,19 +245,19 @@ function change_gif(urlImage, detectedStates, isMirroredLoop, hideIfNotDetectedD
     return;
   }
   if (typeof(detectState)==='undefined'){
-    var detectState = false;
+    var detectState = null;
   }
 
   STATE = STATES.BUSY;
   toggle_carousel(false);
   if (GIF.canvasMask){
     GIF.canvasMask.parentElement.removeChild(GIF.canvasMask);
-    GIF.canvasMask = false;
+    GIF.canvasMask = null;
   }
   
   if (urlImage==='CUSTOM'){ // upload custom image:
     GIF.mirroredLoop = false;
-    GIF.hideIfNotDetectedDuringNframes=5;
+    GIF.hideIfNotDetectedDuringNframes = 5;
 
     const domInputFile = document.getElementById('customImage');
     if (!domInputFile.files || !domInputFile.files[0]){
@@ -267,7 +266,7 @@ function change_gif(urlImage, detectedStates, isMirroredLoop, hideIfNotDetectedD
     }
     load_gifBlob(domInputFile.files[0], update_gif.bind(null, false));
   } else { // upload image from the carousel:
-    GIF.mirroredLoop=(isMirroredLoop) ? true : false;
+    GIF.mirroredLoop = (isMirroredLoop) ? true : false;
     GIF.hideIfNotDetectedDuringNframes = (hideIfNotDetectedDuringNframes) ? hideIfNotDetectedDuringNframes : false;
     load_gifURL(urlImage, update_gif.bind(null, detectedStates));
   }
@@ -306,9 +305,9 @@ function load_gifBlob(blob, callback){ // called both at first loading and by ch
       GIF.info = gify.getInfo(arrayBuffer); // gify read only ArrayBuffer instances
 
       // correct a special bug with gify lib:
-      GIF.info.duration=GIF.info.duration || GIF.info.durationChrome || GIF.info.durationFirefox || GIF.info.durationIE || GIF.frames.length*20;
+      GIF.info.duration = GIF.info.duration || GIF.info.durationChrome || GIF.info.durationFirefox || GIF.info.durationIE || GIF.frames.length*20;
       if (GIF.info.durationChrome){
-        GIF.info.duration=Math.max(GIF.info.duration, GIF.info.durationChrome);
+        GIF.info.duration = Math.max(GIF.info.duration, GIF.info.durationChrome);
       }
 
       if (!GIF.info.valid || !GIF.info.duration) {
@@ -477,7 +476,7 @@ function build_gifFrameMask(detectState, frameIndex){
   }
 
   if (!detectState){
-    GIF.frameMasks[frameIndex]=false;
+    GIF.frameMasks[frameIndex] = null;
     return;
   }
   
@@ -499,7 +498,7 @@ function build_gifFrameMask(detectState, frameIndex){
 
   // build the mask (the gif with the hole cut):
   GL.useProgram(SHPS.buildMask.program);
-  GL.viewport(0,0,FFSPECS.canvasElement.width, FFSPECS.canvasElement.height);
+  GL.viewport(0, 0, FFSPECS.canvasElement.width, FFSPECS.canvasElement.height);
   GL.uniform2f(SHPS.buildMask.offset, xn, yn);
   GL.uniform2f(SHPS.buildMask.scale, sxn, syn);
   GL.uniform1f(SHPS.buildMask.rz, rz);
@@ -509,10 +508,10 @@ function build_gifFrameMask(detectState, frameIndex){
   GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, true);
   GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, GL.RGBA, GL.UNSIGNED_BYTE, GIF.frames[frameIndex]);
   
-  // FILL VIEWPORT:
+  // fill viewport:
   GL.enable(GL.BLEND);
   GL.blendFunc(GL.SRC_ALPHA, GL.ZERO);
-  GL.clearColor(0.,0.,0.,0.);
+  GL.clearColor(0., 0., 0., 0.);
   GL.clear(GL.COLOR_BUFFER_BIT);
   GL.drawElements(GL.TRIANGLES, 3, GL.UNSIGNED_SHORT, 0);
   GL.disable(GL.BLEND);
@@ -523,9 +522,8 @@ function build_gifFrameMask(detectState, frameIndex){
   gifFrameMask.width = GIF.image.width;
   gifFrameMask.height = GIF.image.height;
   const ctx = gifFrameMask.getContext('2d');
-  ctx.drawImage(FFSPECS.canvasElement,0,0);
+  ctx.drawImage(FFSPECS.canvasElement, 0, 0);
   GIF.frameMasks[frameIndex] = gifFrameMask;
-
 
   // BUILD THE HUE TEXTURE:
 
@@ -547,13 +545,13 @@ function build_gifFrameMask(detectState, frameIndex){
 
   GL.bindFramebuffer(GLDRAWTARGET, FBO);
   GL.bindTexture(GL.TEXTURE_2D, GIF.baseTexture);
-  GL.viewport(0,0,GIF.potFaceCutTextureSizePx,GIF.potFaceCutTextureSizePx);
+  GL.viewport(0, 0, GIF.potFaceCutTextureSizePx,GIF.potFaceCutTextureSizePx);
   GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, GIF.potFaceCutTexture, 0);
   GL.drawElements(GL.TRIANGLES, 3, GL.UNSIGNED_SHORT, 0); // FILL VIEWPORT
 
   // copy the GIF.potFaceCutTexture to GIF.hueTexture:
   GL.useProgram(SHPS.copyInvX.program);
-  GL.viewport(0,0,SETTINGS.hueTextureSizePx,SETTINGS.hueTextureSizePx);
+  GL.viewport(0, 0, SETTINGS.hueTextureSizePx,SETTINGS.hueTextureSizePx);
   GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, GIF.hueTextures[frameIndex], 0);
   GL.bindTexture(GL.TEXTURE_2D, GIF.potFaceCutTexture);
   GL.generateMipmap(GL.TEXTURE_2D);
@@ -654,8 +652,9 @@ function build_shps(){
      void main(void){\n\
        float cz = cos(rz), sz = sin(rz);\n\
        vec2 posRz = vec2(0., -PIVOTY)+mat2(cz, sz, -sz, cz)*(position+vec2(0., PIVOTY));\n\
-       gl_Position = vec4(posRz, 0., 1.);\n\
-       vUV = 0.5 + 0.5 * posRz;\n\
+       vec2 posRzOverflow = 1.5 * posRz; // avoid border effect\n\
+       gl_Position = vec4(posRzOverflow, 0., 1.);\n\
+       vUV = 0.5 + 0.5 * posRzOverflow;\n\
      }",
     
     "precision highp float;\n\
@@ -832,7 +831,7 @@ function compile_shader(source, type, typeString) {
   GL.shaderSource(shader, source);
   GL.compileShader(shader);
   if (!GL.getShaderParameter(shader, GL.COMPILE_STATUS)) {
-    alert("ERROR IN "+typeString+ " SHADER: " + GL.getShaderInfoLog(shader));
+    alert("ERROR IN " + typeString + " SHADER: " + GL.getShaderInfoLog(shader));
     console.log('Buggy shader source: \n', source);
     return false;
   }
@@ -939,7 +938,6 @@ function draw_render(detectState){ //detectState is the detectState of the USER 
   GL.bindTexture(GL.TEXTURE_2D, FFSPECS.videoTexture);
   GL.drawElements(GL.TRIANGLES, 3, GL.UNSIGNED_SHORT, 0);
   
-
   //shrink the userface to a SETTINGS.hueTextureSizePx texture:
   GL.useProgram(SHPS.copy.program);
   GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, USERCROP.hueTexture, 0);
@@ -948,7 +946,6 @@ function draw_render(detectState){ //detectState is the detectState of the USER 
   GL.generateMipmap(GL.TEXTURE_2D);
   GL.drawElements(GL.TRIANGLES, 3, GL.UNSIGNED_SHORT, 0);
   
-
   // final rendering including light correction:
   const rz = GIF.rzsFace[GIF.animation.currentFrameIndex] + detectState.rz;
   GL.bindFramebuffer(GLDRAWTARGET, null);
@@ -975,7 +972,7 @@ function callbackTrack(detectState){
 
       ++GIF.testCounter;
       if (GIF.testCounter>SETTINGS.nMaxTestsGif){ // no face has been detected, go to the next frame (face position will be interpolated later)
-        GIF.detectedStates.push(false);
+        GIF.detectedStates.push(null);
         GIF.testCounter = 0;
         GIF.detectCounter = 0;
         if (GIF.detectedStates.length<GIF.frames.length){
@@ -993,7 +990,7 @@ function callbackTrack(detectState){
 
           if (GIF.detectedStates.length<GIF.frames.length){
             set_gifFrameAsInput(GIF.detectedStates.length);
-            isDraw=false;
+            isDraw = false;
           }
         } //end if enough good detections
       }
@@ -1072,10 +1069,10 @@ function callbackTrack(detectState){
       if (currentFrameIndex !== GIF.animation.currentFrameIndex){
         //console.log(currentFrameIndex);
         GIF.animation.currentFrameIndex = currentFrameIndex;
-        if (!GIF.frames[currentFrameIndex]) currentFrameIndex=0;
+        if (!GIF.frames[currentFrameIndex]) currentFrameIndex = 0;
         if (GIF.frameMasks[currentFrameIndex]){
-          GIF.canvasMaskCtx.clearRect(0,0, GIF.canvasMask.width, GIF.canvasMask.height);
-          GIF.canvasMaskCtx.drawImage(GIF.frameMasks[currentFrameIndex],0,0);
+          GIF.canvasMaskCtx.clearRect(0, 0, GIF.canvasMask.width, GIF.canvasMask.height);
+          GIF.canvasMaskCtx.drawImage(GIF.frameMasks[currentFrameIndex], 0, 0);          
           update_positionUserCropCanvas(currentFrameIndex);
         } else {
           GIF.canvasMaskCtx.drawImage(GIF.frames[currentFrameIndex],0,0);
