@@ -2,7 +2,10 @@ let _canvasVideo = null, _canvasAR = null;
 
 // LIPS:
 const SHAPELIPS = {
-  // LIPS:
+  // list of the points involved in this shape.
+  // each point is given as its label
+  // the label depends on the used neural network
+  // run WEBARROCKSFACE.get_LMLabels() to get all labels
   points: [
     "lipsExt0", // 0
     "lipsExtTop1", // 1
@@ -31,8 +34,16 @@ const SHAPELIPS = {
     "lipsIntBot18", // 18
     "lipsIntBot19", // 19
   ],
-  iVals: [ // interpolated values
-    // LIPS:        
+
+  // iVals are interpolated values
+  // a value is given for each shape point
+  // in the same order as points array
+  // a value can have between 0 and 4 elements
+  // the value will be retrieved in the fragment shader used to color the shape
+  // as a float, vec2, vec3 or vec4 depending on its components count
+  // it is useful to not color evenly the shape
+  // we can apply gradients, smooth borders, ...
+  iVals: [
     [1], // lipsExt0
     [1], // lipsExtTop1
     [1], // lipsExtTop2
@@ -60,9 +71,12 @@ const SHAPELIPS = {
     [-1], // lipsIntBot18
     [-1] // lipsIntBot1
   ],
-  tesselation: [ // each value is an index in points array
+
+  // how to group shape points to draw triangles
+  // each value is an index in shape points array
+  tesselation: [
     // upper lip:
-    0,1,13, // each group of 3 indices is a face
+    0,1,13, // each group of 3 indices is a triangular face
     0,12,13,
     1,13,2,
     2,13,14,
@@ -86,7 +100,21 @@ const SHAPELIPS = {
     6,17,16, //*/
   ],
 
-  // interpolated points - compute cubic Hermite interpolation:
+   // interpolated points:
+  // to make shape border smoother, we can add computed points
+  // each value of this array will insert 2 new points
+  // 
+  // the first point will be between the first 2 points indices 
+  // the second point will be between the last 2 points indices
+  // 
+  // the first value of ks controls the position of the first interpolated point
+  // if -1, it will match the first point, if 0 it will match the middle point
+  // the second value of ks controls the position of the second interpolated point
+  // if 1, it will match the last point, if 0 it will match the middle point
+  // 
+  // computed using Cubic Hermite interpolation
+  // the point is automatically inserted into the tesselation
+  // points are given by their indices in shape points array
   interpolations: [
     { // upper lip sides:
       tangentInfluences: [2, 2, 2],
@@ -110,7 +138,12 @@ const SHAPELIPS = {
     }
   ],
 
-  // contours:
+  // we can move points along their normals using the outline feature.
+  // an outline is specified by the list of point indices in shape points array
+  // it will be used to compute the normals, the inside and the outside
+  // 
+  // displacement array are the displacement along normals to apply
+  // for each point of the outline.
   outlines: [
     { // upper lip. Indices of points in points array:
       points: [
@@ -147,6 +180,9 @@ const SHAPELIPS = {
   ],
 
   // RENDERING:
+  // GLSLFragmentSource is the GLSL source code of the shader used
+  // to fill the shape:
+  
   // Debug interpolated vals:
   /*GLSLFragmentSource: "void main(void){\n\
     gl_FragColor = vec4(0.5 + 0.5*iVal, 0., 1.);\n\
@@ -216,7 +252,7 @@ const SHAPEEYES = {
     "eyeLeftOut3" // 15
   ],
   iVals: [
-    [1], // eyeRightInt0 20
+    [1], // eyeRightInt0
     [1], // eyeRightTop0
     [1], // eyeRightTop1
     [1], // eyeRightExt0
@@ -227,12 +263,12 @@ const SHAPEEYES = {
 
     [1], // eyeLeftInt0
     [1], // eyeLeftTop0
-    [1], // eyeLeftTop1 30
+    [1], // eyeLeftTop1
     [1], // eyeLeftExt0
     [1], // eyeLeftOut0
     [-1], // eyeLeftOut1
     [-1], // eyeLeftOut2
-    [-1] // eyeLeftOut3 35
+    [-1] // eyeLeftOut3
   ],
   tesselation: [
     // upper right eye;
@@ -346,38 +382,38 @@ const SHAPEEYES = {
 
 const SHAPECHEEKS = {
   points: [
-    "cheekRightExt0", // 36
+    "cheekRightExt0",
     "cheekRightExt1",
     "cheekRightExt2",
     "cheekRightExt3",
-    "cheekRightExt4", // 40
+    "cheekRightExt4",
     "cheekRightExt5",
     "cheekRightInt0",
 
     "cheekLeftExt0",
     "cheekLeftExt1",
-    "cheekLeftExt2", // 45
+    "cheekLeftExt2",
     "cheekLeftExt3",
     "cheekLeftExt4",
     "cheekLeftExt5",
-    "cheekLeftInt0"  // 49
+    "cheekLeftInt0" 
   ],
   iVals: [
     [-1], // cheekRightExt0
     [-1], // cheekRightExt1
     [-1], // cheekRightExt2
     [-1], // cheekRightExt3
-    [-1], // cheekRightExt4 40
+    [-1], // cheekRightExt4
     [-1], // cheekRightExt5
     [1], // cheekRightInt0
 
     [-1], // cheekLeftExt0
     [-1], // cheekLeftExt1
-    [-1], // cheekLeftExt2 45
+    [-1], // cheekLeftExt2
     [-1], // cheekLeftExt3
     [-1], // cheekLeftExt4
     [-1], // cheekLeftExt5
-    [1] // cheekLeftInt0 49
+    [1] // cheekLeftInt0
   ],
   tesselation: [
     // right cheek:
