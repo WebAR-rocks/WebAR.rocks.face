@@ -202,18 +202,25 @@ After the initialization (ie after that `callbackReady` is launched ) , these me
   * `<string> errorLabel`: if an error happens, the label of the error. It can be: `NOTSUPPORTED`, `NODEVICESFOUND` or `PROMISEREJECTED`.
 
 * `WEBARROCKSFACE.set_scanSettings(<object> scanSettings)`: Override scan settings. `scanSettings` is a dictionnary with the following properties:
-  * `<float> threshold`: detection threshold, between `0` and `1`. Default value is `0.75`. You can lower it if you want to make the detection more sensitive (but it will increase the false positive detections),
-  * `<float> dThreshold`: differential detection threshold, between `0` and `2`. Difference between positive and negative outputs (and not only the positive output like previous parameter). Default is `1`,
+  * `<float> threshold`: detection threshold, between `0` and `2`. Default value is `1`. You can lower it if you want to make the detection more sensitive (but it will increase the false positive detections),
   * `<int> nDetectsPerLoop`: specify the number of detection per drawing loop. `0` for adaptative value. Default: `0`
   * `<int> nScaleLevels`: number of detection steps for the scale. Default: `4`,
   * `[<float>, <float>, <float>] overlapFactors`: overlap between 2 scan positions for `X`, `Y` and `scale`. Default: `[1.5, 1.5, 2]`,
   * `<float> scale0Factor`: scale factor for the largest scan level. Default is `0.8`.
 
-* `WEBARROCKSFACE.set_stabilizationSettings(<object> stabilizationSettings)`: Override detection stabilization settings. The output of the neural network is always noisy, so we need to stabilize it using a floatting average to avoid shaking artifacts. The internal algorithm computes first a stabilization factor `k` between `0` and `1`. If `k==0.0`, the detection is bad and we favor responsivity against stabilization. It happens when the user is moving quickly, rotating the head or when the detection is bad. On the contrary, if `k` is close to `1`, the detection is nice and the user does not move a lot so we can stabilize a lot. `stabilizationSettings` is a dictionnary with the following properties:
-  * `[<float> minValue, <float> maxValue] translationFactorRange`: multiply `k` by a factor `kTranslation` depending on the translation speed of the head (relative to the viewport). `kTranslation=0` if `translationSpeed<minValue` and `kTranslation=1` if `translationSpeed>maxValue`. The regression is linear. Default value: `[0.0015, 0.005]`,
-  * `[<float> minValue, <float> maxValue] rotationFactorRange`: analogous to `translationFactorRange` but for rotation speed. Default value: `[0.003, 0.02]`,
-  * `[<float> minValue, <float> maxValue] qualityFactorRange`: analogous to `translationFactorRange` but for the head detection coefficient. Default value: `[0.9, 0.98]`,
-  * `[<float> minValue, <float> maxValue] alphaRange`: it specify how to apply `k`. Between 2 successive detections, we blend the previous `detectState` values with the current detection values using a mixing factor `alpha`. `alpha=<minValue>` if `k<0.0` and `alpha=<maxValue>` if `k>1.0`. Between the 2 values, the variation is quadratic.
+* `WEBARROCKSFACE.set_stabilizationSettings(<object> stabilizationSettings)`: Override detection stabilization settings. The output of the neural network is always noisy, so we need to stabilize it using a floating average to avoid shaking artifacts. The internal algorithm computes first a stabilization factor `k` between `0` and `1`. If `k==0.0`, the detection is bad and we favor responsivity against stabilization. It happens when the user is moving quickly, rotating the head or when the detection is bad. On the contrary, if `k` is close to `1`, the detection is nice and the user does not move a lot so we can stabilize a lot. `stabilizationSettings` is a dictionnary with the following properties:
+  * Global pose stabilization:
+    * `[<float> minValue, <float> maxValue] translationFactorRange`: multiply `k` by a factor `kTranslation` depending on the translation speed of the head (relative to the viewport). `kTranslation=0` if `translationSpeed<minValue` and `kTranslation=1` if `translationSpeed>maxValue`. The regression is linear. Default value: `[0.0015, 0.005]`,
+    * `[<float> minValue, <float> maxValue] rotationFactorRange`: analogous to `translationFactorRange` but for rotation speed. Default value: `[0.12, 0.25]`,
+    * `[<float> minValue, <float> maxValue] qualityFactorRange`: analogous to `translationFactorRange` but for the head detection coefficient. Default value: `[0.85, 0.95]`,
+    * `[<float> minValue, <float> maxValue] alphaRange`: it specify how to apply `k`. Between 2 successive detections, we blend the previous `detectState` values with the current detection values using a mixing factor `alpha`. `alpha=<minValue>` if `k<0.0` and `alpha=<maxValue>` if `k>1.0`. Between the 2 values, the variation is quadratic. Default value is `[0.05, 0.9]`,
+  * Landmarks filtering: We sort each 2D landmark coordinate into a sliding window. Then we sort the sliding window and we skip outlier values. We keep the mean of remaining values.
+    * `<int> LMmedianFilterLength`: Size of the sliding window. Default is `3`,
+    * `<int> LMmedianFilterSkip`: Count of outliers to skip. Default is `0`,
+  * Landmarks stabilization:
+    * `[<float> minValue, <float> maxValue]` <LMDisplacementRange>: Consider new landmark position only if it is farther away than `minValue`, in pixels. If it is between `minValue` and `maxValue`, dampen displacement. Default is `[1.5, 4]`.
+    * `<float> qualityGoodDetectionThreshold`: stabilized landmarks only if global pose quality factor is above this value. Default is `0.6`
+
 
 * `WEBARROCKSFACE.update_videoElement(<video> vid, <function|False> callback)`: change the video element used for the face detection (which can be provided via `VIDEOSETTINGS.videoElement`) by another video element. A callback function can be called when it is done.
 
