@@ -1,8 +1,7 @@
 
 function start(){
-  WebARRocksFaceHelper.init({
+  WebARRocksFaceDebugHelper.init({
     spec: {}, // keep default specs
-    features: {}, // keep default features
     callbackReady: function(err, spec){
 
     },

@@ -13,9 +13,8 @@ const _state = {
 };
 
 function start(){
-  WebARRocksFaceHelper.init({
+  WebARRocksFaceDebugHelper.init({
     spec: {}, // keep default specs
-    features: {}, // keep default features
     callbackReady: function(err, spec){
       _state.appState = _appStates.idle;
       _state.video = spec.video;
@@ -34,7 +33,7 @@ function change_NN(e){
   }
   _state.appState = _appStates.busy;
 
-  WebARRocksFaceHelper.change_NN('../../neuralNets/' + newNNURL).then(function(){
+  WebARRocksFaceDebugHelper.change_NN('../../neuralNets/' + newNNURL).then(function(){
     _state.appState = _appStates.idle;
     _state.NNURL = newNNURL;
   });  
@@ -62,7 +61,7 @@ function change_video(e){
     _state.canvas.height = newVideo.videoHeight;
 
     newVideo.play();  
-    WebARRocksFaceHelper.update_video(newVideo).then(function(){
+    WebARRocksFaceDebugHelper.update_video(newVideo).then(function(){
       _state.video = newVideo;
       _state.appState = _appStates.idle;      
     });

@@ -13,13 +13,12 @@
 
 "use strict"
 
-const WebARRocksFaceHelper = (function(){
+const WebARRocksFaceThreeHelper = (function(){
   const _settings = {
     cameraMinVideoDimFov: 38, // min camera FoV in degrees (either horizontal or vertical depending on the camera)
-    pointSize: 5, // when landmarks are displayed, their size in pixels
-
+    
     // debug options:
-    debugObjPoints: 0 // display cubes on 3D landmark points - to debug solvePnP feature
+    debugObjPoints: 0 // display cubes on 3D landmark points - to debug pose computation
   };
 
 
@@ -68,14 +67,7 @@ const WebARRocksFaceHelper = (function(){
   let _cameraFoVY = -1;
   let _spec = null;
 
-  // features:
-  const _defaultFeatures = {
-    video: true,       // display the video texture as background
-    landmarks: true,   // display landmarks
-    threejs: false     // initialize THREE.JS
-  };
   const _shps = { // shader programs
-    drawPoints: null,
     copy: null
   };
 
@@ -87,23 +79,16 @@ const WebARRocksFaceHelper = (function(){
     labels: null,
     indices: {}
   };
-
-  const _featureDrawLandmarks = {
-    vertices: null,
-    glIndicesVBO: null,
-    glVerticesVBO: null
-  };
-
-  const _featureSolvePnP = {    
+ 
+  const _computePose = {    
     isCenterObjPoints: true,
     objPoints: [], // will be sorted by solver
     objPointsMean: null,
     imgPointsLMIndices: [], // will be sorted by solver
     imgPointsPx: []
   };
-  const _featureThree = {
+  const _three = {
     isPostProcessing: false,
-    isUseSeparateCanvas: false,
     taaLevel: 0,
     canvas: null,
     renderer: null,
@@ -115,7 +100,6 @@ const WebARRocksFaceHelper = (function(){
     vecForward: null
   };
 
-  //BEGIN VANILLA WEBGL HELPERS
   // compile a shader:
   function compile_shader(source, type, typeString) {
     const shader = _gl.createShader(type);
@@ -150,26 +134,6 @@ const WebARRocksFaceHelper = (function(){
       uniforms:{}
     };
   }
-  //END VANILLA WEBGL HELPERS
-
-  //BEGIN FEATURES SPECIFIC
-  function init_featureDrawPoints(){
-    _featureDrawLandmarks.vertices = new Float32Array(_landmarks.labels.length*2);
-
-    // create vertex buffer objects:
-    // VBO to draw only 1 point
-    _featureDrawLandmarks.glVerticesVBO = _gl.createBuffer();
-    _gl.bindBuffer(_gl.ARRAY_BUFFER, _featureDrawLandmarks.glVerticesVBO);
-    _gl.bufferData(_gl.ARRAY_BUFFER, _featureDrawLandmarks.vertices, _gl.DYNAMIC_DRAW);
-
-    const indices = new Uint16Array(_landmarks.labels.length);
-    for (let i=0; i<_landmarks.labels.length; ++i){
-      indices[i] = i;
-    }
-    _featureDrawLandmarks.glIndicesVBO = _gl.createBuffer();
-    _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, _featureDrawLandmarks.glIndicesVBO);
-    _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, indices, _gl.STATIC_DRAW);
-  }
 
   function update_focals(){
     // COMPUTE CAMERA PARAMS (FOCAL LENGTH)
@@ -186,7 +150,7 @@ const WebARRocksFaceHelper = (function(){
     const cotanHalfFovX = 1.0 / Math.tan(halfFovXRad);
     const fx = 0.5 * that.get_viewWidth() * cotanHalfFovX; //*/
 
-    console.log('INFO in WebARRocksFaceHelper - focal_y =', fy);
+    console.log('INFO in WebARRocksFaceThreeHelper - focal_y =', fy);
     _focals[0] = fy, _focals[1] = fy;
   }
 
@@ -195,89 +159,77 @@ const WebARRocksFaceHelper = (function(){
     for (let i=0; i<imgPointsLabels.length; ++i){
       imgPointsPx.push([0, 0]);
     }
-    _featureSolvePnP.imgPointsPx = imgPointsPx;
-    _featureSolvePnP.imgPointsLMIndices = imgPointsLabels.map(
+    _computePose.imgPointsPx = imgPointsPx;
+    _computePose.imgPointsLMIndices = imgPointsLabels.map(
       function(label, ind){
         return _landmarks.labels.indexOf(label);
       });
-    _featureSolvePnP.objPoints = imgPointsLabels.map(
+    _computePose.objPoints = imgPointsLabels.map(
       function(label, ind){
         return objPointsPositions[label].slice(0);
       }); 
 
-    if (_featureSolvePnP.isCenterObjPoints){
+    if (_computePose.isCenterObjPoints){
       // compute mean:
       const mean = [0, 0, 0];        
-      _featureSolvePnP.objPoints.forEach(function(pt){
+      _computePose.objPoints.forEach(function(pt){
         mean[0] += pt[0], mean[1] += pt[1], mean[2] += pt[2];
       });
-      const n = _featureSolvePnP.objPoints.length;
+      const n = _computePose.objPoints.length;
       mean[0] /= n, mean[1] /= n, mean[2] /= n;
-      _featureSolvePnP.objPointsMean = mean;
+      _computePose.objPointsMean = mean;
 
       // substract mean:
-      _featureSolvePnP.objPoints.forEach(function(pt){
+      _computePose.objPoints.forEach(function(pt){
         pt[0] -= mean[0], pt[1] -= mean[1], pt[2] -= mean[2];
       });      
     } //end if center obj points
   }
 
-  function init_featureThreejs(maxFacesDetected){
-    console.log('INFO in WebARRocksFaceHelper - init_featureThreejs(). Max faces detected = ', maxFacesDetected);
+  function init_three(maxFacesDetected){
+    console.log('INFO in WebARRocksFaceThreeHelper - init_three(). Max faces detected = ', maxFacesDetected);
 
-    if (_spec.canvasThree){
-      _featureThree.canvas = _spec.canvasThree;
-      _featureThree.isUseSeparateCanvas = true;
-    }
-    _featureThree.isPostProcessing = _spec.isPostProcessing;
-    _featureThree.taaLevel = _spec.taaLevel;
-    if ( _featureThree.taaLevel > 0 ){
-      _featureThree.isPostProcessing = true;
+    _three.canvas = _spec.canvasThree;
+    _three.isPostProcessing = _spec.isPostProcessing;
+    _three.taaLevel = _spec.taaLevel;
+    if ( _three.taaLevel > 0 ){
+      _three.isPostProcessing = true;
     }
 
-    if (_featureThree.isUseSeparateCanvas){ // WebAR.rocks.face and THREE.js use 2 canvas with 2 different WebGL context
-      _featureThree.renderer = new THREE.WebGLRenderer({
-        canvas: _featureThree.canvas,
-        alpha: true,
-        antialias: true,
-        preserveDrawingBuffer: true
-      });
-      _featureThree.renderer.setClearAlpha(0);
-    } else { // WebGL context and canvas are shared between WebAR.rocks.face and THREE.js
-      _featureThree.renderer = new THREE.WebGLRenderer({
-        context: _gl,
-        canvas: _cv,
-        alpha: false
-      });
-      _featureThree.renderer.autoClear = false;
-    }
-
-    _featureThree.scene = new THREE.Scene();
-    _featureThree.camera = new THREE.PerspectiveCamera(_cameraFoVY, that.get_viewAspectRatio(), 10, 5000);
+    _three.renderer = new THREE.WebGLRenderer({
+      canvas: _three.canvas,
+      alpha: true,
+      antialias: true,
+      preserveDrawingBuffer: true
+    });
+    _three.renderer.setClearAlpha(0);
     
-    if (_featureThree.isPostProcessing){
-      _featureThree.composer = new THREE.EffectComposer( _featureThree.renderer );
-      const renderScenePass = new THREE.RenderPass( _featureThree.scene, _featureThree.camera );
-      if (_featureThree.taaLevel > 0){
+    _three.scene = new THREE.Scene();
+    _three.camera = new THREE.PerspectiveCamera(_cameraFoVY, that.get_viewAspectRatio(), 10, 5000);
+    
+    if (_three.isPostProcessing){
+      _three.composer = new THREE.EffectComposer( _three.renderer );
+      const renderScenePass = new THREE.RenderPass( _three.scene, _three.camera );
+      if (_three.taaLevel > 0){
         // add temporal anti-aliasing pass:
-        const taaRenderPass = new THREE.TAARenderPass( _featureThree.scene, _featureThree.camera );
+        const taaRenderPass = new THREE.TAARenderPass( _three.scene, _three.camera );
         taaRenderPass.unbiased = false;
-        _featureThree.composer.addPass( taaRenderPass );
-        taaRenderPass.sampleLevel = _featureThree.taaLevel;
+        _three.composer.addPass( taaRenderPass );
+        taaRenderPass.sampleLevel = _three.taaLevel;
       }
 
-      _featureThree.composer.addPass( renderScenePass );
+      _three.composer.addPass( renderScenePass );
 
-      if (_featureThree.taaLevel > 0){
+      if (_three.taaLevel > 0){
         renderScenePass.enabled = false;
         const copyPass = new THREE.ShaderPass( THREE.CopyShader );
-        _featureThree.composer.addPass( copyPass );
+        _three.composer.addPass( copyPass );
       }
 
     } // end if postprocessing
 
     // create face slots objects:
-    _featureThree.faceSlots = [];
+    _three.faceSlots = [];
     for (let i=0; i<maxFacesDetected; ++i){
       // create composite object (which follow the head):
       const faceFollowerParent = new THREE.Object3D();
@@ -286,14 +238,14 @@ const WebARRocksFaceHelper = (function(){
       faceFollowerParent.visible = false;
       faceFollowerParent.matrixAutoUpdate = false;
       faceFollowerParent.add(faceFollower);
-      _featureThree.faceSlots.push({
+      _three.faceSlots.push({
         faceFollower: faceFollower,
         faceFollowerParent: faceFollowerParent
       });
-      _featureThree.scene.add(faceFollowerParent);
+      _three.scene.add(faceFollowerParent);
     }
 
-    // debug solvePnP face objPoints:
+    // debug pose computation face objPoints:
     if (_settings.debugObjPoints){
       const objPointsPositions = _spec.solvePnPObjPointsPositions;
       Object.keys(objPointsPositions).forEach(function(objPointKey){
@@ -303,31 +255,27 @@ const WebARRocksFaceHelper = (function(){
           color: 0xff0000
         }));
         debugCube.position.fromArray(objPoint);
-        _featureThree.faceSlots[0].faceFollower.add(debugCube);
+        _three.faceSlots[0].faceFollower.add(debugCube);
       });
     }
 
-    _featureThree.matMov = new THREE.Matrix4();
-    _featureThree.vecForward = new THREE.Vector4();
+    _three.matMov = new THREE.Matrix4();
+    _three.vecForward = new THREE.Vector4();
       
     that.update_threeCamera();
-    window.debugT = _featureThree;
   }
+
   
-  //END FEATURES SPECIFIC
-
-
-  //BEGIN WEBARROCKSFACE CALLBACKS:
   function callbackReady(err, spec){
     if (err){
-      console.log('ERROR in WebARRocksFaceHelper. ERR =', err);
+      console.log('ERROR in WebARRocksFaceThreeHelper. ERR =', err);
       if (_spec.callbackReady){
         _spec.callbackReady(err, null);
       }
       return;
     }
 
-    console.log('INFO in WebARRocksFaceHelper: WebAR.Rocks.face is ready. spec =', spec);
+    console.log('INFO in WebARRocksFaceThreeHelper: WebAR.Rocks.face is ready. spec =', spec);
     
     _gl = spec.GL;
     _cv = spec.canvasElement;
@@ -335,46 +283,38 @@ const WebARRocksFaceHelper = (function(){
     _landmarks.labels = spec.landmarksLabels;
     _videoElement = spec.video;
 
-    console.log('INFO in WebARRocksFaceHelper: video resolution =', _videoElement.videoWidth, 'x', _videoElement.videoHeight);
+    console.log('INFO in WebARRocksFaceThreeHelper: video resolution =', _videoElement.videoWidth, 'x', _videoElement.videoHeight);
 
     _landmarks.labels.forEach(function(label, ind){
       _landmarks.indices[label] = ind;
     });
 
     init_shps();
-    if (_spec.features.landmarks){
-      init_featureDrawPoints();
-    }
-    if (_spec.features.threejs){
-      init_featureThreejs(spec.maxFacesDetected);
-    }
-    if (_spec.features.solvePnP){
-      update_focals();
-      init_PnPSolver(_spec.solvePnPImgPointsLabels, _spec.solvePnPObjPointsPositions);
-    }
+    init_three(spec.maxFacesDetected);
     
+    update_focals();
+    init_PnPSolver(_spec.solvePnPImgPointsLabels, _spec.solvePnPObjPointsPositions);
+  
     if (_spec.callbackReady){
-      if (_spec.features.threejs){
-        spec.threeFaceFollowers = _featureThree.faceSlots.map(function(faceSlot){
-          return faceSlot.faceFollower;
-        });
-        spec.threeScene = _featureThree.scene;
-        spec.threeRenderer = _featureThree.renderer;
-        spec.threeComposer = _featureThree.composer;
-        spec.threeCamera = _featureThree.camera;
-        
-        // build threeVideoTexture:
-        spec.threeVideoTexture = new THREE.DataTexture( new Uint8Array([255,0,0]), 1, 1, THREE.RGBFormat);
-        spec.threeVideoTexture.needsUpdate = true;
-        spec.threeVideoTexture.onUpdate = function(){
-          console.log('INFO in WebARRocksFaceHelper: init threeVideoTexture');
-          _featureThree.renderer.properties.update(spec.threeVideoTexture, '__webglTexture', _glVideoTexture);
-          spec.threeVideoTexture.magFilter = THREE.LinearFilter;
-          spec.threeVideoTexture.minFilter = THREE.LinearFilter;
-          spec.threeVideoTexture.mapping = THREE.EquirectangularReflectionMapping;
-          delete(spec.threeVideoTexture.onUpdate);
-        }
-      }
+      spec.threeFaceFollowers = _three.faceSlots.map(function(faceSlot){
+        return faceSlot.faceFollower;
+      });
+      spec.threeScene = _three.scene;
+      spec.threeRenderer = _three.renderer;
+      spec.threeComposer = _three.composer;
+      spec.threeCamera = _three.camera;
+      
+      // build threeVideoTexture:
+      spec.threeVideoTexture = new THREE.DataTexture( new Uint8Array([255,0,0]), 1, 1, THREE.RGBFormat);
+      spec.threeVideoTexture.needsUpdate = true;
+      spec.threeVideoTexture.onUpdate = function(){
+        console.log('INFO in WebARRocksFaceThreeHelper: init threeVideoTexture');
+        _three.renderer.properties.update(spec.threeVideoTexture, '__webglTexture', _glVideoTexture);
+        spec.threeVideoTexture.magFilter = THREE.LinearFilter;
+        spec.threeVideoTexture.minFilter = THREE.LinearFilter;
+        spec.threeVideoTexture.mapping = THREE.EquirectangularReflectionMapping;
+        delete(spec.threeVideoTexture.onUpdate);
+      }      
       _spec.callbackReady(err, spec);
     }
   } //end callbackReady()
@@ -383,27 +323,21 @@ const WebARRocksFaceHelper = (function(){
     _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
    
     // draw the video:
-    if (_spec.features.video){
-      draw_video();
-    }
-
+    draw_video();
+    
     if (detectStates.length){ // multiface detection:
-      detectStates.forEach(draw_faceSlot);
+      detectStates.forEach(process_faceSlot);
     } else { // only 1 face detected
-      draw_faceSlot(detectStates, 0);
+      process_faceSlot(detectStates, 0);
     }
     
-    if (_spec.features.threejs){
-      draw_threejs();
-    }
-
+    render_three();
+    
     if (_spec.callbackTrack){
       _spec.callbackTrack(detectStates);
     }
   } //end callbackTrack
-  //END WEBARROCKSFACE CALLBACKS:
-
-  //BEGIND DRAW FUNCS
+  
   function draw_video(){
     // use the head draw shader program and sync uniforms:
     _gl.useProgram(_shps.copy.program);
@@ -416,62 +350,33 @@ const WebARRocksFaceHelper = (function(){
     _gl.drawElements(_gl.TRIANGLES, 3, _gl.UNSIGNED_SHORT, 0);
   }
 
-  function draw_faceSlot(detectState, slotIndex){
-    const faceSlot = _featureThree.faceSlots[slotIndex];
+  function process_faceSlot(detectState, slotIndex){
+    const faceSlot = _three.faceSlots[slotIndex];
     if (detectState.isDetected) {
       
-      // draw landmarks:
-      if (_spec.features.landmarks){
-        draw_landmarks(detectState);
-      }
-
-      if (_spec.features.solvePnP){
-        draw_solvePnP(detectState, faceSlot);
-      }
-
-      if (_spec.features.threejs){
-        faceSlot.faceFollowerParent.visible = true;
-      }
-    } else if (_spec.features.threejs && faceSlot.faceFollowerParent.visible){
+      compute_pose(detectState, faceSlot);
+      
+      faceSlot.faceFollowerParent.visible = true;      
+    } else if (faceSlot.faceFollowerParent.visible){
       faceSlot.faceFollowerParent.visible = false;
     }
   }
 
-  function draw_landmarks(detectState){
-    // copy landmarks:
-    detectState.landmarks.forEach(copy_landmark);
-
-    // draw landmarks:
-    _gl.useProgram(_shps.drawPoints.program);
-
-    _gl.bindBuffer(_gl.ARRAY_BUFFER, _featureDrawLandmarks.glVerticesVBO);
-    _gl.bufferData(_gl.ARRAY_BUFFER, _featureDrawLandmarks.vertices, _gl.DYNAMIC_DRAW);
-    _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, _featureDrawLandmarks.glIndicesVBO);
-    _gl.vertexAttribPointer(0, 2, _gl.FLOAT, false, 8,0);
-
-    _gl.drawElements(_gl.POINTS, _landmarks.labels.length, _gl.UNSIGNED_SHORT, 0);
-  }
-
-  function copy_landmark(lm, lmIndex){
-    _featureDrawLandmarks.vertices[lmIndex*2] =     lm[0]; // X
-    _featureDrawLandmarks.vertices[lmIndex*2 + 1] = lm[1]; // Y
-  }
-
-  function draw_solvePnP(detectState, faceSlot){
+  function compute_pose(detectState, faceSlot){
     const w2 = that.get_viewWidth() / 2;
     const h2 = that.get_viewHeight() / 2;
-    const imgPointsPx = _featureSolvePnP.imgPointsPx;
-    _featureSolvePnP.imgPointsLMIndices.forEach(function(ind, i){
+    const imgPointsPx = _computePose.imgPointsPx;
+    _computePose.imgPointsLMIndices.forEach(function(ind, i){
       const imgPointPx = imgPointsPx[i];
       imgPointPx[0] = - detectState.landmarks[ind][0] * w2,  // X in pixels
       imgPointPx[1] = - detectState.landmarks[ind][1] * h2;  // Y in pixels
     });
 
-    const objectPoints = _featureSolvePnP.objPoints;
+    const objectPoints = _computePose.objPoints;
     const solved = WEBARROCKSFACE.compute_pose(objectPoints, imgPointsPx, _focals[0], _focals[1]);
 
-    if (_spec.features.threejs && solved){
-      const m = _featureThree.matMov.elements;
+    if (solved){
+      const m = _three.matMov.elements;
       const r = solved.rotation, t = solved.translation;
 
       // set translation part:
@@ -483,36 +388,27 @@ const WebARRocksFaceHelper = (function(){
       m[2] = -r[2][0], m[6] =  -r[2][1], m[10] =  r[2][2];
 
       // do not apply matrix if the resulting face is looking in the wrong way:
-      const vf = _featureThree.vecForward;
+      const vf = _three.vecForward;
       vf.set(0, 0, 1, 0); // look forward;
-      vf.applyMatrix4(_featureThree.matMov);
+      vf.applyMatrix4(_three.matMov);
       if (vf.z > 0){
-        faceSlot.faceFollowerParent.matrix.copy(_featureThree.matMov);
-        if (_featureSolvePnP.isCenterObjPoints){
-          const mean = _featureSolvePnP.objPointsMean;
+        faceSlot.faceFollowerParent.matrix.copy(_three.matMov);
+        if (_computePose.isCenterObjPoints){
+          const mean = _computePose.objPointsMean;
           faceSlot.faceFollower.position.fromArray(mean).multiplyScalar(-1);
         }
       }
     }
-  } //end draw_solvePnP()
-
-  function draw_threejs(){
-    if (!_featureThree.isUseSeparateCanvas){
-      _featureThree.renderer.state.reset();
-      _gl.enable(_gl.BLEND); // blending is considered by THREE.js as enabled by default
-      _featureThree.renderer.clearDepth();
-    }
-    if (_featureThree.isPostProcessing){
-      _featureThree.composer.render();
-    } else {
-      _featureThree.renderer.render(_featureThree.scene, _featureThree.camera);
-    }
-    if (!_featureThree.isUseSeparateCanvas){
-      _gl.disable(_gl.CULL_FACE);
-    }
   }
 
-  //BEGIN INIT FUNCS
+  function render_three(){
+    if (_three.isPostProcessing){
+      _three.composer.render();
+    } else {
+      _three.renderer.render(_three.scene, _three.camera);
+    }    
+  }
+
   // build shader programs:
   function init_shps(){
     
@@ -530,33 +426,15 @@ const WebARRocksFaceHelper = (function(){
         gl_FragColor = texture2D(uun_source, vUV);\n\
       }',
       'COPY');
-
-    // create LM display shader program:
-    const shaderVertexSource = "attribute vec2 position;\n\
-      void main(void) {\n\
-        gl_PointSize = " + _settings.pointSize.toFixed(1) + ";\n\
-        gl_Position = vec4(position, 0., 1.);\n\
-      } ";
-    // display lime color:
-    const shaderFragmentSource = "void main(void){\n\
-        gl_FragColor = vec4(0.,1.,0.,1.);\n\
-      }";
-
-    if (_spec.features.landmarks){
-      _shps.drawPoints = build_shaderProgram(shaderVertexSource, shaderFragmentSource, 'DRAWPOINT');
-    }
   }
 
-  //END INIT FUNCS
-
-
+  
   const that = {
     init: function(spec){
       _spec = Object.assign({
-        features: {},
         spec: {},
 
-        // SolvePnP specifics:
+        // pose computation (SolvePnP):
         solvePnPObjPointsPositions: _defaultSolvePnPObjPointsPositions,
         solvePnPImgPointsLabels: _defaultSolvePnPImgPointsLabel,
 
@@ -569,8 +447,7 @@ const WebARRocksFaceHelper = (function(){
         callbackReady: null,
         callbackTrack: null
       }, spec);
-      _spec.features = Object.assign({}, _defaultFeatures, _spec.features);
-
+      
       // init WEBAR.rocks.face:WEBARROCKSFACE
       const defaultSpecLM = {
         canvas: null,
@@ -592,20 +469,14 @@ const WebARRocksFaceHelper = (function(){
 
     resize: function(w, h){ //should be called after resize
       _cv.width = w, _cv.height = h;
-      if (_featureThree.isUseSeparateCanvas){
-        _featureThree.canvas.width = w;
-        _featureThree.canvas.height = h;
-      }
+      _three.canvas.width = w;
+      _three.canvas.height = h;
       WEBARROCKSFACE.resize();
-      if (_spec.features.threejs){
-        that.update_threeCamera();
-      }
-      if (_spec.features.solvePnP){
-        update_focals();
-      }
+      that.update_threeCamera();
+      update_focals();
     },
 
-    add_threejsOccluder: function(occluder, isDebug, occluderMesh){
+    add_occluder: function(occluder, isDebug, occluderMesh){
       if (!occluderMesh){
         occluderMesh = new THREE.Mesh();
       }
@@ -641,12 +512,12 @@ const WebARRocksFaceHelper = (function(){
       occluderMesh.geometry = occluderGeometry;
       occluderMesh.userData.isOccluder = true;
 
-      _featureThree.faceSlots.forEach(function(faceSlot){
+      _three.faceSlots.forEach(function(faceSlot){
         faceSlot.faceFollower.add(occluderMesh.clone());
       });
     },
 
-    add_threejsOccluderFromFile: function(occluderURL, callback, threeLoadingManager, isDebug){
+    add_occluderFromFile: function(occluderURL, callback, threeLoadingManager, isDebug){
       const occluderMesh = new THREE.Mesh();
       const extension = occluderURL.split('.').pop().toUpperCase();
       const loader = {
@@ -656,7 +527,7 @@ const WebARRocksFaceHelper = (function(){
       }[extension];
 
       new loader(threeLoadingManager).load(occluderURL, function(occluder){
-        that.add_threejsOccluder(occluder, isDebug, occluderMesh);
+        that.add_occluder(occluder, isDebug, occluderMesh);
         if (typeof(callback)!=='undefined' && callback) callback(occluderMesh);
       });
       return occluderMesh;
@@ -683,7 +554,7 @@ const WebARRocksFaceHelper = (function(){
       return that.get_viewWidth() / that.get_viewHeight();
     },
 
-    update_solvePnP: function(objPointsPositions,imgPointsLabels){
+    update_solvePnP: function(objPointsPositions, imgPointsLabels){
       if (objPointsPositions){
         _spec.solvePnPObjPointsPositions = Object.assign(_spec.solvePnPObjPointsPositions, objPointsPositions);
       }
@@ -692,8 +563,8 @@ const WebARRocksFaceHelper = (function(){
     },
 
     update_threeCamera: function(){
-      const threeCamera = _featureThree.camera;
-      const threeRenderer = _featureThree.renderer;
+      const threeCamera = _three.camera;
+      const threeRenderer = _three.renderer;
 
       // compute aspectRatio:
       const cvw = that.get_viewWidth();
@@ -713,7 +584,7 @@ const WebARRocksFaceHelper = (function(){
         fov = 2 * Math.atan( (cvh / cvhs) * Math.tan(0.5 * fov * _deg2rad)) / _deg2rad;
       }
       _cameraFoVY = fov;
-       console.log('INFO in WebARRocksFaceHelper.update_threeCamera(): camera vertical estimated FoV is', fov, 'deg');
+       console.log('INFO in WebARRocksFaceThreeHelper.update_threeCamera(): camera vertical estimated FoV is', fov, 'deg');
 
       // update projection matrix:
       threeCamera.aspect = canvasAspectRatio;
@@ -729,12 +600,7 @@ const WebARRocksFaceHelper = (function(){
       return WEBARROCKSFACE.update({
         NNCpath: NNUrl
       }).then(function(){
-        _landmarks.labels = WEBARROCKSFACE.get_LMLabels();
-        if (_spec.features.landmarks){
-          init_featureDrawPoints();
-        }
-
-        //TODO: reinitialize THREE.js feature
+        _landmarks.labels = WEBARROCKSFACE.get_LMLabels();        
       });
     },
 
@@ -753,7 +619,7 @@ const WebARRocksFaceHelper = (function(){
 
 // Export ES6 module:
 try {
-  module.exports = WebARRocksFaceHelper;
+  module.exports = WebARRocksFaceThreeHelper;
 } catch(e){
   console.log('ES6 Module not exported');
 }

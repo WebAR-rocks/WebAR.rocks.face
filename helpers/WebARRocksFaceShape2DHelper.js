@@ -26,12 +26,16 @@ const WebARRocksFaceShape2DHelper = (function(){
 
     // draw shapes:
     // bind and update video texture if necessary
-    if (_videoElement.isFakeVideo && _videoElement.needsUpdate){
-      update_glVideoTexture();
-    } else if (_videoElement.currenTime === _videoElementPreviousTime){
-      _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
-    } else {
-      update_glVideoTexture();
+    if (_videoElement.isFakeVideo){ // WECHAT tweak:
+      if (_videoElement.needsUpdate){
+        update_glVideoTexture();
+      }
+    } else { // standard HTML5 video element:
+      if (_videoElement.currenTime === _videoElementPreviousTime){
+        _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
+      } else {
+        update_glVideoTexture();
+      }
     }
 
     // draw shapes:
@@ -71,11 +75,11 @@ const WebARRocksFaceShape2DHelper = (function(){
 
   function update_glVideoTexture(){
     _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
-   if (_videoElement.isFakeVideo) {
+    if (_videoElement.isFakeVideo) { // WECHAT tweak
       _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _videoElement.videoWidth, _videoElement.videoHeight, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, _videoElement.arrayBuffer);
-   } else {
+    } else {
       _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _gl.RGBA, _gl.UNSIGNED_BYTE, _videoElement);
-   }
+    }
   }
 
 

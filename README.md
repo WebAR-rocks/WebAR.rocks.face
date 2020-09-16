@@ -202,7 +202,7 @@ After the initialization (ie after that `callbackReady` is launched ) , these me
   * `<string> errorLabel`: if an error happens, the label of the error. It can be: `NOTSUPPORTED`, `NODEVICESFOUND` or `PROMISEREJECTED`.
 
 * `WEBARROCKSFACE.set_scanSettings(<object> scanSettings)`: Override scan settings. `scanSettings` is a dictionnary with the following properties:
-  * `<float> threshold`: detection threshold, between `0` and `2`. Default value is `1`. You can lower it if you want to make the detection more sensitive (but it will increase the false positive detections),
+  * `<float> threshold`: detection threshold, between `0` and `1`. Default value is `0.75`. You can decrease it if you want to make the detection more sensitive (but it will increase the false positive detections),
   * `<int> nDetectsPerLoop`: specify the number of detection per drawing loop. `0` for adaptative value. Default: `0`
   * `<int> nScaleLevels`: number of detection steps for the scale. Default: `4`,
   * `[<float>, <float>, <float>] overlapFactors`: overlap between 2 scan positions for `X`, `Y` and `scale`. Default: `[1.5, 1.5, 2]`,

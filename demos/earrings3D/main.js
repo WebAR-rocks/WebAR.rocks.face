@@ -41,7 +41,7 @@ let _three = null;
 
 function start(){
   // Init WebAR.rocks.face through the earrings 3D helper:
-  WebARRocksEarrings3DHelper.init({
+  WebARRocksFaceEarrings3DHelper.init({
     NN: '../../neuralNets/NN_EARS.json',
     taaLevel: _settings.taaLevel,
     canvasFace: _canvases.face,
@@ -154,8 +154,8 @@ function set_occluders(){
   const occluderRightGeom = new THREE.CylinderGeometry(_settings.earsOccluderCylinderRadius, _settings.earsOccluderCylinderRadius, _settings.earsOccluderCylinderHeight);
   const mat = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler().fromArray(_settings.earsOccluderCylinderEuler));
   mat.setPosition(new THREE.Vector3().fromArray(_settings.earsOccluderCylinderOffset));
-  occluderRightGeom.applyMatrix(mat);
-  WebARRocksEarrings3DHelper.add_threeEarsOccluders(occluderRightGeom);
+  occluderRightGeom.applyMatrix4(mat);
+  WebARRocksFaceEarrings3DHelper.add_threeEarsOccluders(occluderRightGeom);
 }
 
 function main(){
@@ -170,6 +170,6 @@ function main(){
     canvas: _canvases.face,     // WebARRocksFace main canvas
     overlayCanvas: [_canvases.three], // other canvas which should be resized at the same size of the main canvas
     callback: start,
-    onResize: WebARRocksEarrings3DHelper.resize
+    onResize: WebARRocksFaceEarrings3DHelper.resize
   })
 }

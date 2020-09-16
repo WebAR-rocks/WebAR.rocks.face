@@ -44,7 +44,6 @@ const WebARRocksMirror = (function(){
 
     resizeDelay: 50, // in milliseconds, min delay between 2 canvas resizing
 
-    debugLandmarks: false,
     debugOccluder: false
   };
   const _threeInstances = {
@@ -249,7 +248,7 @@ const WebARRocksMirror = (function(){
 
     // load occluder:
     if (_spec.occluderURL){
-      WebARRocksFaceHelper.add_threejsOccluderFromFile(_spec.occluderURL, null, _threeInstances.loadingManager, _spec.debugOccluder);
+      WebARRocksFaceThreeHelper.add_occluderFromFile(_spec.occluderURL, null, _threeInstances.loadingManager, _spec.debugOccluder);
     }
 
     // load glasses:
@@ -317,11 +316,6 @@ const WebARRocksMirror = (function(){
           isPostProcessing: (_spec.bloom) ? true : false,
           taaLevel: _spec.taaLevel,
 
-          features: {
-            landmarks: _spec.debugLandmarks,
-            solvePnP: true,
-            threejs: true
-          },
           callbackReady: function(err, threeInstances){
             if (err){
               reject(err);
@@ -340,7 +334,7 @@ const WebARRocksMirror = (function(){
         if (spec.solvePnPImgPointsLabels){
           webARRocksSpec.solvePnPImgPointsLabels = spec.solvePnPImgPointsLabels;
         }
-        WebARRocksFaceHelper.init(webARRocksSpec);
+        WebARRocksFaceThreeHelper.init(webARRocksSpec);
       }); //end returned promise
     }, //end init()
 
@@ -402,7 +396,7 @@ const WebARRocksMirror = (function(){
 
       _timerResize = setTimeout(function(){
         const s = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
-        WebARRocksFaceHelper.resize(width * s, height * s);
+        WebARRocksFaceThreeHelper.resize(width * s, height * s);
         _timerResize = null;
       }, _spec.resizeDelay);
       return true;

@@ -18,7 +18,7 @@
 
 "use strict";
 
-const WebARRocksEarrings3DHelper = (function(){
+const WebARRocksFaceEarrings3DHelper = (function(){
   const _defaultSpec = {
     canvasFace: null,
     canvasThree: null,
@@ -397,7 +397,7 @@ const WebARRocksEarrings3DHelper = (function(){
       // compute geomLeft from geomRight:
       const geomLeft = geomRight.clone();
       const invXMatrix = new THREE.Matrix4().makeScale(-1,1,1);
-      geomLeft.applyMatrix(invXMatrix);
+      geomLeft.applyMatrix4(invXMatrix);
       set_occluderMesh(_three.earringLeft, geomLeft);
     },
 
@@ -443,7 +443,7 @@ const WebARRocksEarrings3DHelper = (function(){
 
 // Export ES6 module:
 try {
-  module.exports = WebARRocksEarrings3DHelper;
+  module.exports = WebARRocksFaceEarrings3DHelper;
 } catch(e){
   console.log('ES6 Module not exported');
 }

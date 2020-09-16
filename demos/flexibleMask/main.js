@@ -86,7 +86,7 @@ function main(){
   const canvasThree = document.getElementById('threeCanvas');
 
   // Init WebAR.rocks.face through the helper:
-  WebARRocksFaceHelper.init({
+  WebARRocksFaceThreeHelper.init({
     spec:  {
       NNCpath: '../../neuralNets/NN_FACE.json'
       /*,videoSettings: {
@@ -97,12 +97,6 @@ function main(){
     canvas: canvasFace,
     canvasThree: canvasThree,
     
-    features: {
-      landmarks: false,
-      solvePnP: true,
-      threejs: true
-    },
-
     callbackTrack: function(detectStates){
       if (_flexibleMaskMesh === null){
         return;
@@ -115,14 +109,14 @@ function main(){
         console.log('ERROR in main.js: ', err);
         return;
       }
-      WebARRocksFaceHelper.resize(window.innerWidth, window.innerHeight);
+      WebARRocksFaceThreeHelper.resize(window.innerWidth, window.innerHeight);
       _flexibleMaskHelper = WebARRocksFaceFlexibleMaskHelper;
 
       // threeInstances are the THREE.js instances initialized by the helper
       // There are a THREE.Camera, a THREE.Scene and an object following the face
       build_scene(threeInstances);
     }
-  }); //end WebARRocksFaceHelper.init() 
+  }); //end WebARRocksFaceThreeHelper.init() 
 } //end main()
 
 function build_scene(threeInstances){
@@ -138,11 +132,11 @@ function build_scene(threeInstances){
   }
 
   // add the occluder:
-  //WebARRocksFaceHelper.add_threejsOccluderFromFile('assets/occluder.glb', null, threeLoadingManager);
+  //WebARRocksFaceThreeHelper.add_occluderFromFile('assets/occluder.glb', null, threeLoadingManager);
 
   // build and add the flexible mask:
   _flexibleMaskHelper.load_geometryFromGLTF(threeLoadingManager, _spec.flexibleMaskURL, null).then(function(geom){
-    const face3DKeypoints = (_spec.flexibleMaskPoints) ? _spec.flexibleMaskPoints : WebARRocksFaceHelper.get_facePointPositions();
+    const face3DKeypoints = (_spec.flexibleMaskPoints) ? _spec.flexibleMaskPoints : WebARRocksFaceThreeHelper.get_facePointPositions();
     _flexibleMaskMesh = _flexibleMaskHelper.build_flexibleMask(geom, face3DKeypoints, {
       kpInfluenceDecay: _spec.kpInfluenceDecay // [ distance from the keypoint where decay start, distance from the keypoint where decay ends ]
     });
