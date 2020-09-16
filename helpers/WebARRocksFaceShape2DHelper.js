@@ -26,7 +26,9 @@ const WebARRocksFaceShape2DHelper = (function(){
 
     // draw shapes:
     // bind and update video texture if necessary
-    if (_videoElement.currenTime === _videoElementPreviousTime){
+    if (_videoElement.isFakeVideo && _videoElement.needsUpdate){
+      update_glVideoTexture();
+    } else if (_videoElement.currenTime === _videoElementPreviousTime){
       _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
     } else {
       update_glVideoTexture();
@@ -69,7 +71,11 @@ const WebARRocksFaceShape2DHelper = (function(){
 
   function update_glVideoTexture(){
     _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
-    _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _gl.RGBA, _gl.UNSIGNED_BYTE, _videoElement);
+   if (_videoElement.isFakeVideo) {
+      _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _videoElement.videoWidth, _videoElement.videoHeight, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, _videoElement.arrayBuffer);
+   } else {
+      _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _gl.RGBA, _gl.UNSIGNED_BYTE, _videoElement);
+   }
   }
 
 
@@ -171,7 +177,8 @@ const WebARRocksFaceShape2DHelper = (function(){
       +'varying vec2 vUV;\n'
       +'uniform sampler2D samplerVideo;\n'
       + shapeSpecs.GLSLFragmentSource;
-    const shp = build_shaderProgram(_gl, vertexShaderSource, fragmentShaderSource, 'SHAPE_' + shapeIndex.toString());
+    const shp = build_shaderProgram(_gl, vertexShaderSource, fragmentShaderSource, 'SHAPE_' + shapeIndex.toString());    
+    shp.attributes.position = _gl.getAttribLocation(shp.program, "position");    
     if (isIVals){
       shp.attributes.aiVal =  _gl.getAttribLocation(shp.program, "aiVal");      
     }
@@ -420,7 +427,7 @@ const WebARRocksFaceShape2DHelper = (function(){
     // send positions to GPU;
     _gl.bindBuffer(_gl.ARRAY_BUFFER, shape.glvVBOPoints);
     _gl.bufferData(_gl.ARRAY_BUFFER, shape.points, _gl.DYNAMIC_DRAW);
-    _gl.vertexAttribPointer(0, 2, _gl.FLOAT, false, 8, 0);
+    _gl.vertexAttribPointer(shape.shp.attributes.position, 2, _gl.FLOAT, false, 8, 0);
 
     // interpolated values:
     if (shape.glVBOIVals){
