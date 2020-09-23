@@ -3,7 +3,14 @@ const WebARRocksFaceShape2DHelper = (function(){
     NNCpath: null,
     canvasVideo: null,
     canvasAR: null,
-    shapes: []
+    shapes: [],
+    stabilizationSettings: {
+      LMDisplacementRange: [0, 3],
+      LMmedianFilterLength: 5,              // Median filter window size
+      LMmedianFilterSkip: 1,                 // Remove this number of value in median filter window size, then average the remaining values
+      LMDisplacementRange: [0.7, 3],                // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
+      qualityGoodDetectionThreshold: 0.7    // good detection considered if quality is above this value
+    }
   };
   let _spec = null;
   let _shapes = null;
@@ -57,6 +64,25 @@ const WebARRocksFaceShape2DHelper = (function(){
     _gl.enable(_gl.BLEND);
     _gl.clearColor(0, 0, 0, 0);
     _gl.blendFunc(_gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA);
+  }
+
+  function create_glImageTexture(imageSrc){
+    return new Promise(function(accept, reject){
+      const img = new Image();
+      img.onload = function(){
+        const glTexture = _gl.createTexture();
+        _gl.bindTexture(_gl.TEXTURE_2D, glTexture);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
+        _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST_MIPMAP_LINEAR);
+        _gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, true);
+        _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _gl.RGBA, _gl.UNSIGNED_BYTE, img);        
+        _gl.generateMipmap(_gl.TEXTURE_2D);
+        _gl.bindTexture(_gl.TEXTURE_2D, null);
+        _gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, false);
+        accept(glTexture);
+      }
+      img.src = imageSrc;
+    }); //end returned promise
   }
 
 
@@ -141,119 +167,142 @@ const WebARRocksFaceShape2DHelper = (function(){
   }
 
 
-  function build_shape(landmarkLabels, shapeSpecs, shapeIndex){
-    const n = shapeSpecs.tesselation.length / 3;
-    const isIVals = ( shapeSpecs.iVals && shapeSpecs.iVals.length );
+  function build_shape(landmarkLabels, shapeSpecsArg, shapeIndex){
+    const shapeSpecs = Object.assign({
+      textures: []
+    }, shapeSpecsArg);
 
-    // interpolated values (iVals):
-    const iValsShaderSources = {
-      vertexPars: "",
-      vertex: "",
-      fragmentPars: ""
-    };
-    let iValCCount = 0;
-    if (isIVals){
-      
-      // get GLSL type of interpolated vals:
-      iValCCount = shapeSpecs.iVals[0].length;
-      const GLSLType = [
-        "float", "vec2", "vec3", "vec4"
-      ][iValCCount-1];
+    return new Promise(function(accept, reject){
+      const n = shapeSpecs.tesselation.length / 3;
+      const isIVals = ( shapeSpecs.iVals && shapeSpecs.iVals.length );
 
-      iValsShaderSources.vertexPars = 'attribute ' + GLSLType + ' aiVal;\n';
-      iValsShaderSources.vertexPars += 'varying ' + GLSLType + ' iVal;\n';
-      iValsShaderSources.vertex = 'iVal = aiVal;\n';
-      iValsShaderSources.fragmentPars += 'varying ' + GLSLType + ' iVal;\n';
-    }
+      // interpolated values (iVals):
+      const iValsShaderSources = {
+        vertexPars: "",
+        vertex: "",
+        fragmentPars: ""
+      };
+      let iValCCount = 0;
+      if (isIVals){
+        
+        // get GLSL type of interpolated vals:
+        iValCCount = shapeSpecs.iVals[0].length;
+        const GLSLType = [
+          "float", "vec2", "vec3", "vec4"
+        ][iValCCount-1];
 
-    // build shader program:
-    const vertexShaderSource = 'attribute vec2 position;\n\
-      varying vec2 vUV;\n\
-      uniform mat2 videoUVScale;\n\
-      ' + iValsShaderSources.vertexPars + '\n\
-      void main(void){\n\
-        gl_Position = vec4(position, 0., 1.);\n\
-        vec2 uvCentered = videoUVScale * position;\n\
-        vUV = 0.5 + vec2(1., -1.) * uvCentered;\n\
-        ' + iValsShaderSources.vertex + '\n\
-      }';
-    const fragmentShaderSource = iValsShaderSources.fragmentPars + '\n'
-      +'varying vec2 vUV;\n'
-      +'uniform sampler2D samplerVideo;\n'
-      + shapeSpecs.GLSLFragmentSource;
-    const shp = build_shaderProgram(_gl, vertexShaderSource, fragmentShaderSource, 'SHAPE_' + shapeIndex.toString());    
-    shp.attributes.position = _gl.getAttribLocation(shp.program, "position");    
-    if (isIVals){
-      shp.attributes.aiVal =  _gl.getAttribLocation(shp.program, "aiVal");      
-    }
-    shp.uniforms.samplerVideo = _gl.getUniformLocation(shp.program, "samplerVideo");
-    shp.uniforms.videoUVScale = _gl.getUniformLocation(shp.program, "videoUVScale");
-
-    // build interpolations:
-    let interpolatedPoints = [];    
-    let interpolatedPointsCount = 0;
-    if (shapeSpecs.interpolations){
-      // split between positive and negative ks and sort them:
-      const interpolationsSplitted = split_interpolations(shapeSpecs.interpolations);
-
-      // build interpolated points:
-      let interpInd = 0;
-      for (let i=0; i<interpolationsSplitted.length; ++i){
-        const interpPoints = build_interpolation(shapeSpecs, interpolationsSplitted[i], interpInd);
-        interpolatedPoints = interpolatedPoints.concat(interpPoints);
-        interpInd += interpPoints.length;
+        iValsShaderSources.vertexPars = 'attribute ' + GLSLType + ' aiVal;\n';
+        iValsShaderSources.vertexPars += 'varying ' + GLSLType + ' iVal;\n';
+        iValsShaderSources.vertex = 'iVal = aiVal;\n';
+        iValsShaderSources.fragmentPars += 'varying ' + GLSLType + ' iVal;\n';
       }
-      interpolatedPointsCount = interpInd;      
-    }
 
-    // build points VBO:
-    const pointsCount = shapeSpecs.points.length;
-    const points = new Float32Array((pointsCount + interpolatedPointsCount) * 2);
-    const glvVBOPoints = _gl.createBuffer ();
+      // build textures:
+      const texturesPromises = shapeSpecs.textures.map(function(textureSpec){
+        return create_glImageTexture(textureSpec.src);
+      });
+      const texturesPromise = (texturesPromises.length === 0) ? Promise.resolve([]) : Promise.all(texturesPromises);
 
-    // compute mapping between shapeSpecs.points and neural network landmarks:
-    const mapPointIndexToNNLandmark = new Uint8Array(pointsCount);
-    shapeSpecs.points.forEach(function(label, ind){
-      const lmInd = landmarkLabels.indexOf(label);
-      if (lmInd === -1){
-        throw new Error('The neural network does not outputs this landmark' + label);
+      // build shader program:
+      const vertexShaderSource = 'attribute vec2 position;\n\
+        varying vec2 vUV;\n\
+        uniform mat2 videoUVScale;\n\
+        ' + iValsShaderSources.vertexPars + '\n\
+        void main(void){\n\
+          gl_Position = vec4(position, 0., 1.);\n\
+          vec2 uvCentered = videoUVScale * position;\n\
+          vUV = 0.5 + vec2(1., -1.) * uvCentered;\n\
+          ' + iValsShaderSources.vertex + '\n\
+        }';
+      const GLSLTextures = shapeSpecs.textures.map(function(textureSpec){
+          return 'uniform sampler2D ' + textureSpec.id + ';';
+        });
+      const fragmentShaderSource = iValsShaderSources.fragmentPars + '\n'
+        + GLSLTextures.join('\n')
+        +'varying vec2 vUV;\n'
+        +'uniform sampler2D samplerVideo;\n'
+        + shapeSpecs.GLSLFragmentSource;
+      const shp = build_shaderProgram(_gl, vertexShaderSource, fragmentShaderSource, 'SHAPE_' + shapeIndex.toString());    
+      shp.attributes.position = _gl.getAttribLocation(shp.program, "position");    
+      if (isIVals){
+        shp.attributes.aiVal =  _gl.getAttribLocation(shp.program, "aiVal");      
       }
-      mapPointIndexToNNLandmark[ind] = lmInd;
-    });
+      shp.uniforms.samplerVideo = _gl.getUniformLocation(shp.program, "samplerVideo");
+      shp.uniforms.videoUVScale = _gl.getUniformLocation(shp.program, "videoUVScale");
+      shp.uniforms.texturesSamplers = shapeSpecs.textures.map(function(textureSpec){
+        return _gl.getUniformLocation(shp.program, textureSpec.id);
+      });
 
-    // build faces VBO:
-    const glVBOFaces = _gl.createBuffer();
-    _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, glVBOFaces);
-    _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(shapeSpecs.tesselation), _gl.STATIC_DRAW);
+      // build interpolations:
+      let interpolatedPoints = [];    
+      let interpolatedPointsCount = 0;
+      if (shapeSpecs.interpolations){
+        // split between positive and negative ks and sort them:
+        const interpolationsSplitted = split_interpolations(shapeSpecs.interpolations);
 
-    // build interpolated vals VBO:
-    let glVBOIVals = null;
-    if (isIVals){
-      const iValsFlatten = [].concat.apply([], shapeSpecs.iVals);
-      glVBOIVals = _gl.createBuffer();
-      _gl.bindBuffer(_gl.ARRAY_BUFFER, glVBOIVals);
-      _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(iValsFlatten), _gl.STATIC_DRAW);
-    }
+        // build interpolated points:
+        let interpInd = 0;
+        for (let i=0; i<interpolationsSplitted.length; ++i){
+          const interpPoints = build_interpolation(shapeSpecs, interpolationsSplitted[i], interpInd);
+          interpolatedPoints = interpolatedPoints.concat(interpPoints);
+          interpInd += interpPoints.length;
+        }
+        interpolatedPointsCount = interpInd;      
+      }
 
-    return {
-      outlines: shapeSpecs.outlines ? shapeSpecs.outlines.map(build_outline) : [],
-      interpolatedPoints: interpolatedPoints,
+      // build points VBO:
+      const pointsCount = shapeSpecs.points.length;
+      const points = new Float32Array((pointsCount + interpolatedPointsCount) * 2);
+      const glvVBOPoints = _gl.createBuffer ();
 
-      // points:
-      pointsCount: pointsCount,
-      interpolatedPointsCount: interpolatedPointsCount,
-      points: points,
-      glvVBOPoints: glvVBOPoints,
+      // compute mapping between shapeSpecs.points and neural network landmarks:
+      const mapPointIndexToNNLandmark = new Uint8Array(pointsCount);
+      shapeSpecs.points.forEach(function(label, ind){
+        const lmInd = landmarkLabels.indexOf(label);
+        if (lmInd === -1){
+          throw new Error('The neural network does not outputs this landmark' + label);
+        }
+        mapPointIndexToNNLandmark[ind] = lmInd;
+      });
 
-      // interpolated vals:
-      iValCCount: iValCCount,
-      glVBOIVals: glVBOIVals,
-      glVBOFaces: glVBOFaces,
+      // build faces VBO:
+      const glVBOFaces = _gl.createBuffer();
+      _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, glVBOFaces);
+      _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(shapeSpecs.tesselation), _gl.STATIC_DRAW);
 
-      mapPointIndexToNNLandmark: mapPointIndexToNNLandmark,
-      trianglesCount: shapeSpecs.tesselation.length / 3,
-      shp: shp
-    };
+      // build interpolated vals VBO:
+      let glVBOIVals = null;
+      if (isIVals){
+        const iValsFlatten = [].concat.apply([], shapeSpecs.iVals);
+        glVBOIVals = _gl.createBuffer();
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, glVBOIVals);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(iValsFlatten), _gl.STATIC_DRAW);
+      }
+
+      texturesPromise.then(function(textures){
+        accept({
+          outlines: shapeSpecs.outlines ? shapeSpecs.outlines.map(build_outline) : [],
+          interpolatedPoints: interpolatedPoints,
+          frontFacing: (shapeSpecs.frontFacing) ? shapeSpecs.frontFacing : '',
+          textures: textures,
+
+          // points:
+          pointsCount: pointsCount,
+          interpolatedPointsCount: interpolatedPointsCount,
+          points: points,
+          glvVBOPoints: glvVBOPoints,
+
+          // interpolated vals:
+          iValCCount: iValCCount,
+          glVBOIVals: glVBOIVals,
+          glVBOFaces: glVBOFaces,
+
+          mapPointIndexToNNLandmark: mapPointIndexToNNLandmark,
+          trianglesCount: shapeSpecs.tesselation.length / 3,
+          shp: shp
+        });
+      }); // end texturesPromise.then      
+    }); //end returned promise
   }
 
 
@@ -325,7 +374,7 @@ const WebARRocksFaceShape2DHelper = (function(){
     if (shapeSpecs.iVals){
       iVals = shapeSpecs.iVals;
       iVal0 = iVals[points[1]];
-      iVal1 = (ks[0] >= 0) ? iVals[2]: iVals[0];
+      iVal1 = (ks[0] >= 0) ? iVals[points[2]]: iVals[points[0]];
     }
 
     // loop over face and split faces including [pt0, pt1] edge:
@@ -339,12 +388,12 @@ const WebARRocksFaceShape2DHelper = (function(){
       // the edge is included in the face
       // get the index of the third point, pt3:
       let pt3 = -1;
-      if (ptsFace[0] !== pt0 && ptsFace[0] !== pt1){
+      if (ptsFace[0] !== pt0 && ptsFace[0] !== pt1){ // we split [1,2] edge
         pt3 = ptsFace[0];
-      } else if (ptsFace[1] !== pt0 && ptsFace[1] !== pt1){
+      } else if (ptsFace[1] !== pt0 && ptsFace[1] !== pt1){ // we split [0,2] edge
         pt3 = ptsFace[1];
       } else  {
-        pt3 = ptsFace[2];
+        pt3 = ptsFace[2]; // we split [0,1] edge
       }
 
       // get index in tess of pt1:
@@ -357,7 +406,11 @@ const WebARRocksFaceShape2DHelper = (function(){
       for (let i=0; i<ks.length; ++i){        
         // Add a new face: pt3, I, (nextI|pt1) as a new face:
         const nextPt = (i === ks.length - 1) ? pt1 : (firstInterpolatedPointInd + i + 1);
-        tess.push(firstInterpolatedPointInd + i, pt3, nextPt);
+        if (ks[i] > 0){ // keep face indexing order for backface culling:
+          tess.push(firstInterpolatedPointInd + i, pt3, nextPt);
+        } else {
+          tess.push(firstInterpolatedPointInd + i, nextPt, pt3);
+        }
       }  
     }
 
@@ -377,6 +430,7 @@ const WebARRocksFaceShape2DHelper = (function(){
 
        // add new iVals:
       if (shapeSpecs.iVals){      
+        // loop over iVal0 components:
         const iValInterpolated = iVal0.map(function(v0, vInd){
           const v1 = iVal1[vInd];
           const kAbs = Math.abs(ks[i]);
@@ -440,12 +494,34 @@ const WebARRocksFaceShape2DHelper = (function(){
       _gl.vertexAttribPointer(shape.shp.attributes.aiVal, shape.iValCCount, _gl.FLOAT, false, 4*shape.iValCCount, 0) ;
     }
 
+    // set culling:
+    if (shape.frontFacing){
+      _gl.enable(_gl.CULL_FACE);  
+      _gl.cullFace(_gl.BACK);
+      _gl.frontFace((shape.frontFacing === 'CW') ? _gl.CW : _gl.CCW);
+    }
+
+    // bind textures:
+    shape.textures.forEach(function(glTexture, ind){
+      _gl.uniform1i(shape.shp.uniforms.texturesSamplers[ind], ind+1);
+      _gl.activeTexture([_gl.TEXTURE1, _gl.TEXTURE2, _gl.TEXTURE3, _gl.TEXTURE4][ind]);
+      _gl.bindTexture(_gl.TEXTURE_2D, glTexture);
+    });
+
+    // draw faces:
     _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, shape.glVBOFaces);
     _gl.drawElements(_gl.TRIANGLES, shape.trianglesCount * 3, _gl.UNSIGNED_SHORT, 0);
+
 
     if (shape.glVBOIVals){
       _gl.disableVertexAttribArray(shape.shp.attributes.aiVal);
     }
+
+    // restore state:
+    if (shape.frontFacing){
+      _gl.disable(_gl.CULL_FACE);   
+    }
+    _gl.activeTexture(_gl.TEXTURE0);
   }
 
 
@@ -624,9 +700,7 @@ const WebARRocksFaceShape2DHelper = (function(){
             'threshold': 0.7,  // absolute treshold for positive face detection
             'dThreshold': 0.9
           },
-          stabilizationSettings: {
-            LMDisplacementRange: [0, 3]
-          },
+          stabilizationSettings: _spec.stabilizationSettings,
           callbackReady: function(err, objs){
             if (err){
               reject(err);
@@ -641,9 +715,10 @@ const WebARRocksFaceShape2DHelper = (function(){
             _glVideoTexture = create_glVideoTexture();
 
             init_shps();
-            _shapes = _spec.shapes.map(build_shape.bind(null, objs.landmarksLabels));
-
-            accept();
+            Promise.all(_spec.shapes.map(build_shape.bind(null, objs.landmarksLabels))).then(function(shapes){
+              _shapes = shapes;
+              accept();
+            });
           },
 
           callbackTrack: callbackTrack

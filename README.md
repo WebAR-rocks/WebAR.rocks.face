@@ -66,7 +66,11 @@ Here are the main features of the library:
 * 3D flexible mask: [live demo](https://webar.rocks/demos/face/demos/flexibleMask/), [source code](/demos/flexibleMask/)
 * 3D flexible mask 2: [live demo](https://webar.rocks/demos/face/demos/flexibleMask2/), [source code](/demos/flexibleMask2/)
 * lipstick VTO: [live demo](https://webar.rocks/demos/face/demos/lipstick/), [source code](/demos/lipstick/)
-* full makeup VTO: [live demo](https://webar.rocks/demos/face/demos/makeup/), [source code](/demos/makeup/)
+* makeup shape based VTO: [live demo](https://webar.rocks/demos/face/demos/makeup/), [source code](/demos/makeup/)
+* makeup texture based VTO: [live demo](https://webar.rocks/demos/face/demos/makeup2/), [source code](/demos/makeup2/)
+* sport makeup: [live demo](https://webar.rocks/demos/face/demos/sportMakeup/), [source code](/demos/sportMakeup/)
+
+
 * GIF Face replacement: [live demo](https://webar.rocks/demos/face/demos/faceReplacement/gif), [source code](/demos/faceReplacement/gif/)
 
 

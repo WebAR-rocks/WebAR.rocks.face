@@ -185,7 +185,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
           'alphaRange': [0.05, 0.92],              // for state stabilization: alpha min (when detection quality is good)
           'LMmedianFilterLength': 10,              // Median filter window size
           'LMmedianFilterSkip': 3,                 // Remove this number of value in median filter window size, then average the remaining values
-          'LMminDisplacement': 0.5,                // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
+          'LMDisplacementRange': [0.5, 3],                // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
           'qualityGoodDetectionThreshold': 0.08    // good detection considered if quality is above this value
         }
       }, _spec.spec));

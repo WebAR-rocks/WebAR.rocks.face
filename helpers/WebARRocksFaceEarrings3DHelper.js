@@ -41,10 +41,10 @@ const WebARRocksFaceEarrings3DHelper = (function(){
     k: 0.7,  // position is interpolated between 2 keypoints. this is the interpolation coefficient
              // 0-> earrings are at the bottom of the ear, 1-> earrings are further back
     stabilizationSettings: {
-      LMmedianFilterLength: 10,              // Median filter window size
-      LMmedianFilterSkip: 3,                 // Remove this number of value in median filter window size, then average the remaining values
-      LMminDisplacement: 0.7,                // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
-      qualityGoodDetectionThreshold: 0.2    // good detection considered if quality is above this value
+      LMmedianFilterLength: 5,              // Median filter window size
+      LMmedianFilterSkip: 1,                 // Remove this number of value in median filter window size, then average the remaining values
+      LMDisplacementRange: [0.7, 3],               // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
+      qualityGoodDetectionThreshold: 0.6    // good detection considered if quality is above this value
     },
 
     scanSettings: {

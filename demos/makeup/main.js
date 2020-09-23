@@ -362,7 +362,7 @@ const SHAPEEYES = {
       points: [0,1,2,3,4,5,6,7],
       displacements: [-0.07,-0.03,-0.01,-0.05,0,0,0,0]
     },
-    // left eye:
+    // left top eye higher:
     {
       points: [8,9,10,11,12,13,14,15],
       displacements: [-0.07,-0.03,-0.01,-0.05,0,0,0,0]
