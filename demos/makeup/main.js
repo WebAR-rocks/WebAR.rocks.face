@@ -2,6 +2,8 @@ let _canvasVideo = null, _canvasAR = null;
 
 // LIPS:
 const SHAPELIPS = {
+  name: 'LIPS',
+
   // list of the points involved in this shape.
   // each point is given as its label
   // the label depends on the used neural network
@@ -200,9 +202,8 @@ const SHAPELIPS = {
 
   // color with smooth border:
   GLSLFragmentSource: "\n\
-    const vec2 ALPHARANGE = vec2(0.1, 0.9);\n\
+    const vec2 ALPHARANGE = vec2(0.01, 0.6);\n\
     const vec3 LUMA = 1.3 * vec3(0.299, 0.587, 0.114);\n\
-    const vec3 BASECOLOR = vec3(1.0, 0., 0.3);\n\
     \n\
     float linStep(float edge0, float edge1, float x){\n\
       float val = (x - edge0) / (edge1 - edge0);\n\
@@ -222,16 +223,23 @@ const SHAPELIPS = {
       float alphaClamped = ALPHARANGE.x + (ALPHARANGE.y - ALPHARANGE.x) * alpha;\n\
       \n\
       // mix colors:\n\
-      vec3 color = videoColorGs * BASECOLOR;\n\
+      vec3 color = videoColorGs * uBaseColor;\n\
       gl_FragColor = vec4(color*alpha, alphaClamped);\n\
       \n\
       //gl_FragColor = vec4(alpha, alpha, alphaClamped, 1.0); // for debugging\n\
       //gl_FragColor = vec4(0., 1., 0., 1.); // for debugging\n\
-    }" //*/
+    }", //*/
+
+  // shader uniforms:
+  uniforms: [{
+    name: 'uBaseColor',
+    value: [0.81, 0.2, 0.26]
+  }]  
 }; // END SHAPELIPS
 
 
 const SHAPEEYES = {
+  name: 'EYES',
   points: [
     "eyeRightInt0", // 0
     "eyeRightTop0",
@@ -381,6 +389,7 @@ const SHAPEEYES = {
 
 
 const SHAPECHEEKS = {
+  name: 'CHEEKS',
   points: [
     "cheekRightExt0",
     "cheekRightExt1",
@@ -470,3 +479,6 @@ function main(){
     isFullScreen: true
   });
 }
+
+// to change lips color, you can run:
+// WebARRocksFaceShape2DHelper.set_uniformValue('LIPS', 'uBaseColor', [0,1,0])

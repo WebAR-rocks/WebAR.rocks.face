@@ -14,6 +14,7 @@ const WebARRocksFaceShape2DHelper = (function(){
   };
   let _spec = null;
   let _shapes = null;
+  let _shapesByName = {};
 
   let _videoElement = null, _videoElementPreviousTime = -1;
   let _gl = null, _glVideoTexture = null;  // gl context is for the AR canvas
@@ -51,6 +52,12 @@ const WebARRocksFaceShape2DHelper = (function(){
     } 
 
     _gl.flush();
+
+    // WECHAT tweak:
+    if (_videoElement.isFakeVideo && _videoElement.pendingBuffer) {
+      _videoElement.arrayBuffer = _videoElement.pendingBuffer.slice()
+      _videoElement.needsUpdate = true 
+    }
   }
 
 
@@ -140,7 +147,7 @@ const WebARRocksFaceShape2DHelper = (function(){
 
     return {
       program: shaderProgram,
-      uniforms:{},
+      uniforms: {},
       attributes: {
         position: aPos
       }
@@ -169,7 +176,8 @@ const WebARRocksFaceShape2DHelper = (function(){
 
   function build_shape(landmarkLabels, shapeSpecsArg, shapeIndex){
     const shapeSpecs = Object.assign({
-      textures: []
+      textures: [],
+      uniforms: []
     }, shapeSpecsArg);
 
     return new Promise(function(accept, reject){
@@ -214,15 +222,22 @@ const WebARRocksFaceShape2DHelper = (function(){
           vUV = 0.5 + vec2(1., -1.) * uvCentered;\n\
           ' + iValsShaderSources.vertex + '\n\
         }';
-      const GLSLTextures = shapeSpecs.textures.map(function(textureSpec){
+      const GLSLTexturesSamplers = shapeSpecs.textures.map(function(textureSpec){
           return 'uniform sampler2D ' + textureSpec.id + ';';
         });
+      const GLSLUniforms = shapeSpecs.uniforms.map(function(uniformSpec){
+          const GLSLUniformType = ['float', 'vec2', 'vec3', 'vec4'][uniformSpec.value.length - 1];
+          return 'uniform ' + GLSLUniformType + ' ' + uniformSpec.name + ';'
+        });
       const fragmentShaderSource = iValsShaderSources.fragmentPars + '\n'
-        + GLSLTextures.join('\n')
+        + GLSLTexturesSamplers.join('\n') + '\n'
+        + GLSLUniforms.join('\n') + '\n'
         +'varying vec2 vUV;\n'
         +'uniform sampler2D samplerVideo;\n'
         + shapeSpecs.GLSLFragmentSource;
       const shp = build_shaderProgram(_gl, vertexShaderSource, fragmentShaderSource, 'SHAPE_' + shapeIndex.toString());    
+      
+      // link shader program:
       shp.attributes.position = _gl.getAttribLocation(shp.program, "position");    
       if (isIVals){
         shp.attributes.aiVal =  _gl.getAttribLocation(shp.program, "aiVal");      
@@ -231,6 +246,22 @@ const WebARRocksFaceShape2DHelper = (function(){
       shp.uniforms.videoUVScale = _gl.getUniformLocation(shp.program, "videoUVScale");
       shp.uniforms.texturesSamplers = shapeSpecs.textures.map(function(textureSpec){
         return _gl.getUniformLocation(shp.program, textureSpec.id);
+      });
+      shapeSpecs.uniforms.forEach(function(uniformSpec){
+        shp.uniforms[uniformSpec.name] = _gl.getUniformLocation(shp.program, uniformSpec.name);
+      });
+
+      // build uniforms:
+      const uniformsByName = {};
+      const uniforms = shapeSpecs.uniforms.map(function(uniformSpec){        
+        uniform = {
+          name: uniformSpec.name,
+          i: uniformSpec.value.length-1,
+          value: uniformSpec.value,
+          previousValue: null
+        };
+        uniformsByName[uniformSpec.name] = uniform;
+        return uniform;
       });
 
       // build interpolations:
@@ -280,11 +311,13 @@ const WebARRocksFaceShape2DHelper = (function(){
       }
 
       texturesPromise.then(function(textures){
-        accept({
+        const shapeBuilt = {
           outlines: shapeSpecs.outlines ? shapeSpecs.outlines.map(build_outline) : [],
           interpolatedPoints: interpolatedPoints,
           frontFacing: (shapeSpecs.frontFacing) ? shapeSpecs.frontFacing : '',
           textures: textures,
+          uniforms: uniforms,
+          uniformsByName: uniformsByName,
 
           // points:
           pointsCount: pointsCount,
@@ -300,7 +333,11 @@ const WebARRocksFaceShape2DHelper = (function(){
           mapPointIndexToNNLandmark: mapPointIndexToNNLandmark,
           trianglesCount: shapeSpecs.tesselation.length / 3,
           shp: shp
-        });
+        };
+        if (shapeSpecs.name){
+          _shapesByName[shapeSpecs.name] = shapeBuilt;
+        }
+        accept(shapeBuilt);
       }); // end texturesPromise.then      
     }); //end returned promise
   }
@@ -465,6 +502,27 @@ const WebARRocksFaceShape2DHelper = (function(){
 
   function draw_shape(landmarksPositions, shape){
     _gl.useProgram(shape.shp.program);
+
+    // set uniforms:
+    shape.uniforms.forEach(function(uniform){
+      if (uniform.previousValue === uniform.value) return;
+      const glUniformLocation = shape.shp.uniforms[uniform.name];
+      switch(uniform.i){
+        case 0:
+          _gl.uniform1f(glUniformLocation, uniform.value[0]); 
+          break;
+        case 1:
+          _gl.uniform2fv(glUniformLocation, uniform.value); 
+          break;
+        case 2:
+          _gl.uniform3fv(glUniformLocation, uniform.value); 
+          break;
+        case 3:
+          _gl.uniform4fv(glUniformLocation, uniform.value); 
+          break;  
+      }
+      uniform.previousValue = uniform.value;
+    });
 
     // send video UVScale:
     _gl.uniformMatrix2fv(shape.shp.uniforms.videoUVScale, false, WEBARROCKSFACE.get_videoUVScaleMat2());
@@ -724,7 +782,12 @@ const WebARRocksFaceShape2DHelper = (function(){
           callbackTrack: callbackTrack
         }); // end WEBARROCKSFACE.init call
       }); // end returned promise
-    } //end init()
+    }, //end init()
+
+    set_uniformValue(shapeName, uniformName, value){
+      const shapeUniforms = _shapesByName[shapeName].uniformsByName;
+      shapeUniforms[uniformName].value = value;
+    }
   } //end returned value
 })(); 
 

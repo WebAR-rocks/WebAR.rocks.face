@@ -208,8 +208,8 @@ After the initialization (ie after that `callbackReady` is launched ) , these me
 * `WEBARROCKSFACE.set_scanSettings(<object> scanSettings)`: Override scan settings. `scanSettings` is a dictionnary with the following properties:
   * `<float> threshold`: detection threshold, between `0` and `1`. Default value is `0.75`. You can decrease it if you want to make the detection more sensitive (but it will increase the false positive detections),
   * `<int> nDetectsPerLoop`: specify the number of detection per drawing loop. `0` for adaptative value. Default: `0`
-  * `<int> nScaleLevels`: number of detection steps for the scale. Default: `4`,
-  * `[<float>, <float>, <float>] overlapFactors`: overlap between 2 scan positions for `X`, `Y` and `scale`. Default: `[1.5, 1.5, 2]`,
+  * `<int> nScaleLevels`: number of detection steps for the scale. Default: `3`,
+  * `[<float>, <float>, <float>] overlapFactors`: overlap between 2 scan positions for `X`, `Y` and `scale`. Default: `[2, 2, 3]`,
   * `<float> scale0Factor`: scale factor for the largest scan level. Default is `0.8`.
 
 * `WEBARROCKSFACE.set_stabilizationSettings(<object> stabilizationSettings)`: Override detection stabilization settings. The output of the neural network is always noisy, so we need to stabilize it using a floating average to avoid shaking artifacts. The internal algorithm computes first a stabilization factor `k` between `0` and `1`. If `k==0.0`, the detection is bad and we favor responsivity against stabilization. It happens when the user is moving quickly, rotating the head or when the detection is bad. On the contrary, if `k` is close to `1`, the detection is nice and the user does not move a lot so we can stabilize a lot. `stabilizationSettings` is a dictionnary with the following properties:
