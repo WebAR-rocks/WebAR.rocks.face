@@ -79,6 +79,8 @@ const WebARRocksFaceEarrings3DHelper = (function(){
   let _videoElement = null, _cameraFoVY = -1;
   let _gl = null, _glVideoTexture = null, _glShpDrawVideo = null;
   let _earLeft = null, _earRight = null;
+  let _stabilizer = null;
+
   const _headPose = {
     euler: null,
     ear2ear: null
@@ -282,8 +284,10 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       // compute headRotationMatrix:
       compute_headPose(detectState.rx, detectState.ry, detectState.rz);
 
+      // stabilize landmarks positions:
+      const lms = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
+
       // compute earrings 2D positions and director vectors:
-      const lms = detectState.landmarks;
       extract_earringPosition(lms[_lmIndPerLabel.rightEarBottom], lms[_lmIndPerLabel.rightEarEarring], _earRight);
       extract_earringPosition(lms[_lmIndPerLabel.leftEarBottom], lms[_lmIndPerLabel.leftEarEarring], _earLeft);
 
@@ -316,6 +320,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
     } else {
       _three.earringRight.visible = false;
       _three.earringLeft.visible = false;
+      _stabilizer.reset();
     }
 
     //_three.renderer.render(_three.scene, _three.camera);
@@ -331,6 +336,8 @@ const WebARRocksFaceEarrings3DHelper = (function(){
   const that = {
     init: function(spec){
       _spec = Object.assign({}, _defaultSpec, spec);
+
+      _stabilizer = WebARRocksLMStabilizer.instance({});
 
       return new Promise(function(accept, reject){
         WEBARROCKSFACE.init({

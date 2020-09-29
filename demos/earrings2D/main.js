@@ -38,11 +38,11 @@ function start(){
       console.log('INFO in demo.js: WebAR.rocks.face is ready :)');
     },
 
-    callbackTrack: function(data){
+    callbackTrack: function(detectState){
       clear_canvas();
-      if (data.isDetected){
-        draw_faceCrop(data.faceCrop);
-        draw_earrings(data.landmarks, data.faceWidth, data.ry);
+      if (detectState.isDetected){
+        draw_faceCrop(detectState.faceCrop);
+        draw_earrings(detectState.landmarks, detectState.faceWidth, detectState.ry);
       } else {
         _earringsVisibility.right = true;
         _earringsVisibility.left = true;

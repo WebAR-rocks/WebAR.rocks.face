@@ -20,6 +20,8 @@ const WebARRocksFaceShape2DHelper = (function(){
   let _gl = null, _glVideoTexture = null;  // gl context is for the AR canvas
   let _glv = null, _glvVideoTexture = null; // glv is for video and computation
 
+  let _stabilizer = null;
+
   const _shps = {};
 
 
@@ -48,8 +50,11 @@ const WebARRocksFaceShape2DHelper = (function(){
 
     // draw shapes:
     if (detectState.isDetected){
-      _shapes.forEach(draw_shape.bind(null, detectState.landmarks));
-    } 
+      const landmarksStabilized = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
+      _shapes.forEach(draw_shape.bind(null, landmarksStabilized));
+    } else {
+      _stabilizer.reset();
+    }
 
     _gl.flush();
 
@@ -744,9 +749,11 @@ const WebARRocksFaceShape2DHelper = (function(){
 
 
   // public methods:
-  return {
+  const that = {
     init: function(spec){
       _spec = Object.assign({}, _defaultSpec, spec);
+
+      _stabilizer = WebARRocksLMStabilizer.instance({});
 
       init_gl();
 
@@ -787,8 +794,17 @@ const WebARRocksFaceShape2DHelper = (function(){
     set_uniformValue(shapeName, uniformName, value){
       const shapeUniforms = _shapesByName[shapeName].uniformsByName;
       shapeUniforms[uniformName].value = value;
+    },
+
+    get_viewWidth: function(){
+      return _spec.canvasVideo.width;
+    },
+
+    get_viewHeight: function(){
+      return _spec.canvasVideo.height;
     }
-  } //end returned value
+  } //end that
+  return that;
 })(); 
 
 // Export ES6 module:

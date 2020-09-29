@@ -480,7 +480,7 @@ function build_gifFrameMask(detectState, frameIndex){
     return;
   }
   
-  const x=detectState.x, y=detectState.y, s=detectState.s, ry=detectState.ry, rz=(detectState.rz)?detectState.rz:0;
+  const x=detectState.x, y=detectState.y, s=detectState.s, ry=detectState.ry, rz=(detectState.rz) ? detectState.rz : 0;
   // compute normalized frame cut params:
   let xn = x*0.5 + 0.5 + s*SETTINGS.gifMaskOffset[0]*Math.sin(ry); // normalized x position
   const yn = y*0.5 + 0.5 + s*SETTINGS.gifMaskOffset[1];

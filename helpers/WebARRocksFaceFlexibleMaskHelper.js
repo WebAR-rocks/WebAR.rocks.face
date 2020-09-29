@@ -783,11 +783,11 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
     },
 
 
-    copy_keypointPositionsMeasured: function(mesh, detectState){
+    copy_keypointPositionsMeasured: function(mesh, landmarks){
       const keypoints = mesh.userData.keypoints;
       keypoints.forEach(function(kp){
         const ind = kp.ind;
-        const posVpMeasured = detectState.landmarks[ind];
+        const posVpMeasured = landmarks[ind];
         kp.positionVpMeasured.fromArray(posVpMeasured);
       });
     },
@@ -838,7 +838,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
     },
 
 
-    update_flexibleMask: function(camera, mesh, detectStates){
+    update_flexibleMask: function(camera, mesh, detectStates, landmarks){
       if (detectStates.length){
         throw new Error('Flexible mask currently only works for single face detection');
       }
@@ -850,7 +850,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
       }
 
       that.compute_face3DKeypointsPositionsVp(camera, mesh);
-      that.copy_keypointPositionsMeasured(mesh, detectState);
+      that.copy_keypointPositionsMeasured(mesh, landmarks);
       if (_settings.debugKeypointDisplacement !== -1){
         that.debug_keypointsDisplacement(mesh);
       }

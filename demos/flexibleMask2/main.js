@@ -26,11 +26,11 @@ function main(){
     canvas: canvasFace,
     canvasThree: canvasThree,
     
-    callbackTrack: function(detectStates){
+    callbackTrack: function(detectStates, landmarksStabilized){
       if (_flexibleMaskMesh === null){
         return;
       }
-      _flexibleMaskHelper.update_flexibleMask(_threeInstances.threeCamera, _flexibleMaskMesh, detectStates);
+      _flexibleMaskHelper.update_flexibleMask(_threeInstances.threeCamera, _flexibleMaskMesh, detectStates, landmarksStabilized);
     },
 
     callbackReady: function(err, threeInstances){

@@ -39,6 +39,8 @@ const WebARRocksFaceDebugHelper = (function(){
     glVerticesVBO: null
   };
 
+  const _stabilizers = [];
+
   // compile a shader:
   function compile_shader(source, type, typeString) {
     const shader = _gl.createShader(type);
@@ -152,17 +154,34 @@ const WebARRocksFaceDebugHelper = (function(){
     _gl.drawElements(_gl.TRIANGLES, 3, _gl.UNSIGNED_SHORT, 0);
   }
 
+  function get_stabilizer(slotIndex){
+    if (!_stabilizers[slotIndex]){
+      _stabilizers[slotIndex] = WebARRocksLMStabilizer.instance({});
+    }
+
+    return _stabilizers[slotIndex];
+  }
+
   function process_faceSlot(detectState, slotIndex){
    if (detectState.isDetected) {
-      
+      // stabilize landmarks:
+      let landmarks = null;
+      if (_spec.isStabilized){
+        landmarks = get_stabilizer(slotIndex).update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
+      } else {
+        landmarks = detectState.landmarks;
+      }
+
       // draw landmarks:
-      draw_landmarks(detectState);
+      draw_landmarks(landmarks);
+    } else if(_spec.isStabilized){
+      get_stabilizer(slotIndex).reset();
     }
   }
 
-  function draw_landmarks(detectState){
+  function draw_landmarks(landmarks){
     // copy landmarks:
-    detectState.landmarks.forEach(copy_landmark);
+    landmarks.forEach(copy_landmark);
 
     // draw landmarks:
     _gl.useProgram(_shps.drawPoints.program);
@@ -217,7 +236,8 @@ const WebARRocksFaceDebugHelper = (function(){
     init: function(spec){
       _spec = Object.assign({
         spec: {},
-       
+        isStabilized: true,
+
         // callbacks:
         callbackReady: null,
         callbackTrack: null
@@ -279,8 +299,11 @@ const WebARRocksFaceDebugHelper = (function(){
           accept();
         });
       });      
-    }
+    },
 
+    toggle_stabilization: function(isStabilized){
+      _spec.isStabilized = isStabilized;
+    }
   }; //end that
   return that;
 })();

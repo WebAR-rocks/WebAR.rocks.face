@@ -78,6 +78,11 @@ function pause_video(){
   _state.video.pause();
 }
 
+function toggle_stabilization(event){
+  const isStabilized = event.target.checked;
+  WebARRocksFaceDebugHelper.toggle_stabilization(isStabilized);
+}
+
 // entry point:
 function main(){
   WebARRocksResizer.size_canvas({

@@ -23,9 +23,10 @@ const WebARRocksFaceCanvas2DHelper = (function(){
   // private variables:
   let _spec = null;
   let _gl = null, _cv = null, _glVideoTexture = null, _landmarksLabels = null;
+  let _stabilizer = null;
 
   const _shps = {};
-  const _friendlyData = {
+  const _friendlyDetectState = {
     isDetected: false,
     faceCrop: [[0,0],[0,0],[0,0],[0,0]],
     ry: 0,
@@ -112,9 +113,9 @@ const WebARRocksFaceCanvas2DHelper = (function(){
     _glVideoTexture = spec.videoTexture;
     _landmarksLabels = spec.landmarksLabels;
 
-    // initialize _friendlyData.landmarks:
+    // initialize _friendlyDetectState.landmarks:
     _landmarksLabels.forEach(function(lmLabel){
-      _friendlyData.landmarks[lmLabel] = [0, 0];
+      _friendlyDetectState.landmarks[lmLabel] = [0, 0];
     });
 
     init_shps();
@@ -128,12 +129,16 @@ const WebARRocksFaceCanvas2DHelper = (function(){
     draw_video();
 
     // compute friendly data:
-    _friendlyData.isDetected = detectState.isDetected;
-    
-    if (_friendlyData.isDetected){
+    _friendlyDetectState.isDetected = detectState.isDetected;
+
+    let landmarksStabilized = null;
+
+    if (_friendlyDetectState.isDetected){
       // get canvas dimensions:
       const cvw = _cv.width;
       const cvh = _cv.height;
+
+      landmarksStabilized = _stabilizer.update(detectState.landmarks, cvw, cvh);
 
       // compute face crop points:
       // size of face crop square in pixels:
@@ -141,7 +146,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
       // center coordinates in pixels:
       const cx = (0.5 + 0.5*detectState.x) * cvw;
       const cy = (0.5 - 0.5*detectState.y) * cvh;
-      const faceCrop = _friendlyData.faceCrop;
+      const faceCrop = _friendlyDetectState.faceCrop;
       const xMin = cx - w/2;
       const xMax = cx + w/2;
       const yMin = cy - w/2;
@@ -152,21 +157,21 @@ const WebARRocksFaceCanvas2DHelper = (function(){
       faceCrop[3][0] = xMin, faceCrop[3][1] = yMax;
 
       // face width:
-      _friendlyData.faceWidth = w;
+      _friendlyDetectState.faceWidth = w;
 
       // copy Y rotation:
-      _friendlyData.ry = detectState.ry / _deg2rad;
+      _friendlyDetectState.ry = detectState.ry / _deg2rad;
 
       // compute landmarks pixel positions:
-      const landmarks = _friendlyData.landmarks;
-      detectState.landmarks.forEach(function(lmPos, lmInd){
+      const landmarks = _friendlyDetectState.landmarks;
+      landmarksStabilized.forEach(function(lmPos, lmInd){
         const label = _landmarksLabels[lmInd];
         landmarks[label][0] = (0.5 + 0.5*lmPos[0]) * cvw;
         landmarks[label][1] = (0.5 - 0.5*lmPos[1]) * cvh;
       });
     }
 
-    _spec.callbackTrack(_friendlyData);
+    _spec.callbackTrack(_friendlyDetectState);
 
     _gl.flush();
   }
@@ -175,6 +180,9 @@ const WebARRocksFaceCanvas2DHelper = (function(){
   const that = {
     init: function(spec){
       _spec = spec;
+
+      _stabilizer = WebARRocksLMStabilizer.instance({});
+
       WEBARROCKSFACE.init(Object.assign({
         callbackReady: callbackReady,
         callbackTrack: callbackTrack,
@@ -182,11 +190,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
           'translationFactorRange': [0.002, 0.005],// translation speed quality factor
           'rotationFactorRange': [0.03, 0.05],     // rotation speed quality factor
           'qualityFactorRange': [0.8, 0.9],        // compare detected state with these values
-          'alphaRange': [0.05, 0.92],              // for state stabilization: alpha min (when detection quality is good)
-          'LMmedianFilterLength': 10,              // Median filter window size
-          'LMmedianFilterSkip': 3,                 // Remove this number of value in median filter window size, then average the remaining values
-          'LMDisplacementRange': [0.5, 3],                // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
-          'qualityGoodDetectionThreshold': 0.08    // good detection considered if quality is above this value
+          'alphaRange': [0.05, 0.92]              // for state stabilization: alpha min (when detection quality is good)          
         }
       }, _spec.spec));
     }

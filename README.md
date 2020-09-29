@@ -58,17 +58,17 @@ Here are the main features of the library:
 
 * basic debug view (displays the face landmarks): [live demo](https://webar.rocks/demos/face/demos/basic/), [source code](/demos/basic/)
 * advanced debug view: [live demo](https://webar.rocks/demos/face/demos/debug/), [source code](/demos/debug/)
-* earrings VTO 2D: [live demo](https://webar.rocks/demos/face/demos/earrings/), [source code](/demos/earrings/)
+* earrings VTO 2D: [live demo](https://webar.rocks/demos/face/demos/earrings2D/), [source code](/demos/earrings2D/)
 * earrings VTO 3D: [live demo](https://webar.rocks/demos/face/demos/earrings3D/), [source code](/demos/earrings3D/)
-* glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTO/), [source code](/demos/VTO/)
+* glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTOGlasses/), [source code](/demos/VTOGlasses/)
 * headphones/helmet VTO: [live demo](https://webar.rocks/demos/face/demos/VTOHelmet/), [source code](/demos/VTOHelmet/)
 * necklace VTO: [live demo](https://webar.rocks/demos/face/demos/VTONecklace/), [source code](/demos/VTONecklace/)
 * 3D flexible mask: [live demo](https://webar.rocks/demos/face/demos/flexibleMask/), [source code](/demos/flexibleMask/)
 * 3D flexible mask 2: [live demo](https://webar.rocks/demos/face/demos/flexibleMask2/), [source code](/demos/flexibleMask2/)
-* lipstick VTO: [live demo](https://webar.rocks/demos/face/demos/lipstick/), [source code](/demos/lipstick/)
-* makeup shape based VTO: [live demo](https://webar.rocks/demos/face/demos/makeup/), [source code](/demos/makeup/)
-* makeup texture based VTO: [live demo](https://webar.rocks/demos/face/demos/makeup2/), [source code](/demos/makeup2/)
-* sport makeup: [live demo](https://webar.rocks/demos/face/demos/sportMakeup/), [source code](/demos/sportMakeup/)
+* makeup lipstick VTO: [live demo](https://webar.rocks/demos/face/demos/makeupLipstick/), [source code](/demos/makeupLipstick/)
+* makeup shapes based VTO: [live demo](https://webar.rocks/demos/face/demos/makeupShapes/), [source code](/demos/makeupShapes/)
+* makeup texture based VTO: [live demo](https://webar.rocks/demos/face/demos/makeupTexture/), [source code](/demos/makeupTexture/)
+* sport makeup: [live demo](https://webar.rocks/demos/face/demos/makeupSport/), [source code](/demos/makeupSport/)
 
 
 * GIF Face replacement: [live demo](https://webar.rocks/demos/face/demos/faceReplacement/gif), [source code](/demos/faceReplacement/gif/)
@@ -118,7 +118,7 @@ WEBARROCKSFACE.init({
 
 ### Optionnal init arguments
 * `<integer> maxFacesDetected`: Only for multiple face detection - maximum number of faces which can be detected and tracked. Should be between `1` (no multiple detection) and `8`. See [Multiple face section](#multiple-faces) for more details,
-* `<integer> animateDelay`: It is used only in normal rendering mode (not in slow rendering mode). With this statement you can set accurately the number of milliseconds during which the browser wait at the end of the rendering loop before starting another detection. If you use the canvas of this API as a secondary element (for example in *PACMAN* or *EARTH NAVIGATION* demos) you should set a small `animateDelay` value (for example 2 milliseconds) in order to avoid rendering lags.
+* `<integer> animateDelay`: With this statement you can set accurately the number of milliseconds during which the browser wait at the end of the rendering loop before starting another detection. If you use the canvas of this API as a secondary element (for example in *PACMAN* or *EARTH NAVIGATION* demos) you should set a small `animateDelay` value (for example 2 milliseconds) in order to avoid rendering lags.
 * `<function> onWebcamAsk`: Function launched just before asking for the user to allow its webcam sharing,
 * `<function> onWebcamGet`: Function launched just after the user has accepted to share its video. It is called with the video element as argument,
 * `<dict> videoSettings`: override WebRTC specified video settings, which are by default:
@@ -193,8 +193,6 @@ After the initialization (ie after that `callbackReady` is launched ) , these me
 
 * `WEBARROCKSFACE.toggle_pause(<boolean> isPause)`: pause/resume,
 
-* `WEBARROCKSFACE.toggle_slow(<boolean> isSlow)`: toggle the slow rendering mode: because this API consumes a lot of GPU resources, it may slow down other elements of the application. If the user opens a CSS menu for example, the CSS transitions and the DOM update can be slow. With this function you can slow down the rendering in order to relieve the GPU. Unfortunately the tracking and the 3D rendering will also be slower but this is not a problem is the user is focusing on other elements of the application. We encourage to enable the slow mode as soon as a the user's attention is focused on a different part of the canvas,
-
 * `WEBARROCKSFACE.set_animateDelay(<integer> delay)`: Change the `animateDelay` (see `init()` arguments),
 
 * `WEBARROCKSFACE.set_inputTexture(<WebGLTexture> tex, <integer> width, <integer> height)`: Change the video input by a WebGL Texture instance. The dimensions of the texture, in pixels, should be provided,
@@ -213,18 +211,11 @@ After the initialization (ie after that `callbackReady` is launched ) , these me
   * `<float> scale0Factor`: scale factor for the largest scan level. Default is `0.8`.
 
 * `WEBARROCKSFACE.set_stabilizationSettings(<object> stabilizationSettings)`: Override detection stabilization settings. The output of the neural network is always noisy, so we need to stabilize it using a floating average to avoid shaking artifacts. The internal algorithm computes first a stabilization factor `k` between `0` and `1`. If `k==0.0`, the detection is bad and we favor responsivity against stabilization. It happens when the user is moving quickly, rotating the head or when the detection is bad. On the contrary, if `k` is close to `1`, the detection is nice and the user does not move a lot so we can stabilize a lot. `stabilizationSettings` is a dictionnary with the following properties:
-  * Global pose stabilization:
-    * `[<float> minValue, <float> maxValue] translationFactorRange`: multiply `k` by a factor `kTranslation` depending on the translation speed of the head (relative to the viewport). `kTranslation=0` if `translationSpeed<minValue` and `kTranslation=1` if `translationSpeed>maxValue`. The regression is linear. Default value: `[0.0015, 0.005]`,
-    * `[<float> minValue, <float> maxValue] rotationFactorRange`: analogous to `translationFactorRange` but for rotation speed. Default value: `[0.12, 0.25]`,
-    * `[<float> minValue, <float> maxValue] qualityFactorRange`: analogous to `translationFactorRange` but for the head detection coefficient. Default value: `[0.85, 0.95]`,
-    * `[<float> minValue, <float> maxValue] alphaRange`: it specify how to apply `k`. Between 2 successive detections, we blend the previous `detectState` values with the current detection values using a mixing factor `alpha`. `alpha=<minValue>` if `k<0.0` and `alpha=<maxValue>` if `k>1.0`. Between the 2 values, the variation is quadratic. Default value is `[0.05, 0.9]`,
-  * Landmarks filtering: We sort each 2D landmark coordinate into a sliding window. Then we sort the sliding window and we skip outlier values. We keep the mean of remaining values.
-    * `<int> LMmedianFilterLength`: Size of the sliding window. Default is `3`,
-    * `<int> LMmedianFilterSkip`: Count of outliers to skip. Default is `0`,
-  * Landmarks stabilization:
-    * `[<float> minValue, <float> maxValue]` <LMDisplacementRange>: Consider new landmark position only if it is farther away than `minValue`, in pixels. If it is between `minValue` and `maxValue`, dampen displacement. Default is `[1.5, 4]`.
-    * `<float> qualityGoodDetectionThreshold`: stabilized landmarks only if global pose quality factor is above this value. Default is `0.6`
-
+  * `[<float> minValue, <float> maxValue] translationFactorRange`: multiply `k` by a factor `kTranslation` depending on the translation speed of the head (relative to the viewport). `kTranslation=0` if `translationSpeed<minValue` and `kTranslation=1` if `translationSpeed>maxValue`. The regression is linear. Default value: `[0.0015, 0.005]`,
+  * `[<float> minValue, <float> maxValue] rotationFactorRange`: analogous to `translationFactorRange` but for rotation speed. Default value: `[0.12, 0.25]`,
+  * `[<float> minValue, <float> maxValue] qualityFactorRange`: analogous to `translationFactorRange` but for the head detection coefficient. Default value: `[0.85, 0.95]`,
+  * `[<float> minValue, <float> maxValue] alphaRange`: it specify how to apply `k`. Between 2 successive detections, we blend the previous `detectState` values with the current detection values using a mixing factor `alpha`. `alpha=<minValue>` if `k<0.0` and `alpha=<maxValue>` if `k>1.0`. Between the 2 values, the variation is quadratic. Default value is `[0.05, 0.9]`,
+It only applies to global pose stabilization. Landmarks are stabilized using helpers (`/helpers/WebARRocksLMStabilizer<X>.js`).
 
 * `WEBARROCKSFACE.update_videoElement(<video> vid, <function|False> callback)`: change the video element used for the face detection (which can be provided via `VIDEOSETTINGS.videoElement`) by another video element. A callback function can be called when it is done.
 

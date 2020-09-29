@@ -16,6 +16,9 @@
     <!-- INCLUDE RESIZER HELPER -->
     <script src="../../helpers/WebARRocksResizer.js"></script>
 
+    <!-- INCLUDE LANDMARKS STABILIZER -->
+    <script src="../../helpers/WebARRocksLMStabilizer.js"></script>
+
     <!-- INCLUDE DEMO SCRIPT -->
     <script src="./main.js"></script>
 
@@ -62,6 +65,9 @@
       <hr/>
       <button onclick='play_video()'>PLAY</button>
       <button onclick='pause_video()'>PAUSE</button>
+
+      <hr/>
+      Stabilize: <input type='checkbox' onclick='toggle_stabilization(event)' checked='true' />
 
     </div>
   </body>

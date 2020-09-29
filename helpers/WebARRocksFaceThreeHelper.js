@@ -11,7 +11,6 @@
  * OR TO ADDRESS A SPECIFIC USE CASE.
  */
 
-"use strict"
 
 const WebARRocksFaceThreeHelper = (function(){
   const _settings = {
@@ -66,6 +65,7 @@ const WebARRocksFaceThreeHelper = (function(){
   const _deg2rad = Math.PI / 180;
   let _cameraFoVY = -1;
   let _spec = null;
+  let _stabilizers = null;
 
   const _shps = { // shader programs
     copy: null
@@ -289,6 +289,14 @@ const WebARRocksFaceThreeHelper = (function(){
       _landmarks.indices[label] = ind;
     });
 
+    // init stabilizer:
+    if (typeof(WebARRocksLMStabilizer) === 'undefined' ){
+      _stabilizers = null;
+      console.warn("WARNING in WebARRocksFaceThreeHelper: cannot find WebARRocksLMStabilizer. Points won't be stabilized");
+    } else {
+      _stabilizers = {};
+    }
+
     init_shps();
     init_three(spec.maxFacesDetected);
     
@@ -325,16 +333,17 @@ const WebARRocksFaceThreeHelper = (function(){
     // draw the video:
     draw_video();
     
+    let landmarksStabilized = null;
     if (detectStates.length){ // multiface detection:
-      detectStates.forEach(process_faceSlot);
+      landmarksStabilized = detectStates.map(process_faceSlot);
     } else { // only 1 face detected
-      process_faceSlot(detectStates, 0);
+      landmarksStabilized = process_faceSlot(detectStates, 0);
     }
     
     render_three();
     
     if (_spec.callbackTrack){
-      _spec.callbackTrack(detectStates);
+      _spec.callbackTrack(detectStates, landmarksStabilized);
     }
   } //end callbackTrack
   
@@ -351,25 +360,42 @@ const WebARRocksFaceThreeHelper = (function(){
   }
 
   function process_faceSlot(detectState, slotIndex){
+    let landmarksStabilized = null;
     const faceSlot = _three.faceSlots[slotIndex];
     if (detectState.isDetected) {
       
-      compute_pose(detectState, faceSlot);
+      let landmarks = null;
+      if (_stabilizers === null){
+        landmarksStabilized = detectState.landmarks;
+      } else {
+        if (!_stabilizers[slotIndex]){
+          _stabilizers[slotIndex] = WebARRocksLMStabilizer.instance({});
+        };
+        landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
+      }
+
+      compute_pose(landmarksStabilized, faceSlot);
       
       faceSlot.faceFollowerParent.visible = true;      
     } else if (faceSlot.faceFollowerParent.visible){
       faceSlot.faceFollowerParent.visible = false;
+      if (_stabilizers && _stabilizers[slotIndex]){
+        _stabilizers[slotIndex].reset();
+      }
     }
+
+    return landmarksStabilized;
   }
 
-  function compute_pose(detectState, faceSlot){
+  function compute_pose(landmarks, faceSlot){
     const w2 = that.get_viewWidth() / 2;
     const h2 = that.get_viewHeight() / 2;
     const imgPointsPx = _computePose.imgPointsPx;
+
     _computePose.imgPointsLMIndices.forEach(function(ind, i){
       const imgPointPx = imgPointsPx[i];
-      imgPointPx[0] = - detectState.landmarks[ind][0] * w2,  // X in pixels
-      imgPointPx[1] = - detectState.landmarks[ind][1] * h2;  // Y in pixels
+      imgPointPx[0] = - landmarks[ind][0] * w2,  // X in pixels
+      imgPointPx[1] = - landmarks[ind][1] * h2;  // Y in pixels
     });
 
     const objectPoints = _computePose.objPoints;
