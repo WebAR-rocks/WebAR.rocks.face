@@ -96,7 +96,7 @@ This canvas will be used by WebGL both for the computation and the 3D rendering.
 ```javascript
 WEBARROCKSFACE.init({
   canvasId: 'WebARRocksFaceCanvas',
-  NNCpath: '../../../neuralNets/NN_FACE.json', // neural network model
+  NNCpath: '../../../neuralNets/NN_FACE_0.json', // neural network model
   callbackReady: function(errCode, spec){
     if (errCode){
       console.log('AN ERROR HAPPENS. ERROR CODE =', errCode);
