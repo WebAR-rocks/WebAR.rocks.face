@@ -176,11 +176,11 @@ const WebARRocksLMStabilizer = (function(){
           
             const accl = _force; // because m = 1 (mass)
             
-            // update position:
-            fma_vec2(pos, velocity, dt);
-
             // update velocity:
             fma_vec2(velocity, accl, dt);
+
+            // update position:
+            fma_vec2(pos, velocity, dt);
           }
           
           // convert from pixels to normalized viewport coordinates:
