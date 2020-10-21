@@ -548,14 +548,14 @@ const SHAPEFACE = {
   
   textures: [{
     id: 'color',
-    src: 'sportMakeup.png'
+    src: 'assets/sportMakeup.png'
   }]
 }; // END SHAPEFACE
 
 
 function start(){
   WebARRocksFaceShape2DHelper.init({
-    NNCpath: '../../neuralNets/NN_FULLMAKEUP_0.json',
+    NNCPath: '../../neuralNets/NN_FULLMAKEUP_0.json',
     canvasVideo: _canvasVideo,
     canvasAR:_canvasAR,
     shapes: [SHAPEFACE]

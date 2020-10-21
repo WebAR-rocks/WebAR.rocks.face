@@ -21,7 +21,7 @@ function main(){
   // Init WebAR.rocks.face through the helper:
   WebARRocksFaceThreeHelper.init({
     spec:  {
-      NNCpath: '../../neuralNets/NN_FACE_0.json'
+      NNCPath: '../../neuralNets/NN_FACE_0.json'
     },
     canvas: canvasFace,
     canvasThree: canvasThree,

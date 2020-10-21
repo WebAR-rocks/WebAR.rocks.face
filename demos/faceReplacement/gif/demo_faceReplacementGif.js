@@ -102,7 +102,7 @@ function main(){
 
   WEBARROCKSFACE.init({
     canvas: document.getElementById('WebARRocksFaceCanvas'),
-    NNCpath: '../../../neuralNets/NN_FACE_0.json',
+    NNCPath: '../../../neuralNets/NN_FACE_0.json',
     callbackReady: function(errCode, spec){
       if (errCode){
         console.log('AN ERROR HAPPENS. ERROR CODE =', errCode);

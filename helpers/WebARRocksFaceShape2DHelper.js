@@ -1,16 +1,23 @@
+/**
+ * Copyright 2020 WebAR.rocks ( https://webar.rocks )
+ * 
+ * WARNING: YOU SHOULD NOT MODIFY THIS FILE OTHERWISE WEBAR.ROCKS
+ * WON'T BE RESPONSIBLE TO MAINTAIN AND KEEP YOUR ADDED FEATURES
+ * WEBAR.ROCKS WON'T BE LIABLE FOR BREAKS IN YOUR ADDED FUNCTIONNALITIES
+ *
+ * WEBAR.ROCKS KEEP THE RIGHT TO WORK ON AN UNMODIFIED VERSION OF THIS SCRIPT.
+ * 
+ * THIS FILE IS A HELPER AND SHOULD NOT BE USED TO IMPLEMENT A SPECIFIC USER SCENARIO
+ * OR TO ADDRESS A SPECIFIC USE CASE.
+ */
+
+
 const WebARRocksFaceShape2DHelper = (function(){
   const _defaultSpec = {
-    NNCpath: null,
+    NNCPath: null,
     canvasVideo: null,
     canvasAR: null,
-    shapes: [],
-    stabilizationSettings: {
-      LMDisplacementRange: [0, 3],
-      LMmedianFilterLength: 5,              // Median filter window size
-      LMmedianFilterSkip: 1,                 // Remove this number of value in median filter window size, then average the remaining values
-      LMDisplacementRange: [0.7, 3],                // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
-      qualityGoodDetectionThreshold: 0.7    // good detection considered if quality is above this value
-    }
+    shapes: []
   };
   let _spec = null;
   let _shapes = null;
@@ -600,7 +607,7 @@ const WebARRocksFaceShape2DHelper = (function(){
         if (p[1] <= Math.max(p1[1], p2[1])) {
           if (p[0] <= Math.max(p1[0], p2[0])) {
             if (p1[1] !== p2[1]) {
-              xinters = (p[1]-p1[1]) * (p2[0]-p1[0]) / (p2[1]-p1[1]) + p1[0];
+              const xinters = (p[1]-p1[1]) * (p2[0]-p1[0]) / (p2[1]-p1[1]) + p1[0];
               if (p1.x === p2[0] || p[0] <= xinters)
                 ++counter;
             }
@@ -760,12 +767,10 @@ const WebARRocksFaceShape2DHelper = (function(){
       return new Promise(function(accept, reject){
         WEBARROCKSFACE.init({
           canvas: _spec.canvasVideo,
-          NNCpath: _spec.NNCpath,
+          NNCPath: _spec.NNCPath,
           scanSettings: {
-            'threshold': 0.7,  // absolute treshold for positive face detection
-            'dThreshold': 0.9
+            'threshold': 0.7
           },
-          stabilizationSettings: _spec.stabilizationSettings,
           callbackReady: function(err, objs){
             if (err){
               reject(err);

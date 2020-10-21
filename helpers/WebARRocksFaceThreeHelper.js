@@ -101,36 +101,36 @@ const WebARRocksFaceThreeHelper = (function(){
   };
 
   // compile a shader:
-  function compile_shader(source, type, typeString) {
-    const shader = _gl.createShader(type);
-    _gl.shaderSource(shader, source);
-    _gl.compileShader(shader);
-    if (!_gl.getShaderParameter(shader, _gl.COMPILE_STATUS)) {
-      alert("ERROR IN " + typeString + " SHADER: " + _gl.getShaderInfoLog(shader));
+  function compile_shader(source, glType, typeString) {
+    const glShader = _gl.createShader(glType);
+    _gl.shaderSource(glShader, source);
+    _gl.compileShader(glShader);
+    if (!_gl.getShaderParameter(glShader, _gl.COMPILE_STATUS)) {
+      alert("ERROR IN " + typeString + " SHADER: " + _gl.getShaderInfoLog(glShader));
       console.log('Buggy shader source: \n', source);
       return false;
     }
-    return shader;
+    return glShader;
   };
 
   // build the shader program:
   function build_shaderProgram(shaderVertexSource, shaderFragmentSource, id) {
     // compile both shader separately:
     const GLSLprecision = 'precision lowp float;';
-    const shaderVertex = compile_shader(shaderVertexSource, _gl.VERTEX_SHADER, "VERTEX " + id);
-    const shaderFragment = compile_shader(GLSLprecision + shaderFragmentSource, _gl.FRAGMENT_SHADER, "FRAGMENT " + id);
+    const glShaderVertex = compile_shader(shaderVertexSource, _gl.VERTEX_SHADER, "VERTEX " + id);
+    const glShaderFragment = compile_shader(GLSLprecision + shaderFragmentSource, _gl.FRAGMENT_SHADER, "FRAGMENT " + id);
 
-    const shaderProgram = _gl.createProgram();
-    _gl.attachShader(shaderProgram, shaderVertex);
-    _gl.attachShader(shaderProgram, shaderFragment);
+    const glShaderProgram = _gl.createProgram();
+    _gl.attachShader(glShaderProgram, glShaderVertex);
+    _gl.attachShader(glShaderProgram, glShaderFragment);
 
     // start the linking stage:
-    _gl.linkProgram(shaderProgram);
-    const aPos = _gl.getAttribLocation(shaderProgram, "position");
+    _gl.linkProgram(glShaderProgram);
+    const aPos = _gl.getAttribLocation(glShaderProgram, "position");
     _gl.enableVertexAttribArray(aPos);
 
     return {
-      program: shaderProgram,
+      program: glShaderProgram,
       uniforms:{}
     };
   }
@@ -311,18 +311,6 @@ const WebARRocksFaceThreeHelper = (function(){
       spec.threeRenderer = _three.renderer;
       spec.threeComposer = _three.composer;
       spec.threeCamera = _three.camera;
-      
-      // build threeVideoTexture:
-      spec.threeVideoTexture = new THREE.DataTexture( new Uint8Array([255,0,0]), 1, 1, THREE.RGBFormat);
-      spec.threeVideoTexture.needsUpdate = true;
-      spec.threeVideoTexture.onUpdate = function(){
-        console.log('INFO in WebARRocksFaceThreeHelper: init threeVideoTexture');
-        _three.renderer.properties.update(spec.threeVideoTexture, '__webglTexture', _glVideoTexture);
-        spec.threeVideoTexture.magFilter = THREE.LinearFilter;
-        spec.threeVideoTexture.minFilter = THREE.LinearFilter;
-        spec.threeVideoTexture.mapping = THREE.EquirectangularReflectionMapping;
-        delete(spec.threeVideoTexture.onUpdate);
-      }      
       _spec.callbackReady(err, spec);
     }
   } //end callbackReady()
@@ -478,7 +466,7 @@ const WebARRocksFaceThreeHelper = (function(){
       const defaultSpecLM = {
         canvas: null,
         canvasId: 'WebARRocksFaceCanvas',
-        NNCpath: '../../neuralNets/',
+        NNCPath: '../../neuralNets/',
         callbackReady: callbackReady,
         callbackTrack: callbackTrack
       };
@@ -624,7 +612,7 @@ const WebARRocksFaceThreeHelper = (function(){
 
     change_NN: function(NNUrl){
       return WEBARROCKSFACE.update({
-        NNCpath: NNUrl
+        NNCPath: NNUrl
       }).then(function(){
         _landmarks.labels = WEBARROCKSFACE.get_LMLabels();        
       });

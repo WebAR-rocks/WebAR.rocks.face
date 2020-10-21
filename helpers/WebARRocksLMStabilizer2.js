@@ -120,6 +120,8 @@ const WebARRocksLMStabilizer = (function(){
         c: -1 // damping coefficient
       };
 
+      const _timer = (typeof(performance) === 'undefined') ? Date : performance;
+
       function allocate(lmCount){
         _lmCount = lmCount;
         
@@ -192,7 +194,7 @@ const WebARRocksLMStabilizer = (function(){
       const that = {
         update: function(landmarks, widthPx, heightPx){
           // time in seconds
-          const t = performance.now() / 1000;
+          const t = _timer.now() / 1000;
 
           // allocate if necessary:
           if (landmarks.length !== _lmCount){

@@ -12,10 +12,9 @@ const WebARRocksMirror = (function(){
     height: window.innerHeight,
 
     specWebARRocksFace: {
-      NNCpath: '../../neuralNets/NN_GLASSES_0.json',
+      NNCPath: '../../neuralNets/NN_GLASSES_0.json',
       scanSettings: { // harden detection:
-        threshold: 0.9,
-        dThreshold: 1.0
+        threshold: 0.9
       }
       //,maxFacesDetected: 2 // Experimental: add glasses on multiple detected faces
     },
@@ -119,7 +118,7 @@ const WebARRocksMirror = (function(){
       // the width of the head in the glasses 3D model is 2
       // and the width of the face in dev/face.obj is 154
       // so we need to scale the 3D model to 154/2 = 70
-      threeGlasses.scale.multiplyScalar(77);
+      threeGlasses.scale.multiplyScalar(85);
 
       // the origin of the glasses 3D model is the point supporting the glasses
       // (on the base of the nose)

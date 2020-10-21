@@ -40,16 +40,9 @@ const WebARRocksFaceEarrings3DHelper = (function(){
                     // 1 -> earring are displaed above the spotted position 
     k: 0.7,  // position is interpolated between 2 keypoints. this is the interpolation coefficient
              // 0-> earrings are at the bottom of the ear, 1-> earrings are further back
-    stabilizationSettings: {
-      LMmedianFilterLength: 5,              // Median filter window size
-      LMmedianFilterSkip: 1,                 // Remove this number of value in median filter window size, then average the remaining values
-      LMDisplacementRange: [0.7, 3],               // change LM position if displacement is larger than this value (relative). multiplied by 1/inputWidth
-      qualityGoodDetectionThreshold: 0.6    // good detection considered if quality is above this value
-    },
-
+    
     scanSettings: {
-      threshold: 0.7,
-      dThreshold: 0.9
+      threshold: 0.7
     },
 
     // callbacks
@@ -66,7 +59,6 @@ const WebARRocksFaceEarrings3DHelper = (function(){
   let _spec = null;
   const _three = {
     renderer: null,
-    renderSize: null,
     composer: null,
     scene: null,
     loadingManager: null,
@@ -136,15 +128,15 @@ const WebARRocksFaceEarrings3DHelper = (function(){
     _gl.enableVertexAttribArray(aPos);
   }
 
-  function compile_shader(source, type, typeString) {
-    const shader = _gl.createShader(type);
-    _gl.shaderSource(shader, source);
-    _gl.compileShader(shader);
-    if (!_gl.getShaderParameter(shader, _gl.COMPILE_STATUS)) {
-      throw new Error("ERROR IN " + typeString + " SHADER: " + _gl.getShaderInfoLog(shader));
+  function compile_shader(source, glType, typeString) {
+    const glShader = _gl.createShader(glType);
+    _gl.shaderSource(glShader, source);
+    _gl.compileShader(glShader);
+    if (!_gl.getShaderParameter(glShader, _gl.COMPILE_STATUS)) {
+      throw new Error("ERROR IN " + typeString + " SHADER: " + _gl.getShaderInfoLog(glShader));
       return false;
     }
-    return shader;
+    return glShader;
   };
 
 
@@ -342,8 +334,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       return new Promise(function(accept, reject){
         WEBARROCKSFACE.init({
           canvas: _spec.canvasFace,
-          NNCpath: _spec.NN,
-          stabilizationSettings: _spec.stabilizationSettings,
+          NNCPath: _spec.NN,
           scanSettings: _spec.scanSettings,
           callbackReady: function(err, spec){
             if (err){

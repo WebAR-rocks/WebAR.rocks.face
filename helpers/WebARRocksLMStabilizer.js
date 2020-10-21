@@ -237,13 +237,15 @@ const WebARRocksLMStabilizer = (function(){
       let _lmsVelocities = null, _lmsAccelerations = null;
       let _lmsPredictedPx = null, _lmsStabilized = null, _lmsStabilizedPx = null;
 
+      const _timer = (typeof(performance) === 'undefined') ? Date : performance;
+
       function allocate(lmCount){
         that.reset();
         _lmCount = lmCount;
         
         _lastPositionsPx = allocate_pointsLists(_spec.n, lmCount);
         _lastPredicteds = allocate_pointsLists(_spec.n, lmCount);
-        _lastTimestamps = new Float32Array(_spec.n);
+        _lastTimestamps = new Float64Array(_spec.n);
         
         _lmsPx = allocate_pointsList(lmCount);
         
@@ -268,7 +270,7 @@ const WebARRocksLMStabilizer = (function(){
       }
 
       function save(lmsPx){
-        const t = performance.now() / 1000; // timestamp in seconds
+        const t = _timer.now() / 1000; // timestamp in seconds
         _lastTimestamps[_cursor] = t;
         const cursorPrev = (_cursor === 0) ? _spec.n - 1 : _cursor - 1;
         const tPrev = (_counter === 0) ? t : _lastTimestamps[cursorPrev];

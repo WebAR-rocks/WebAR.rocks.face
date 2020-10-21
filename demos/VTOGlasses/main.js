@@ -9,7 +9,7 @@ function main(){
     canvasFace: canvasFace,
     canvasThree: canvasThree,
 
-    maxFacesDetected: 2,
+    maxFacesDetected: 1,
 
     // initial canvas dimensions:
     width: window.innerWidth,
@@ -31,7 +31,7 @@ function main(){
     envmapURL: "assets/envmaps/venice_sunset_1k.hdr",
 
     // lighting:
-    pointLightIntensity: 0.8, //intensity of the point light. Set to 0 to disable
+    pointLightIntensity: 0.5, //intensity of the point light. Set to 0 to disable
     pointLightY: 200, // larger -> move the pointLight to the top
     hemiLightIntensity: 0, // intensity of the hemispheric light. Set to 0 to disable (not really useful if we use an envmap)
 

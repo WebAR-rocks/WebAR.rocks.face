@@ -247,7 +247,7 @@ const WebARRocksFaceDebugHelper = (function(){
       const defaultSpecLM = {
         canvas: null,
         canvasId: 'WebARRocksFaceCanvas',
-        NNCpath: '../../neuralNets/',
+        NNCPath: '../../neuralNets/',
         callbackReady: callbackReady,
         callbackTrack: callbackTrack
       };
@@ -285,7 +285,7 @@ const WebARRocksFaceDebugHelper = (function(){
 
     change_NN: function(NNUrl){
       return WEBARROCKSFACE.update({
-        NNCpath: NNUrl
+        NNCPath: NNUrl
       }).then(function(){
         _landmarks.labels = WEBARROCKSFACE.get_LMLabels();
         init_drawLandmarks();

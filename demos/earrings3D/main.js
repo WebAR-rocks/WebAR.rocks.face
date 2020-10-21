@@ -47,7 +47,7 @@ function start(){
     canvasFace: _canvases.face,
     canvasThree: _canvases.three,
     debugOccluder: _settings.debugOccluder,
-    callbackReady: function(err, threeStuffs){
+    callbackReady: function(err){
       if (err){
         throw new Error(err);
       }
@@ -152,9 +152,9 @@ function set_shinyMetal(model){
 
 function set_occluders(){
   const occluderRightGeom = new THREE.CylinderGeometry(_settings.earsOccluderCylinderRadius, _settings.earsOccluderCylinderRadius, _settings.earsOccluderCylinderHeight);
-  const mat = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler().fromArray(_settings.earsOccluderCylinderEuler));
-  mat.setPosition(new THREE.Vector3().fromArray(_settings.earsOccluderCylinderOffset));
-  occluderRightGeom.applyMatrix4(mat);
+  const matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler().fromArray(_settings.earsOccluderCylinderEuler));
+  matrix.setPosition(new THREE.Vector3().fromArray(_settings.earsOccluderCylinderOffset));
+  occluderRightGeom.applyMatrix4(matrix);
   WebARRocksFaceEarrings3DHelper.add_threeEarsOccluders(occluderRightGeom);
 }
 

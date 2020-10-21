@@ -51,10 +51,15 @@ Here are the main features of the library:
 * `/helpers/`: scripts which can help you to use this library in some specific use cases,
 * `/neuralNets/`: neural networks models,
 * `/libs/`: 3rd party libraries and 3D engines used in the demos.
-
+* `/reactThreeFiberDemos`: Demos with Webpack4/NPM/React/Three Fiber
 
 
 ## Demonstrations
+
+The best demos have been ported to a modern front-end development environment (NPM / Webpack / React / Three Fiber / ES6) in  the [/reactThreeFiberDemos](/reactThreeFiberDemos) directory. This is a standalone directory.
+
+
+Here are the static javascript demos:
 
 * basic debug view (displays the face landmarks): [live demo](https://webar.rocks/demos/face/demos/basic/), [source code](/demos/basic/)
 * advanced debug view: [live demo](https://webar.rocks/demos/face/demos/debug/), [source code](/demos/debug/)
@@ -96,7 +101,7 @@ This canvas will be used by WebGL both for the computation and the 3D rendering.
 ```javascript
 WEBARROCKSFACE.init({
   canvasId: 'WebARRocksFaceCanvas',
-  NNCpath: '../../../neuralNets/NN_FACE_0.json', // neural network model
+  NNCPath: '../../../neuralNets/NN_FACE_0.json', // neural network model
   callbackReady: function(errCode, spec){
     if (errCode){
       console.log('AN ERROR HAPPENS. ERROR CODE =', errCode);

@@ -9,10 +9,9 @@ function main(){
     isGlasses: false,
 
     specWebARRocksFace: {
-      NNCpath: '../../neuralNets/NN_HEADPHONES_1.json',
+      NNCPath: '../../neuralNets/NN_HEADPHONES_1.json',
       scanSettings: { // harden detection:
-        threshold: 0.9,
-        dThreshold: 1.0
+        threshold: 0.9
       }
     },
 

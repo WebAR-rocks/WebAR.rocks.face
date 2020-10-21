@@ -456,7 +456,7 @@ const SHAPECHEEKS = {
 
 function start(){
   WebARRocksFaceShape2DHelper.init({
-    NNCpath: '../../neuralNets/NN_MAKEUP_0.json',
+    NNCPath: '../../neuralNets/NN_MAKEUP_0.json',
     canvasVideo: _canvasVideo,
     canvasAR:_canvasAR,
     shapes: [SHAPELIPS, SHAPEEYES, SHAPECHEEKS]
