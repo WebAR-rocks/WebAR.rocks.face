@@ -1,7 +1,7 @@
 # JavaScript/WebGL lightweight and robust face tracking library based on landmark detection and tracking
 
 
-This JavaScript library detects and tracks the face in real time from the webcam video feed captured with WebRTC. Then it is possible to overlay 3D content for augmented reality applications. This library is lightweight and it does not include any 3D engine or third party library. We want to keep it framework agnostic so the outputs of the library are raw: if the a face is detected or not, the position and the scale of the detected face and the rotation Euler angles.
+This JavaScript library detects and tracks the face in real time from the webcam video feed captured with WebRTC. Then it is possible to overlay 3D content for augmented reality applications. This library is lightweight and it does not include any 3D engine or third party library. We want to keep it framework agnostic so the outputs of the library are raw: if a face is detected or not, the position and the scale of the detected face and the rotation Euler angles.
 
 Facial landmarks positions are also among the neuron network outputs. There is still a balance between the number of detected keypoints and the accuracy/weights of the neuron network: the fewer keypoints, the best is the detection accuracy because the neuron network can be more focused.
 
@@ -13,7 +13,7 @@ Facial landmarks positions are also among the neuron network outputs. There is s
 * [Demonstrations](#demonstrations)
 * [Specifications](#specifications)
   * [Get started](#get-started)
-  * [Optionnal init arguments](#optionnal-init-arguments)
+  * [Optional init arguments](#optionnal-init-arguments)
   * [Error codes](#error-codes)
   * [The returned objects](#the-returned-objects)
   * [Miscellaneous methods](#miscellaneous-methods)
@@ -82,7 +82,7 @@ Here are the static javascript demos:
 ## Specifications
 
 ### Get started
-The best way to get started is to take a look at our [boilerplate demo](/demos/basic/). It uses some handful helpers from [/helpers path](/helpers/). Here we describes the initialization of the core library without the helpers. But we strongly advise to use them.
+The best way to get started is to take a look at our [boilerplate demo](/demos/basic/). It uses some handful helpers from [/helpers path](/helpers/). Here we describe the initialization of the core library without the helpers. But we strongly advise to use them.
 
 
 On your HTML page, you first need to include the main script between the tags `<head>` and `</head>`:
@@ -121,7 +121,7 @@ WEBARROCKSFACE.init({
 
 
 
-### Optionnal init arguments
+### Optional init arguments
 * `<integer> maxFacesDetected`: Only for multiple face detection - maximum number of faces which can be detected and tracked. Should be between `1` (no multiple detection) and `8`. See [Multiple face section](#multiple-faces) for more details,
 * `<integer> animateDelay`: With this statement you can set accurately the number of milliseconds during which the browser wait at the end of the rendering loop before starting another detection. If you use the canvas of this API as a secondary element (for example in *PACMAN* or *EARTH NAVIGATION* demos) you should set a small `animateDelay` value (for example 2 milliseconds) in order to avoid rendering lags.
 * `<function> onWebcamAsk`: Function launched just before asking for the user to allow its webcam sharing,
@@ -146,8 +146,8 @@ WEBARROCKSFACE.init({
   'rotate': 0         // rotation in degrees possible values: 0,90,-90,180
 },
 ```
-* `<dict> scanSettings`: override face scan settings - see `set_scanSettings(...)` method for more information.
-* `<dict> stabilizationSettings`: override tracking stabilization settings - see `set_stabilizationSettings(...)` method for more information.
+* `<dict> scanSettings`: overrides face scan settings - see `set_scanSettings(...)` method for more information.
+* `<dict> stabilizationSettings`: overrides tracking stabilization settings - see `set_stabilizationSettings(...)` method for more information.
 
 
 If the user has a mobile device in portrait display mode, the width and height of these parameters are automatically inverted for the first camera request. If it does not succeed, we invert the width and height.
@@ -210,7 +210,7 @@ After the initialization (ie after that `callbackReady` is launched ) , these me
 
 * `WEBARROCKSFACE.set_scanSettings(<object> scanSettings)`: Override scan settings. `scanSettings` is a dictionnary with the following properties:
   * `<float> threshold`: detection threshold, between `0` and `1`. Default value is `0.75`. You can decrease it if you want to make the detection more sensitive (but it will increase the false positive detections),
-  * `<int> nDetectsPerLoop`: specify the number of detection per drawing loop. `0` for adaptative value. Default: `0`
+  * `<int> nDetectsPerLoop`: specify the number of detections per drawing loop. `0` for adaptative value. Default: `0`
   * `<int> nScaleLevels`: number of detection steps for the scale. Default: `3`,
   * `[<float>, <float>, <float>] overlapFactors`: overlap between 2 scan positions for `X`, `Y` and `scale`. Default: `[2, 2, 3]`,
   * `<float> scale0Factor`: scale factor for the largest scan level. Default is `0.8`.
