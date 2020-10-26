@@ -1,7 +1,7 @@
 # JavaScript/WebGL lightweight and robust face tracking library based on landmark detection and tracking
 
 
-This JavaScript library detects and tracks the face in real time from the webcam video feed captured with WebRTC. Then it is possible to overlay 3D content for augmented reality applications. This library is lightweight and it does not include any 3D engine or third party library. We want to keep it framework agnostic so the outputs of the library are raw: if the a face is detected or not, the position and the scale of the detected face and the rotation Euler angles.
+This JavaScript library detects and tracks the face in real time from the webcam video feed captured with WebRTC. Then it is possible to overlay 3D content for augmented reality applications. This library is lightweight and it does not include any 3D engine or third party library. We want to keep it framework agnostic so the outputs of the library are raw: if a face is detected or not, the position and the scale of the detected face and the rotation Euler angles.
 
 Facial landmarks positions are also among the neuron network outputs. There is still a balance between the number of detected keypoints and the accuracy/weights of the neuron network: the fewer keypoints, the best is the detection accuracy because the neuron network can be more focused.
 
@@ -13,7 +13,7 @@ Facial landmarks positions are also among the neuron network outputs. There is s
 * [Demonstrations](#demonstrations)
 * [Specifications](#specifications)
   * [Get started](#get-started)
-  * [Optionnal init arguments](#optionnal-init-arguments)
+  * [Optional init arguments](#optionnal-init-arguments)
   * [Error codes](#error-codes)
   * [The returned objects](#the-returned-objects)
   * [Miscellaneous methods](#miscellaneous-methods)
@@ -82,7 +82,7 @@ Here are the static javascript demos:
 ## Specifications
 
 ### Get started
-The best way to get started is to take a look at our [boilerplate demo](/demos/basic/). It uses some handful helpers from [/helpers path](/helpers/). Here we describes the initialization of the core library without the helpers. But we strongly advise to use them.
+The best way to get started is to take a look at our [boilerplate demo](/demos/basic/). It uses some handful helpers from [/helpers path](/helpers/). Here we describe the initialization of the core library without the helpers. But we strongly advise to use them.
 
 
 On your HTML page, you first need to include the main script between the tags `<head>` and `</head>`:
@@ -121,7 +121,7 @@ WEBARROCKSFACE.init({
 
 
 
-### Optionnal init arguments
+### Optional init arguments
 * `<integer> maxFacesDetected`: Only for multiple face detection - maximum number of faces which can be detected and tracked. Should be between `1` (no multiple detection) and `8`. See [Multiple face section](#multiple-faces) for more details,
 * `<integer> animateDelay`: With this statement you can set accurately the number of milliseconds during which the browser wait at the end of the rendering loop before starting another detection. If you use the canvas of this API as a secondary element (for example in *PACMAN* or *EARTH NAVIGATION* demos) you should set a small `animateDelay` value (for example 2 milliseconds) in order to avoid rendering lags.
 * `<function> onWebcamAsk`: Function launched just before asking for the user to allow its webcam sharing,
@@ -146,8 +146,8 @@ WEBARROCKSFACE.init({
   'rotate': 0         // rotation in degrees possible values: 0,90,-90,180
 },
 ```
-* `<dict> scanSettings`: override face scan settings - see `set_scanSettings(...)` method for more information.
-* `<dict> stabilizationSettings`: override tracking stabilization settings - see `set_stabilizationSettings(...)` method for more information.
+* `<dict> scanSettings`: overrides face scan settings - see `set_scanSettings(...)` method for more information.
+* `<dict> stabilizationSettings`: overrides tracking stabilization settings - see `set_stabilizationSettings(...)` method for more information.
 
 
 If the user has a mobile device in portrait display mode, the width and height of these parameters are automatically inverted for the first camera request. If it does not succeed, we invert the width and height.
@@ -161,7 +161,7 @@ The initialization function ( `callbackReady` in the code snippet ) will be call
 * `"GL_INCOMPATIBLE"`: WebGL is not available, or this WebGL configuration is not enough (there is no WebGL2, or there is WebGL1 without OES_TEXTURE_FLOAT or OES_TEXTURE_HALF_FLOAT extension),
 * `"ALREADY_INITIALIZED"`: the API has been already initialized,
 * `"NO_CANVASID"`: no canvas ID was specified,
-* `"INVALID_CANVASID"`: cannot found the `<canvas>` element in the DOM,
+* `"INVALID_CANVASID"`: cannot find the `<canvas>` element in the DOM,
 * `"INVALID_CANVASDIMENSIONS"`: the dimensions `width` and `height` of the canvas are not specified,
 * `"WEBCAM_UNAVAILABLE"`: cannot get access to the webcam (the user has no webcam, or it has not accepted to share the device, or the webcam is already busy),
 * `"GLCONTEXT_LOST"`: The WebGL context was lost. If the context is lost after the initialization, the `callbackReady` function will be launched a second time with this value as error code,
@@ -196,35 +196,35 @@ After the initialization (ie after that `callbackReady` is launched ) , these me
 
 * `WEBARROCKSFACE.resize()`: should be called after resizing the `<canvas>` element to adapt the cut of the video,
 
-* `WEBARROCKSFACE.toggle_pause(<boolean> isPause)`: pause/resume,
+* `WEBARROCKSFACE.toggle_pause(<boolean> isPause)`: pauses/resumes,
 
-* `WEBARROCKSFACE.set_animateDelay(<integer> delay)`: Change the `animateDelay` (see `init()` arguments),
+* `WEBARROCKSFACE.set_animateDelay(<integer> delay)`: Changes the `animateDelay` (see `init()` arguments),
 
-* `WEBARROCKSFACE.set_inputTexture(<WebGLTexture> tex, <integer> width, <integer> height)`: Change the video input by a WebGL Texture instance. The dimensions of the texture, in pixels, should be provided,
+* `WEBARROCKSFACE.set_inputTexture(<WebGLTexture> tex, <integer> width, <integer> height)`: Changes the video input by a WebGL Texture instance. The dimensions of the texture, in pixels, should be provided,
 
-* `WEBARROCKSFACE.reset_inputTexture()`: Come back to the user's video as input texture,
+* `WEBARROCKSFACE.reset_inputTexture()`: Comes back to the user's video as input texture,
 
 * `WEBARROCKSFACE.get_videoDevices(<function> callback)`: Should be called before the `init` method. 2 arguments are provided to the callback function:
   * `<array> mediaDevices`: an array with all the devices founds. Each device is a javascript object having a `deviceId` string attribute. This value can be provided to the `init` method to use a specific webcam. If an error happens, this value is set to `false`,
   * `<string> errorLabel`: if an error happens, the label of the error. It can be: `NOTSUPPORTED`, `NODEVICESFOUND` or `PROMISEREJECTED`.
 
-* `WEBARROCKSFACE.set_scanSettings(<object> scanSettings)`: Override scan settings. `scanSettings` is a dictionnary with the following properties:
+* `WEBARROCKSFACE.set_scanSettings(<object> scanSettings)`: Overrides scan settings. `scanSettings` is a dictionnary with the following properties:
   * `<float> threshold`: detection threshold, between `0` and `1`. Default value is `0.75`. You can decrease it if you want to make the detection more sensitive (but it will increase the false positive detections),
-  * `<int> nDetectsPerLoop`: specify the number of detection per drawing loop. `0` for adaptative value. Default: `0`
+  * `<int> nDetectsPerLoop`: specifies the number of detections per drawing loop. `0` for adaptative value. Default: `0`
   * `<int> nScaleLevels`: number of detection steps for the scale. Default: `3`,
-  * `[<float>, <float>, <float>] overlapFactors`: overlap between 2 scan positions for `X`, `Y` and `scale`. Default: `[2, 2, 3]`,
+  * `[<float>, <float>, <float>] overlapFactors`: overlaps between 2 scan positions for `X`, `Y` and `scale`. Default: `[2, 2, 3]`,
   * `<float> scale0Factor`: scale factor for the largest scan level. Default is `0.8`.
 
-* `WEBARROCKSFACE.set_stabilizationSettings(<object> stabilizationSettings)`: Override detection stabilization settings. The output of the neural network is always noisy, so we need to stabilize it using a floating average to avoid shaking artifacts. The internal algorithm computes first a stabilization factor `k` between `0` and `1`. If `k==0.0`, the detection is bad and we favor responsivity against stabilization. It happens when the user is moving quickly, rotating the head or when the detection is bad. On the contrary, if `k` is close to `1`, the detection is nice and the user does not move a lot so we can stabilize a lot. `stabilizationSettings` is a dictionnary with the following properties:
+* `WEBARROCKSFACE.set_stabilizationSettings(<object> stabilizationSettings)`: Overrides detection stabilization settings. The output of the neural network is always noisy, so we need to stabilize it using a floating average to avoid shaking artifacts. The internal algorithm computes first a stabilization factor `k` between `0` and `1`. If `k==0.0`, the detection is bad and we favor responsivity against stabilization. It happens when the user is moving quickly, rotating the head or when the detection is bad. On the contrary, if `k` is close to `1`, the detection is nice and the user does not move a lot so we can stabilize a lot. `stabilizationSettings` is a dictionnary with the following properties:
   * `[<float> minValue, <float> maxValue] translationFactorRange`: multiply `k` by a factor `kTranslation` depending on the translation speed of the head (relative to the viewport). `kTranslation=0` if `translationSpeed<minValue` and `kTranslation=1` if `translationSpeed>maxValue`. The regression is linear. Default value: `[0.0015, 0.005]`,
   * `[<float> minValue, <float> maxValue] rotationFactorRange`: analogous to `translationFactorRange` but for rotation speed. Default value: `[0.12, 0.25]`,
   * `[<float> minValue, <float> maxValue] qualityFactorRange`: analogous to `translationFactorRange` but for the head detection coefficient. Default value: `[0.85, 0.95]`,
-  * `[<float> minValue, <float> maxValue] alphaRange`: it specify how to apply `k`. Between 2 successive detections, we blend the previous `detectState` values with the current detection values using a mixing factor `alpha`. `alpha=<minValue>` if `k<0.0` and `alpha=<maxValue>` if `k>1.0`. Between the 2 values, the variation is quadratic. Default value is `[0.05, 0.9]`,
+  * `[<float> minValue, <float> maxValue] alphaRange`: it specifies how to apply `k`. Between 2 successive detections, we blend the previous `detectState` values with the current detection values using a mixing factor `alpha`. `alpha=<minValue>` if `k<0.0` and `alpha=<maxValue>` if `k>1.0`. Between the 2 values, the variation is quadratic. Default value is `[0.05, 0.9]`,
 It only applies to global pose stabilization. Landmarks are stabilized using helpers (`/helpers/WebARRocksLMStabilizer<X>.js`).
 
-* `WEBARROCKSFACE.update_videoElement(<video> vid, <function|False> callback)`: change the video element used for the face detection (which can be provided via `VIDEOSETTINGS.videoElement`) by another video element. A callback function can be called when it is done.
+* `WEBARROCKSFACE.update_videoElement(<video> vid, <function|False> callback)`: changes the video element used for the face detection (which can be provided via `VIDEOSETTINGS.videoElement`) by another video element. A callback function can be called when it is done.
 
-* `WEBARROCKSFACE.destroy()`: Clean both graphic memory and JavaScript memory, uninit the library. After that you need to init the library again. A `Promise` is returned.
+* `WEBARROCKSFACE.destroy()`: Cleans both graphic memory and JavaScript memory, uninit the library. After that you need to init the library again. A `Promise` is returned.
 
 
 ### Multiple faces
