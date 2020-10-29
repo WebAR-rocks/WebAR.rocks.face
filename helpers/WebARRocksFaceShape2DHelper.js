@@ -26,6 +26,7 @@ const WebARRocksFaceShape2DHelper = (function(){
   let _videoElement = null, _videoElementPreviousTime = -1;
   let _gl = null, _glVideoTexture = null;  // gl context is for the AR canvas
   let _glv = null, _glvVideoTexture = null; // glv is for video and computation
+  let _videoTransformMat2 = null;
 
   let _stabilizer = null;
 
@@ -107,6 +108,7 @@ const WebARRocksFaceShape2DHelper = (function(){
 
   function create_glVideoTexture(){
     const glTexture = _gl.createTexture();
+    _gl.activeTexture(_gl.TEXTURE0);
     _gl.bindTexture(_gl.TEXTURE_2D, glTexture);
     _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
     _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
@@ -119,6 +121,9 @@ const WebARRocksFaceShape2DHelper = (function(){
 
 
   function update_glVideoTexture(){
+    if (_glVideoTexture === null) {
+      return;
+    }
     _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
     if (_videoElement.isFakeVideo) { // WECHAT tweak
       _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _videoElement.videoWidth, _videoElement.videoHeight, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, _videoElement.arrayBuffer);
@@ -128,16 +133,16 @@ const WebARRocksFaceShape2DHelper = (function(){
   }
 
 
-  function compile_shader(gl, source, type, typeString) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      alert("ERROR IN " + typeString + " SHADER: " + gl.getShaderInfoLog(shader));
+  function compile_shader(gl, source, glType, typeString) {
+    const glShader = gl.createShader(glType);
+    gl.shaderSource(glShader, source);
+    gl.compileShader(glShader);
+    if (!gl.getShaderParameter(glShader, gl.COMPILE_STATUS)) {
+      alert("ERROR IN " + typeString + " SHADER: " + gl.getShaderInfoLog(glShader));
       console.log('Buggy shader source: \n', source);
-      return false;
+      return null;
     }
-    return shader;
+    return glShader;
   };
 
 
@@ -145,20 +150,20 @@ const WebARRocksFaceShape2DHelper = (function(){
   function build_shaderProgram(gl, shaderVertexSource, shaderFragmentSource, id) {
     // compile both shader separately:
     const GLSLprecision = 'precision lowp float;';
-    const shaderVertex = compile_shader(gl, shaderVertexSource, gl.VERTEX_SHADER, "VERTEX " + id);
-    const shaderFragment = compile_shader(gl, GLSLprecision + shaderFragmentSource, gl.FRAGMENT_SHADER, "FRAGMENT " + id);
+    const glShaderVertex = compile_shader(gl, shaderVertexSource, gl.VERTEX_SHADER, "VERTEX " + id);
+    const glShaderFragment = compile_shader(gl, GLSLprecision + shaderFragmentSource, gl.FRAGMENT_SHADER, "FRAGMENT " + id);
 
-    const shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, shaderVertex);
-    gl.attachShader(shaderProgram, shaderFragment);
+    const glShaderProgram = gl.createProgram();
+    gl.attachShader(glShaderProgram, glShaderVertex);
+    gl.attachShader(glShaderProgram, glShaderFragment);
 
     // start the linking stage:
-    gl.linkProgram(shaderProgram);
-    const aPos = gl.getAttribLocation(shaderProgram, "position");
+    gl.linkProgram(glShaderProgram);
+    const aPos = gl.getAttribLocation(glShaderProgram, "position");
     gl.enableVertexAttribArray(aPos);
 
     return {
-      program: shaderProgram,
+      program: glShaderProgram,
       uniforms: {},
       attributes: {
         position: aPos
@@ -171,9 +176,10 @@ const WebARRocksFaceShape2DHelper = (function(){
   function init_shps(){
     // create video shp, used to display the video on the canvas:
     _shps.drawVideo = build_shaderProgram(_glv, 'attribute vec2 position;\n\
+      uniform mat2 transform;\n\
       varying vec2 vUV;\n\
       void main(void){\n\
-        vUV = 0.5*position+vec2(0.5,0.5);\n\
+        vUV = 0.5 + transform * position;\n\
         gl_Position = vec4(position, 0., 1.);\n\
       }'
       ,
@@ -183,6 +189,7 @@ const WebARRocksFaceShape2DHelper = (function(){
         gl_FragColor = texture2D(uun_source, vUV);\n\
       }',
       'DRAW VIDEO');
+    _shps.drawVideo.uniforms.transformMat2 = _glv.getUniformLocation(_shps.drawVideo.program, 'transform');
   }
 
 
@@ -231,7 +238,7 @@ const WebARRocksFaceShape2DHelper = (function(){
         void main(void){\n\
           gl_Position = vec4(position, 0., 1.);\n\
           vec2 uvCentered = videoUVScale * position;\n\
-          vUV = 0.5 + vec2(1., -1.) * uvCentered;\n\
+          vUV = 0.5 + uvCentered;\n\
           ' + iValsShaderSources.vertex + '\n\
         }';
       const GLSLTexturesSamplers = shapeSpecs.textures.map(function(textureSpec){
@@ -500,6 +507,7 @@ const WebARRocksFaceShape2DHelper = (function(){
     
     // use the head draw shader program and sync uniforms:
     _glv.useProgram(_shps.drawVideo.program);
+    _glv.uniformMatrix2fv(_shps.drawVideo.uniforms.transformMat2, false, _videoTransformMat2);
     _glv.activeTexture(_glv.TEXTURE0);
     _glv.bindTexture(_glv.TEXTURE_2D, _glvVideoTexture);
     
@@ -780,6 +788,7 @@ const WebARRocksFaceShape2DHelper = (function(){
             console.log('INFO in WebARRocksFaceShape2DHelper: WEBARROCKSFACE is initialized' )
             _glv = objs.GL;
             _glvVideoTexture = objs.videoTexture;
+            _videoTransformMat2 = objs.videoTransformMat2;
 
             _videoElement = objs.video;
             _glVideoTexture = create_glVideoTexture();

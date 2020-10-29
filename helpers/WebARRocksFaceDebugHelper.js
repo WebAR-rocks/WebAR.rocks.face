@@ -25,7 +25,7 @@ const WebARRocksFaceDebugHelper = (function(){
     copy: null
   };
 
-  let _gl = null, _cv = null, _glVideoTexture = null;
+  let _gl = null, _cv = null, _glVideoTexture = null, _videoTransformMat2 = null;
   let _videoElement = null;
 
   const _landmarks = {
@@ -42,37 +42,37 @@ const WebARRocksFaceDebugHelper = (function(){
   const _stabilizers = [];
 
   // compile a shader:
-  function compile_shader(source, type, typeString) {
-    const shader = _gl.createShader(type);
-    _gl.shaderSource(shader, source);
-    _gl.compileShader(shader);
-    if (!_gl.getShaderParameter(shader, _gl.COMPILE_STATUS)) {
-      alert("ERROR IN " + typeString + " SHADER: " + _gl.getShaderInfoLog(shader));
+  function compile_shader(source, glType, typeString) {
+    const glShader = _gl.createShader(glType);
+    _gl.shaderSource(glShader, source);
+    _gl.compileShader(glShader);
+    if (!_gl.getShaderParameter(glShader, _gl.COMPILE_STATUS)) {
+      alert("ERROR IN " + typeString + " SHADER: " + _gl.getShaderInfoLog(glShader));
       console.log('Buggy shader source: \n', source);
-      return false;
+      return null;
     }
-    return shader;
+    return glShader;
   };
 
   // build the shader program:
   function build_shaderProgram(shaderVertexSource, shaderFragmentSource, id) {
     // compile both shader separately:
     const GLSLprecision = 'precision lowp float;';
-    const shaderVertex = compile_shader(shaderVertexSource, _gl.VERTEX_SHADER, "VERTEX " + id);
-    const shaderFragment = compile_shader(GLSLprecision + shaderFragmentSource, _gl.FRAGMENT_SHADER, "FRAGMENT " + id);
+    const glShaderVertex = compile_shader(shaderVertexSource, _gl.VERTEX_SHADER, "VERTEX " + id);
+    const glShaderFragment = compile_shader(GLSLprecision + shaderFragmentSource, _gl.FRAGMENT_SHADER, "FRAGMENT " + id);
 
-    const shaderProgram = _gl.createProgram();
-    _gl.attachShader(shaderProgram, shaderVertex);
-    _gl.attachShader(shaderProgram, shaderFragment);
+    const glShaderProgram = _gl.createProgram();
+    _gl.attachShader(glShaderProgram, glShaderVertex);
+    _gl.attachShader(glShaderProgram, glShaderFragment);
 
     // start the linking stage:
-    _gl.linkProgram(shaderProgram);
-    const aPos = _gl.getAttribLocation(shaderProgram, "position");
+    _gl.linkProgram(glShaderProgram);
+    const aPos = _gl.getAttribLocation(glShaderProgram, "position");
     _gl.enableVertexAttribArray(aPos);
 
     return {
-      program: shaderProgram,
-      uniforms:{}
+      program: glShaderProgram,
+      uniforms: {}
     };
   }
   
@@ -108,6 +108,7 @@ const WebARRocksFaceDebugHelper = (function(){
     _gl = spec.GL;
     _cv = spec.canvasElement;
     _glVideoTexture = spec.videoTexture;
+    _videoTransformMat2 = spec.videoTransformMat2;
     _landmarks.labels = spec.landmarksLabels;
     _videoElement = spec.video;
 
@@ -144,7 +145,8 @@ const WebARRocksFaceDebugHelper = (function(){
 
   function draw_video(){
     // use the head draw shader program and sync uniforms:
-    _gl.useProgram(_shps.copy.program);
+    _gl.useProgram(_shps.copyCrop.program);
+    _gl.uniformMatrix2fv(_shps.copyCrop.uniforms.transformMat2, false, _videoTransformMat2);
     _gl.activeTexture(_gl.TEXTURE0);
     _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
 
@@ -203,10 +205,11 @@ const WebARRocksFaceDebugHelper = (function(){
   function init_shps(){
     
     // create copy shp, used to display the video on the canvas:
-    _shps.copy = build_shaderProgram('attribute vec2 position;\n\
+    _shps.copyCrop = build_shaderProgram('attribute vec2 position;\n\
+      uniform mat2 transform;\n\
       varying vec2 vUV;\n\
       void main(void){\n\
-        vUV = 0.5 * position + vec2(0.5,0.5);\n\
+        vUV = 0.5 + transform * position;\n\
         gl_Position = vec4(position, 0., 1.);\n\
       }'
       ,
@@ -215,7 +218,8 @@ const WebARRocksFaceDebugHelper = (function(){
       void main(void){\n\
         gl_FragColor = texture2D(uun_source, vUV);\n\
       }',
-      'COPY');
+      'COPY CROP');
+    _shps.copyCrop.uniforms.transformMat2 = _gl.getUniformLocation(_shps.copyCrop.program, 'transform');
 
     // create LM display shader program:
     const shaderVertexSource = "attribute vec2 position;\n\

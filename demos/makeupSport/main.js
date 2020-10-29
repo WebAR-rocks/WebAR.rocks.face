@@ -544,6 +544,7 @@ const SHAPEFACE = {
     \n\
     // DEBUG ZONE:\n\
     //gl_FragColor = vec4(0., 1., 0., 1.);\n\
+    //gl_FragColor = vec4(1.5*videoColor, 1.0);\n\
   }",
   
   textures: [{

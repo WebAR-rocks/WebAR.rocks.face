@@ -67,6 +67,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
   let _gl = null, _glVideoTexture = null, _glShpDrawVideo = null;
   let _earLeft = null, _earRight = null;
   let _stabilizer = null;
+  let _shpDrawVideoUniformTransform2D = null, _videoTransformMat2 = null;
 
   const _headPose = {
     euler: null,
@@ -86,6 +87,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
   function draw_video(){
     // use the head draw shader program and sync uniforms:
     _gl.useProgram(_glShpDrawVideo);
+    _gl.uniformMatrix2fv(_shpDrawVideoUniformTransform2D, false, _videoTransformMat2);
     _gl.activeTexture(_gl.TEXTURE0);
     _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
     
@@ -98,12 +100,13 @@ const WebARRocksFaceEarrings3DHelper = (function(){
   // build shader program to display video:
   function init_drawVideoShp(){
     const shaderVertexSource = 'attribute vec2 position;\n\
+      uniform mat2 transform;\n\
       varying vec2 vUV;\n\
       void main(void){\n\
-        vUV = 0.5*position+vec2(0.5,0.5);\n\
+        vUV = 0.5 + transform * position;\n\
         gl_Position = vec4(position, 0., 1.);\n\
       }'; 
-    const shaderVertex = compile_shader(shaderVertexSource, _gl.VERTEX_SHADER, "VERTEX DRAWVIDEO");
+    const glShaderVertex = compile_shader(shaderVertexSource, _gl.VERTEX_SHADER, "VERTEX DRAWVIDEO");
     
     const shaderFragmentSource =  'precision lowp float;\n\
       uniform sampler2D uun_source;\n\
@@ -111,15 +114,16 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       void main(void){\n\
         gl_FragColor = texture2D(uun_source, vUV);\n\
       }'
-    const shaderFragment = compile_shader(shaderFragmentSource, _gl.FRAGMENT_SHADER, "FRAGMENT DRAWVIDEO");
+    const glShaderFragment = compile_shader(shaderFragmentSource, _gl.FRAGMENT_SHADER, "FRAGMENT DRAWVIDEO");
 
     _glShpDrawVideo = _gl.createProgram();
-    _gl.attachShader(_glShpDrawVideo, shaderVertex);
-    _gl.attachShader(_glShpDrawVideo, shaderFragment);
+    _gl.attachShader(_glShpDrawVideo, glShaderVertex);
+    _gl.attachShader(_glShpDrawVideo, glShaderFragment);
 
     // start the linking stage:
     _gl.linkProgram(_glShpDrawVideo);
     const aPos = _gl.getAttribLocation(_glShpDrawVideo, "position");
+    _shpDrawVideoUniformTransform2D = _gl.getUniformLocation(_glShpDrawVideo, 'transform');
     _gl.enableVertexAttribArray(aPos);
   }
 
@@ -129,7 +133,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
     _gl.compileShader(glShader);
     if (!_gl.getShaderParameter(glShader, _gl.COMPILE_STATUS)) {
       throw new Error("ERROR IN " + typeString + " SHADER: " + _gl.getShaderInfoLog(glShader));
-      return false;
+      return null;
     }
     return glShader;
   };
@@ -310,6 +314,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
 
             _gl = spec.GL;
             _glVideoTexture = spec.videoTexture;
+            _videoTransformMat2 = spec.videoTransformMat2;
             _videoElement = spec.video;
             init_drawVideoShp();
             init_three();
