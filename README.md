@@ -175,9 +175,11 @@ We detail here the arguments of the callback functions like `callbackReady` or `
 The initialization callback function ( `callbackReady` in the code snippet ) is called with a second argument, `spec`, if there is no error. `spec` is a dictionnary having these properties:
 * `GL`: the WebGL context. The rendering 3D engine should use this WebGL context,
 * `canvasElement`: the `<canvas>` element,
-* `videoTexture`: a WebGL texture displaying the webcam video. It matches the dimensions of the canvas. It can be used as a background,
-* `maxFacesDetected`: the maximum number of detected faces,
-* `landmarksLabels`: the list of the landmark labels. This list depends on the neural network model.
+* `videoTexture`: a WebGL texture displaying the webcam video. It has the same resolution as the camera video,
+* `[<float>, <float>, <float>, <float>]` videoTransformMat2: flatten 2x2 matrix encoding a scaling and a rotation. We should apply this matrix to viewport coordinates to render `videoTexture` in the viewport,
+* `<HTMLVideoElement> video`: the video used as source for the webgl texture `videoTexture`,
+* `<int> maxFacesDetected`: the maximum number of detected faces,
+* `[<string> landmarksLabels]`: the list of the landmark labels. This list depends on the neural network model.
 
 
 #### The detection state
