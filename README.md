@@ -65,7 +65,7 @@ Here are the static JavaScript demos:
 * advanced debug view: [live demo](https://webar.rocks/demos/face/demos/debug/), [source code](/demos/debug/)
 * earrings VTO 2D: [live demo](https://webar.rocks/demos/face/demos/earrings2D/), [source code](/demos/earrings2D/)
 * earrings VTO 3D: [live demo](https://webar.rocks/demos/face/demos/earrings3D/), [source code](/demos/earrings3D/)
-* glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTOGlasses/), [source code](/demos/VTOGlasses/)
+* glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTOGlasses/), [source code and specific documentation](/demos/VTOGlasses/),
 * headphones/helmet VTO: [live demo](https://webar.rocks/demos/face/demos/VTOHelmet/), [source code](/demos/VTOHelmet/)
 * necklace VTO: [live demo](https://webar.rocks/demos/face/demos/VTONecklace/), [source code](/demos/VTONecklace/)
 * 3D flexible mask: [live demo](https://webar.rocks/demos/face/demos/flexibleMask/), [source code](/demos/flexibleMask/)
