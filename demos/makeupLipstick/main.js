@@ -231,7 +231,7 @@ const SHAPELIPS = {
 
 function start(){
   WebARRocksFaceShape2DHelper.init({
-    NNCPath: '../../neuralNets/NN_LIPSTICK_6.json',
+    NNCPath: '../../neuralNets/NN_LIPS_7.json',
     canvasVideo: _canvasVideo,
     canvasAR:_canvasAR,
     shapes: [ SHAPELIPS ]
