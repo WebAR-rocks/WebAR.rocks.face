@@ -17,7 +17,8 @@ const WebARRocksFaceShape2DHelper = (function(){
     NNCPath: null,
     canvasVideo: null,
     canvasAR: null,
-    shapes: []
+    shapes: [],
+    videoURL: null
   };
   let _spec = null;
   let _shapes = null;
@@ -763,6 +764,46 @@ const WebARRocksFaceShape2DHelper = (function(){
   }
 
 
+  function start(domVideo){    
+    return new Promise(function(accept, reject){
+      const initSettings = {
+        canvas: _spec.canvasVideo,
+        NNCPath: _spec.NNCPath,
+        scanSettings: {
+          'threshold': 0.7
+        },
+        callbackReady: function(err, objs){
+          if (err){
+            reject(err);
+            return;
+          }
+
+          console.log('INFO in WebARRocksFaceShape2DHelper: WEBARROCKSFACE is initialized' )
+          _glv = objs.GL;
+          _glvVideoTexture = objs.videoTexture;
+          _videoTransformMat2 = objs.videoTransformMat2;
+
+          _videoElement = objs.video;
+          _glVideoTexture = create_glVideoTexture();
+
+          init_shps();
+          Promise.all(_spec.shapes.map(build_shape.bind(null, objs.landmarksLabels))).then(function(shapes){
+            _shapes = shapes;
+            accept();
+          });
+        },
+
+        callbackTrack: callbackTrack
+      };
+
+      if (domVideo){
+        initSettings.videoSettings = {videoElement: domVideo};
+      }
+
+      WEBARROCKSFACE.init(initSettings);
+    }); // end returned promise
+  } //end start()
+
   // public methods:
   const that = {
     init: function(spec){
@@ -772,37 +813,33 @@ const WebARRocksFaceShape2DHelper = (function(){
 
       init_gl();
 
-      return new Promise(function(accept, reject){
-        WEBARROCKSFACE.init({
-          canvas: _spec.canvasVideo,
-          NNCPath: _spec.NNCPath,
-          scanSettings: {
-            'threshold': 0.7
-          },
-          callbackReady: function(err, objs){
-            if (err){
-              reject(err);
-              return;
-            }
-
-            console.log('INFO in WebARRocksFaceShape2DHelper: WEBARROCKSFACE is initialized' )
-            _glv = objs.GL;
-            _glvVideoTexture = objs.videoTexture;
-            _videoTransformMat2 = objs.videoTransformMat2;
-
-            _videoElement = objs.video;
-            _glVideoTexture = create_glVideoTexture();
-
-            init_shps();
-            Promise.all(_spec.shapes.map(build_shape.bind(null, objs.landmarksLabels))).then(function(shapes){
-              _shapes = shapes;
+      if (_spec.videoURL){
+        const domVideo = document.createElement('video');
+        domVideo.setAttribute('src', _spec.videoURL);
+        domVideo.setAttribute('autoplay', true);
+        domVideo.setAttribute('loop', true);
+        domVideo.setAttribute('playsinline', true); // for IOS
+        document.body.appendChild(domVideo);
+        return new Promise(function(accept, reject){
+          domVideo.oncanplay = function(e){
+            domVideo.oncanplay = null;
+            let isPlaying = false;
+            const onUserEvent = function(){
+              if (isPlaying) return;
+              domVideo.style.display = 'none';
+              domVideo.play();
               accept();
-            });
-          },
-
-          callbackTrack: callbackTrack
-        }); // end WEBARROCKSFACE.init call
-      }); // end returned promise
+              isPlaying = true;
+            }
+            start(domVideo).then(function(){
+              window.addEventListener('click', onUserEvent); // desktop
+              window.addEventListener('touchstart', onUserEvent); // mobile
+            }).catch(reject);
+          }
+        });        
+      } else {
+        return start(null);
+      }
     }, //end init()
 
     set_uniformValue(shapeName, uniformName, value){

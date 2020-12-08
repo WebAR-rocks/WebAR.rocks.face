@@ -81,7 +81,6 @@ const WebARRocksFaceThreeHelper = (function(){
   };
  
   const _computePose = {    
-    isCenterObjPoints: true,
     objPoints: [], // will be sorted by solver
     objPointsMean: null,
     imgPointsLMIndices: [], // will be sorted by solver
@@ -169,7 +168,7 @@ const WebARRocksFaceThreeHelper = (function(){
         return objPointsPositions[label].slice(0);
       }); 
 
-    if (_computePose.isCenterObjPoints){
+    if (_spec.isCenterObjPoints){
       // compute mean:
       const mean = [0, 0, 0];        
       _computePose.objPoints.forEach(function(pt){
@@ -409,7 +408,7 @@ const WebARRocksFaceThreeHelper = (function(){
       vf.applyMatrix4(_three.matMov);
       if (vf.z > 0){
         faceSlot.faceFollowerParent.matrix.copy(_three.matMov);
-        if (_computePose.isCenterObjPoints){
+        if (_spec.isCenterObjPoints){
           const mean = _computePose.objPointsMean;
           faceSlot.faceFollower.position.fromArray(mean).multiplyScalar(-1);
         }
@@ -446,6 +445,14 @@ const WebARRocksFaceThreeHelper = (function(){
     _shps.copyCrop.uniforms.transformMat2 = _gl.getUniformLocation(_shps.copyCrop.program, 'transform');
   }
 
+  function start(domVideo){
+    if (domVideo){
+      _spec.spec.videoSettings = {videoElement: domVideo};
+    }
+
+    WEBARROCKSFACE.init(_spec.spec);
+  }
+
   
   const that = {
     init: function(spec){
@@ -455,6 +462,7 @@ const WebARRocksFaceThreeHelper = (function(){
         // pose computation (SolvePnP):
         solvePnPObjPointsPositions: _defaultSolvePnPObjPointsPositions,
         solvePnPImgPointsLabels: _defaultSolvePnPImgPointsLabel,
+        isCenterObjPoints: true,
 
         // THREE specifics:
         canvasThree: null,
@@ -463,7 +471,10 @@ const WebARRocksFaceThreeHelper = (function(){
 
         // callbacks:
         callbackReady: null,
-        callbackTrack: null
+        callbackTrack: null,
+
+        // use video file instead of camera video stream:
+        videoURL: null
       }, spec);
       
       // init WEBAR.rocks.face:WEBARROCKSFACE
@@ -478,7 +489,32 @@ const WebARRocksFaceThreeHelper = (function(){
       if (_spec.spec.canvas === null){
         _spec.spec.canvas = document.getElementById(_spec.spec.canvasId);
       }
-      WEBARROCKSFACE.init(_spec.spec);
+      if (_spec.videoURL){
+        const domVideo = document.createElement('video');
+        domVideo.setAttribute('src', _spec.videoURL);
+        domVideo.setAttribute('autoplay', true);
+        domVideo.setAttribute('loop', true);
+        domVideo.setAttribute('playsinline', true); // for IOS
+        document.body.appendChild(domVideo);
+        return new Promise(function(accept, reject){
+          domVideo.oncanplay = function(e){
+            domVideo.oncanplay = null;
+            let isPlaying = false;
+            const onUserEvent = function(){
+              if (isPlaying) return;
+              domVideo.style.display = 'none';
+              domVideo.play();
+              accept();
+              isPlaying = true;              
+            }
+            start(domVideo);
+            window.addEventListener('click', onUserEvent); // desktop
+            window.addEventListener('touchstart', onUserEvent); // mobile
+          }
+        });        
+      } else {
+        return start(null);
+      }      
     },
 
     get_facePointPositions: function(){
@@ -545,8 +581,8 @@ const WebARRocksFaceThreeHelper = (function(){
       }[extension];
 
       new loader(threeLoadingManager).load(occluderURL, function(occluder){
-        that.add_occluder(occluder, isDebug, occluderMesh);
         if (typeof(callback)!=='undefined' && callback) callback(occluderMesh);
+        that.add_occluder(occluder, isDebug, occluderMesh);
       });
       return occluderMesh;
     },

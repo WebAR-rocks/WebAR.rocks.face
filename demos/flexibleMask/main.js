@@ -96,6 +96,7 @@ function main(){
     },
     canvas: canvasFace,
     canvasThree: canvasThree,
+    isCenterObjPoints: false,
     
     callbackTrack: function(detectStates, landmarksStabilized){
       if (_flexibleMaskMesh === null){

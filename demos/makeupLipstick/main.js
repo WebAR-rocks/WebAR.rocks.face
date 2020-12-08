@@ -1,6 +1,14 @@
 let _canvasVideo = null, _canvasAR = null;
+let _selectedDOMColorButton = null;
+
+// tweak contours coefficients - 0 -> no tweak:
+const mouthWiden = 0.01;
+const upperLipOut = 0.01;
+const lowerLipOut = 0.01;
 
 const SHAPELIPS = {
+  name: 'LIPS',
+
   // list of the points involved in this shape.
   // each point is given as its label
   // the label depends on the used neural network
@@ -153,11 +161,11 @@ const SHAPELIPS = {
         12
       ],
       displacements: [ // displacements, relative to perimeter:
-        0.00,
-        0.0, 0.0, -0.015, 0.0, 0.0, // exterior
+        mouthWiden,
+        upperLipOut, upperLipOut, upperLipOut - 0.015, upperLipOut, upperLipOut, // exterior
         0.00, 0,
         0.01, 0.015, 0.01, // interior
-        0
+        mouthWiden
       ]
     },
     { // lower lip:
@@ -172,7 +180,7 @@ const SHAPELIPS = {
         0,
         0.015, 0.02, 0.015,
         0, 0.0,
-        0,0,0,0,0,
+        lowerLipOut, lowerLipOut, lowerLipOut, lowerLipOut, lowerLipOut,
         0.0
       ]
     }
@@ -199,9 +207,8 @@ const SHAPELIPS = {
 
   // color with smooth border:
   GLSLFragmentSource: "\n\
-    const vec2 ALPHARANGE = vec2(0.1, 0.9);\n\
+    const vec2 ALPHARANGE = vec2(0.1, 0.6);\n\
     const vec3 LUMA = 1.3 * vec3(0.299, 0.587, 0.114);\n\
-    const vec3 BASECOLOR = vec3(1.0, 0., 0.3);\n\
     \n\
     float linStep(float edge0, float edge1, float x){\n\
       float val = (x - edge0) / (edge1 - edge0);\n\
@@ -217,16 +224,22 @@ const SHAPELIPS = {
       // computer alpha:\n\
       float alpha = 1.0; // no border smoothing\n\
       alpha *= linStep(-1.0, -0.95, abs(iVal)); // interior\n\
-      alpha *= linStep(1.0, 0.6, abs(iVal)); // exterior smoothing\n\
+      alpha *= 0.5 + 0.5 * linStep(1.0, 0.6, abs(iVal)); // exterior smoothing\n\
       float alphaClamped = ALPHARANGE.x + (ALPHARANGE.y - ALPHARANGE.x) * alpha;\n\
       \n\
       // mix colors:\n\
-      vec3 color = videoColorGs * BASECOLOR;\n\
-      gl_FragColor = vec4(color*alpha, alphaClamped);\n\
+      vec3 color = videoColorGs * lipstickColor;\n\
+      gl_FragColor = vec4(color*alphaClamped, alphaClamped);\n\
       \n\
-      //gl_FragColor = vec4(alpha, alpha, alphaClamped, 1.0); // for debugging\n\
-      //gl_FragColor = vec4(0., 1., 0., 1.); // for debugging\n\
-    }" //*/
+      // DEBUG ZONE:\n\
+      //gl_FragColor = vec4(0., alpha, 0., 1.0);\n\
+      //gl_FragColor = vec4(alpha, alpha, alphaClamped, 1.0);\n\
+      //gl_FragColor = vec4(0., 1., 0., 1.);\n\
+    }",
+    uniforms: [{
+      name: 'lipstickColor',
+      value: [1, 0, 0.3]
+    }]
 }; //end SHAPELIPS
 
 function start(){
@@ -235,6 +248,7 @@ function start(){
     canvasVideo: _canvasVideo,
     canvasAR:_canvasAR,
     shapes: [ SHAPELIPS ]
+    //,videoURL: '../../../../testVideos/1032526922-hd.mov'
   }).then(function(){
 
   }).catch(function(err){
@@ -248,10 +262,22 @@ function main(){
   _canvasAR = document.getElementById('WebARRocksFaceCanvasAR');
   _canvasVideo = document.getElementById('WebARRocksFaceCanvasVideo');
   
+  _selectedDOMColorButton = document.getElementById('colorRed');
+
   WebARRocksResizer.size_canvas({
     canvas: _canvasVideo,
     overlayCanvas: [_canvasAR],
     callback: start,
     isFullScreen: true
   });
+}
+
+
+
+function change_lipstickColor(color, event){
+  _selectedDOMColorButton.classList.remove('controlButtonSelected');
+  const domLink = event.target;
+  domLink.classList.add('controlButtonSelected');
+  _selectedDOMColorButton = domLink;
+  WebARRocksFaceShape2DHelper.set_uniformValue('LIPS', 'lipstickColor', color);
 }

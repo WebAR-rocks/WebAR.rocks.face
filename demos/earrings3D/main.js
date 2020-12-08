@@ -52,6 +52,7 @@ function start(){
         throw new Error(err);
       }
     }
+    //,videoURL: '../../../../testVideos/1032526922-hd.mov'    
   }).then(function(three){
     
     _three = three;

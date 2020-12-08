@@ -3,6 +3,10 @@
 const _spec = {
   maskURL: 'assets/foolMask.glb',
   maskARMetadataURL: 'assets/foolMaskARMetadata.json',
+
+  occluderURL: 'assets/occluder.glb',
+  occluderScale: 1.1,
+  occluderDebug: false,
  
   // debug flags:
   debugCube: false //display a cube tracking the head
@@ -66,7 +70,9 @@ function build_scene(threeInstances){
   });
 
   // add the occluder:
-  WebARRocksFaceThreeHelper.add_occluderFromFile('assets/occluder.glb', null, threeLoadingManager);
+  WebARRocksFaceThreeHelper.add_occluderFromFile(_spec.occluderURL, function(occluder){
+    occluder.scale.multiplyScalar(_spec.occluderScale);
+  }, threeLoadingManager, _spec.occluderDebug);
 
   // add tone mapping:
   _threeInstances.threeRenderer.toneMapping = THREE.ACESFilmicToneMapping;

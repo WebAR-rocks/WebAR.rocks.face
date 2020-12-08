@@ -23,6 +23,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
     canvasFace: null,
     canvasThree: null,
     NN: '../../neuralNets/NN_EARS_2.json',
+    videoURL: null, // use a video file instead of camera
 
     earringsScale: 1,
     earsDistance: 22, // in cm, mean distance between the 2 ears
@@ -328,6 +329,37 @@ const WebARRocksFaceEarrings3DHelper = (function(){
   } //end callbackTrack()
 
 
+  function start(domVideo){
+    return new Promise(function(accept, reject){
+      const initSettings = {
+        canvas: _spec.canvasFace,
+        NNCPath: _spec.NN,
+        scanSettings: _spec.scanSettings,
+        callbackReady: function(err, spec){
+          if (err){
+            reject(err);
+            return;
+          }
+
+          _gl = spec.GL;
+          _glVideoTexture = spec.videoTexture;
+          _videoTransformMat2 = spec.videoTransformMat2;
+          _videoElement = spec.video;
+          init_drawVideoShp();
+          init_three();
+          init_landmarks();
+
+          accept(_three);
+        },
+        callbackTrack: callbackTrack,
+      };
+      if (domVideo){
+        initSettings.videoSettings = {videoElement: domVideo};
+      }
+      WEBARROCKSFACE.init(initSettings);
+    }); //end returned promise
+  }
+
   // public methods:
   const that = {
     init: function(spec){
@@ -335,30 +367,34 @@ const WebARRocksFaceEarrings3DHelper = (function(){
 
       _stabilizer = WebARRocksLMStabilizer.instance({});
 
-      return new Promise(function(accept, reject){
-        WEBARROCKSFACE.init({
-          canvas: _spec.canvasFace,
-          NNCPath: _spec.NN,
-          scanSettings: _spec.scanSettings,
-          callbackReady: function(err, spec){
-            if (err){
-              reject(err);
-              return;
-            }
-
-            _gl = spec.GL;
-            _glVideoTexture = spec.videoTexture;
-            _videoTransformMat2 = spec.videoTransformMat2;
-            _videoElement = spec.video;
-            init_drawVideoShp();
-            init_three();
-            init_landmarks();
-
-            accept(_three);
-          },
-          callbackTrack: callbackTrack,
-        });
-      }); //end returned promise
+      if (_spec.videoURL){
+        const domVideo = document.createElement('video');
+        domVideo.setAttribute('src', _spec.videoURL);
+        domVideo.setAttribute('autoplay', true);
+        domVideo.setAttribute('loop', true);
+        domVideo.setAttribute('playsinline', true); // for IOS
+        document.body.appendChild(domVideo);
+        return new Promise(function(accept, reject){
+          domVideo.oncanplay = function(e){
+            domVideo.oncanplay = null;
+            start(domVideo).then(function(three){
+              let isPlaying = false;
+              const onUserEvent = function(){
+                if (isPlaying) return;
+                domVideo.style.display = 'none';
+                domVideo.play();
+                accept(three);
+                isPlaying = true;
+              }
+              window.addEventListener('click', onUserEvent); // desktop
+              window.addEventListener('touchstart', onUserEvent); // mobile      
+            }).catch(reject);
+          }
+        });        
+      } else {
+        return start(null);
+      }
+      
     },
 
     get_sourceWidth: function(){

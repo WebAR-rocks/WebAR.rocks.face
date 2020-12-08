@@ -7,6 +7,8 @@ const WebARRocksMirror = (function(){
     canvasFace: null,
     canvasThree: null,
 
+    videoURL: null, // use a video file instead of camera video
+
     // initial dimensions:
     width: window.innerWidth,
     height: window.innerHeight,
@@ -311,6 +313,7 @@ const WebARRocksMirror = (function(){
           spec: _spec.specWebARRocksFace,
           canvas: _spec.canvasFace,
           canvasThree: _spec.canvasThree,
+          videoURL: _spec.videoURL,
           
           isPostProcessing: (_spec.bloom) ? true : false,
           taaLevel: _spec.taaLevel,

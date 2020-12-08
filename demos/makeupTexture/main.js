@@ -578,7 +578,7 @@ const SHAPEFACE = {
   
   textures: [{
     id: 'color',
-    src: 'assets/makeup.png'
+    src: 'assets/makeup2.png'
   }]
 }; // END SHAPEFACE
 
@@ -589,6 +589,7 @@ function start(){
     canvasVideo: _canvasVideo,
     canvasAR:_canvasAR,
     shapes: [SHAPEFACE]
+    //,videoURL: '../../../../testVideos/1032526922-hd.mov'
   }).then(function(){
     console.log('READY');
   }).catch(function(err){

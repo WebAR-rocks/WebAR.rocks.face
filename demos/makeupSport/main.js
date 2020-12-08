@@ -560,6 +560,7 @@ function start(){
     canvasVideo: _canvasVideo,
     canvasAR:_canvasAR,
     shapes: [SHAPEFACE]
+    //,videoURL: '../../../../testVideos/1032526922-preview.mp4'
   }).then(function(){
     console.log('READY');
   }).catch(function(err){
