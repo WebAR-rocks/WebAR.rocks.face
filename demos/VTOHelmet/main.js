@@ -8,6 +8,8 @@ function main(){
   WebARRocksMirror.init({
     isGlasses: false,
 
+    //videoURL: '../../../../testVideos/1056010826-hd.mp4', // use a video from a file instead of camera video
+
     specWebARRocksFace: {
       NNCPath: '../../neuralNets/NN_HEADPHONES_1.json',
       scanSettings: { // harden detection:

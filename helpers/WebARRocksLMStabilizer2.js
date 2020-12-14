@@ -87,9 +87,12 @@ const WebARRocksLMStabilizer = (function(){
     return Math.sqrt(dx*dx + dy*dy);
   }
 
+  function size(u){
+    return Math.sqrt(u[0]*u[0] + u[1]*u[1]);
+  }
+
   const superThat = {
     instance: function(spec){
-
 
       const _spec = Object.assign({
         dampingRatio: 0.6, // 1 -> critically damped, >1 -> overdamped
@@ -97,7 +100,9 @@ const WebARRocksLMStabilizer = (function(){
         estimateFreq: true, // dynamically estimates filtering frequency in a crappy way. 
         estimateFreqFactor: 0.07,
         dtMax: 0.3, // in seconds   
-        nSimulationLoops: 3 // number of simulation loops
+        nSimulationLoops: 3, // number of simulation loops
+        strengthStallThreshold: 2000, // disable stabilization is strength is > this value
+        strengthStallThresholdHysteresis: 1000
       }, spec);
 
       const _dims = {
@@ -109,6 +114,7 @@ const WebARRocksLMStabilizer = (function(){
       let _lmsPx = null;
       let _lmsVelocities = null;
       let _lmsStabilized = null, _lmsStabilizedPx = null;
+      let _isStalled = false;
 
       const _force = [0, 0], _posDiff = [0, 0];
 
@@ -157,6 +163,7 @@ const WebARRocksLMStabilizer = (function(){
       }
 
       function compute_stabilized(){
+        let _meanForce = 0;
         for (let i=0; i<_lmCount; ++i){
           const velocity = _lmsVelocities[i];
           const pos = _lmsStabilizedPx[i];
@@ -176,6 +183,12 @@ const WebARRocksLMStabilizer = (function(){
             // add damping force:
             fma_vec2(_force, velocity, -_dampingParams.c);
           
+            // accumulate forces
+            // only for the first round:
+            if (j === 0){
+              _meanForce += size(_force);
+            }
+
             const accl = _force; // because m = 1 (mass)
             
             // update velocity:
@@ -183,12 +196,34 @@ const WebARRocksLMStabilizer = (function(){
 
             // update position:
             fma_vec2(pos, velocity, dt);
+
+            copy_vec2(pos, _lmsStabilized[i]);          
           }
-          
+        } // end loop on landmarks
+
+
+        // determine if we have stalled or not:
+        _meanForce /= _lmCount;
+        let isResetStabilization = false;
+        if (!_isStalled && _meanForce > _spec.strengthStallThreshold + _spec.strengthStallThresholdHysteresis){
+          _isStalled = true;
+          console.log('INFO in WebARRocksLMStabilizer2: stalled!');
+        } else if (_isStalled && _meanForce < _spec.strengthStallThreshold - _spec.strengthStallThresholdHysteresis){
+          _isStalled = false;
+          isResetStabilization = true;
+          console.log('INFO in WebARRocksLMStabilizer2: unstalled!');
+        } 
+
+
+        for (let i=0; i<_lmCount; ++i){
+          if (isResetStabilization){
+            copy_vec2(_lmsPx[i], _lmsStabilized[i]);
+            reset_vec2(_lmsVelocities[i]);
+          }
+
           // convert from pixels to normalized viewport coordinates:
-          copy_vec2(pos, _lmsStabilized[i]);
           scale_vec2(_lmsStabilized[i], 2 / _dims.widthPx, 2 / _dims.heightPx);
-        }        
+        }      
       }
 
       const that = {
@@ -233,7 +268,7 @@ const WebARRocksLMStabilizer = (function(){
 
           _lastTimestamp = t;
           ++_counter;
-          return _lmsStabilized;
+          return (_isStalled ? landmarks : _lmsStabilized);
         },
 
         reset: function(){

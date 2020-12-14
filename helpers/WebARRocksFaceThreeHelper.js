@@ -494,20 +494,29 @@ const WebARRocksFaceThreeHelper = (function(){
         domVideo.setAttribute('src', _spec.videoURL);
         domVideo.setAttribute('autoplay', true);
         domVideo.setAttribute('loop', true);
+        domVideo.setAttribute('preload', true);
+        domVideo.setAttribute('muted', 'muted');
         domVideo.setAttribute('playsinline', true); // for IOS
+
+        // append the video to the DOM for debug:
         document.body.appendChild(domVideo);
+        domVideo.style.maxWidth = '50vw';
+        domVideo.style.border = "1px solid red";
+
         return new Promise(function(accept, reject){
           domVideo.oncanplay = function(e){
+            console.log('INFO in WebARRocksFaceThreeHelper: video file can play');
             domVideo.oncanplay = null;
             let isPlaying = false;
+            // the user needs to interact with the DOM to start the video (browser security)
             const onUserEvent = function(){
+              domVideo.play();
               if (isPlaying) return;
               domVideo.style.display = 'none';
-              domVideo.play();
-              accept();
-              isPlaying = true;              
-            }
-            start(domVideo);
+              isPlaying = true;
+              start(domVideo);
+              accept();              
+            }            
             window.addEventListener('click', onUserEvent); // desktop
             window.addEventListener('touchstart', onUserEvent); // mobile
           }
