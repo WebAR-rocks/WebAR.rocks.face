@@ -10,7 +10,7 @@ import BackButton from '../components/BackButton.js'
 import VTOButton from '../components/VTOButton.js'
 
 // import neural network model:
-import NN from '../contrib/WebARRocksFace/neuralNets/NN_NECKLACE_1.json'
+import NN from '../contrib/WebARRocksFace/neuralNets/NN_NECKLACE_2.json'
 
 // import WebARRocksMirror, a helper
 // This helper is not minified, feel free to customize it (and submit pull requests bro):
