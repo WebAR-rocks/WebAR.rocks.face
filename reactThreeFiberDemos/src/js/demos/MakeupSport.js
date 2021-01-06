@@ -4,7 +4,7 @@ import React, { Component, useRef, useState, Suspense } from 'react'
 import BackButton from '../components/BackButton.js'
 
 // import neural network model:
-import NN from '../contrib/WebARRocksFace/neuralNets/NN_FULLMAKEUP_0.json'
+import NN from '../contrib/WebARRocksFace/neuralNets/NN_FULLMAKEUP_2.json'
 
 // import Shape2D helper:
 import shape2DHelper from '../contrib/WebARRocksFace/helpers/WebARRocksFaceShape2DHelper.js'
