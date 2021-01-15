@@ -19,6 +19,7 @@ const WebARRocksFaceDebugHelper = (function(){
   };
 
   let _spec = null;
+  let _pointSize = _settings.pointSize;
 
   const _shps = { // shader programs
     drawPoints: null,
@@ -187,6 +188,7 @@ const WebARRocksFaceDebugHelper = (function(){
 
     // draw landmarks:
     _gl.useProgram(_shps.drawPoints.program);
+    _gl.uniform1f(_shps.drawPoints.uniforms.pointSize, _pointSize);
 
     _gl.bindBuffer(_gl.ARRAY_BUFFER, _drawLandmarks.glVerticesVBO);
     _gl.bufferData(_gl.ARRAY_BUFFER, _drawLandmarks.vertices, _gl.DYNAMIC_DRAW);
@@ -223,8 +225,9 @@ const WebARRocksFaceDebugHelper = (function(){
 
     // create LM display shader program:
     const shaderVertexSource = "attribute vec2 position;\n\
+      uniform float pointSize;\n\
       void main(void) {\n\
-        gl_PointSize = " + _settings.pointSize.toFixed(1) + ";\n\
+        gl_PointSize = pointSize;\n\
         gl_Position = vec4(position, 0., 1.);\n\
       } ";
     // display lime color:
@@ -233,6 +236,7 @@ const WebARRocksFaceDebugHelper = (function(){
       }";
 
     _shps.drawPoints = build_shaderProgram(shaderVertexSource, shaderFragmentSource, 'DRAWPOINT');    
+    _shps.drawPoints.uniforms.pointSize = _gl.getUniformLocation(_shps.drawPoints.program, 'pointSize');
   }
 
 
@@ -285,7 +289,11 @@ const WebARRocksFaceDebugHelper = (function(){
 
     get_viewAspectRatio: function(){
       return that.get_viewWidth() / that.get_viewHeight();
-    },   
+    },
+
+    set_pointSize: function(ps){
+      _pointSize = ps;
+    },
 
     change_NN: function(NNUrl){
       return WEBARROCKSFACE.update({
@@ -303,7 +311,7 @@ const WebARRocksFaceDebugHelper = (function(){
           WEBARROCKSFACE.resize();
           accept();
         });
-      });      
+      });
     },
 
     toggle_stabilization: function(isStabilized){

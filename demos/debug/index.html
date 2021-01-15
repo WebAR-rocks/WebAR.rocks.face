@@ -39,6 +39,16 @@
       select, input, button {
         cursor: pointer;
       }
+
+      .pointSizeInput {
+        width: 50px;
+        text-align: right;
+      }
+
+      #WebARRocksFaceCanvas {
+        min-width: 100vmin;
+        width: auto;
+      }
     </style>
 
   </head>
@@ -69,6 +79,11 @@
 
       <hr/>
       Stabilize: <input type='checkbox' onclick='toggle_stabilization(event)' checked='true' />
+
+      <br/>
+      PointSize (in px): <input type='text' value='5' class='pointSizeInput' onchange='change_pointSize(event)' />
+
+
 
     </div>
   </body>

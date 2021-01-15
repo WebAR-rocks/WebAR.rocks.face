@@ -26,6 +26,11 @@ function start(){
   })
 }
 
+function change_pointSize(e){
+  const v = parseInt(e.target.value);
+  WebARRocksFaceDebugHelper.set_pointSize(v);
+}
+
 function change_NN(e){
   const newNNURL = e.target.value;
   if (newNNURL===_state.NNURL || _state.appState !== _appStates.idle){
@@ -63,7 +68,7 @@ function change_video(e){
     newVideo.play();  
     WebARRocksFaceDebugHelper.update_video(newVideo).then(function(){
       _state.video = newVideo;
-      _state.appState = _appStates.idle;      
+      _state.appState = _appStates.idle;
     });
   });
 }
