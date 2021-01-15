@@ -298,7 +298,8 @@ const WebARRocksFaceDebugHelper = (function(){
 
     update_video: function(video){
       return new Promise(function(accept, reject){
-        WEBARROCKSFACE.update_videoElement(video, function(){
+        WEBARROCKSFACE.update_videoElement(video, function(glVideoTexture){
+          _glVideoTexture = glVideoTexture;
           WEBARROCKSFACE.resize();
           accept();
         });
