@@ -101,7 +101,7 @@ const WebARRocksLMStabilizer = (function(){
         estimateFreqFactor: 0.07,
         dtMax: 0.3, // in seconds   
         nSimulationLoops: 3, // number of simulation loops
-        strengthStallThreshold: 2000, // disable stabilization is strength is > this value
+        strengthStallThreshold: 5000, // disable stabilization is strength is > this value
         strengthStallThresholdHysteresis: 1000
       }, spec);
 

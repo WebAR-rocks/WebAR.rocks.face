@@ -21,7 +21,7 @@ const WebARRocksFaceThreeHelper = (function(){
   };
 
 
-  const _defaultSolvePnPObjPointsPositions = { // 3d positions, got using Blender in edit mode and opening dev/face.obj
+  /*const _defaultSolvePnPObjPointsPositions = { // 3d positions, got using Blender in edit mode and opening dev/face.obj
                         // the value added as comment is the point indice
     'leftEyeCtr': [33.7,37.9,45.9], // 6022
     'rightEyeCtr':[-33.7,37.9,45.9], // 5851
@@ -58,9 +58,57 @@ const WebARRocksFaceThreeHelper = (function(){
     "leftEyeBrowInt": [15, 55.4, 51.2], // 3164
     "rightEyeBrowInt": [-15, 55.4, 51.2], // 4928
     
-    'chin':  [0, -71, 91] // 2395  //*/
-  };
-  const _defaultSolvePnPImgPointsLabel = ['chin', 'leftEarBottom', 'rightEarBottom', 'noseOuter', 'leftEyeExt', 'rightEyeExt'];
+    'chin':  [0, -71, 91] // 2395
+  };  //*/
+
+  const _defaultSolvePnPObjPointsPositions = { // 3d positions, got using Blender in edit mode and opening dev/face.obj
+                        // the value added as comment is the point indice
+    'leftEyeCtr': [33.7,37.9,45.9], // 6022
+    'rightEyeCtr':[-33.7,37.9,45.9], // 5851
+
+    'leftEyeInt': [16,36,40], // 6026
+    'rightEyeInt':[-16,36,40], // 5855
+
+    'leftEyeExt': [44,34,38],  // 1808
+    'rightEyeExt':[-44,34,38], // 2214
+
+    'leftEyeBot': [33,31,45], // 2663
+    'rightEyeBot':[-33,31,45], // 4462
+
+    'leftEarBottom': [76,-18.6,-18], // 65
+    'rightEarBottom': [-76,-18.6,-18], // 245
+
+    'leftEarEarring': [81, -37, -24.8], // 3874
+    'rightEarEarring': [-81, -37, -24.8], // 5625
+    
+    'noseLeft': [21,-0.1,67], // 1791
+    'noseRight': [-21,-0.1,67], // 2198
+
+    'noseBottom': [0, -0.6, 82], // 468
+    'noseOuter': [0, 16, 93], // 707
+
+    "mouthLeft":  [27, -29.9, 70.8], // 32
+    "mouthRight": [-27, -29.9, 70.8], // 209
+
+    "upperLipBot": [0, -24, 83.5], // 3072
+    "upperLipTop": [0, -17.2, 86.3],// 595
+    "lowerLipTop": [0, -26, 84.3],// 627
+    "lowerLipBot": [0, -34, 89.6],// 2808
+
+    "leftEyeBrowInt": [15, 55.4, 51.2], // 3164
+    "rightEyeBrowInt": [-15, 55.4, 51.2], // 4928
+    
+    'chin':  [0, -71, 91] // 2395
+  };  //*/
+
+  const _defaultSolvePnPImgPointsLabels = [
+    'chin',
+    'leftEarBottom',
+    'rightEarBottom',
+    'noseOuter',
+    'leftEyeExt',
+    'rightEyeExt'
+  ];
     
   const _deg2rad = Math.PI / 180;
   let _cameraFoVY = -1;
@@ -461,7 +509,7 @@ const WebARRocksFaceThreeHelper = (function(){
 
         // pose computation (SolvePnP):
         solvePnPObjPointsPositions: _defaultSolvePnPObjPointsPositions,
-        solvePnPImgPointsLabels: _defaultSolvePnPImgPointsLabel,
+        solvePnPImgPointsLabels: _defaultSolvePnPImgPointsLabels,
         isCenterObjPoints: true,
 
         // THREE specifics:

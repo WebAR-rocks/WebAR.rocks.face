@@ -557,10 +557,10 @@ const SHAPEFACE = {
         0,0,0,0,0,
         0.0
       ]
-    },
+    }
 
     // right top eye higher:
-    {
+    /*,{
       points: [20,21,22,23,24,25],
       displacements: [0.07,0.06,0.02,0.05,0,0,0,0]
     },
@@ -568,7 +568,7 @@ const SHAPEFACE = {
     {
       points: [30,31,32,33,34,35],
       displacements: [0.07,0.06,0.02,0.05,0,0,0,0]
-    }
+    }*/
   ],
 
   // RENDERING:
