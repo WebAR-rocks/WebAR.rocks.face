@@ -15,7 +15,7 @@
 
 
 import * as THREE from 'three'
-import WebARRocksLMStabilizer from './WebARRocksLMStabilizer2.js'
+import WebARRocksLMStabilizer from './stabilizers/WebARRocksLMStabilizer2.js'
 
 
 

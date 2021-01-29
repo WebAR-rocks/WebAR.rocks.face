@@ -14,7 +14,7 @@
  */
 
 import WEBARROCKSFACE from '../dist/WebARRocksFace.module.js';
-import WebARRocksLMStabilizer from './WebARRocksLMStabilizer2.js';
+import WebARRocksLMStabilizer from './stabilizers/WebARRocksLMStabilizer2.js';
 
 
 const WebARRocksFaceShape2DHelper = (function(){
