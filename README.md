@@ -249,6 +249,14 @@ or using `require`.
 ## Hosting
 You should host the content of this repository using a HTTPS static server.
 
+Example:
+```
+npm install -g tiny-server
+tiny-server .
+```
+
+The above will give you a directory list. Then navigate to the relevant demo
+
 Be careful to enable gzip HTTP/HTTPS compression for JSON and JS files. Indeed, the neuron network JSON file, `neuralNets/NN_<xxx>.json` is quite heavy, but very well compressed with GZIP. You can check the gzip compression of your server [here](https://checkgzipcompression.com/).
 
 The neuron network file, `neuralNets/NN_<xxx>.json` is loaded using an ajax `XMLHttpRequest` after calling `WEBARROCKSFACE.init()`. This loading is proceeded after the user has accepted to share its camera. So we won't load this quite heavy file if the user refuses to share it or if there is no webcam available. The loading can be faster if you systematically preload `neuralNets/NN_<xxx>.json` using a service worker or a simple raw `XMLHttpRequest` just after the HTML page loading. Then the file will be already in the browser cache when WebAR.rocks.face will request it.
