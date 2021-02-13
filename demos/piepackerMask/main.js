@@ -2,29 +2,28 @@
 const _spec = {
   // debug mask:
   flexibleMaskURL: "assets/The_Hood.glb",
-  flexibleMaskPoints: null, // use default points
-  kpInfluenceDecay: [80, 120],
+  // flexibleMaskPoints: null, // use default points
+  // kpInfluenceDecay: [80, 120],
   //*/
 
   // Tiger mask:
-  /*
-  flexibleMaskURL: "assets/tiger.glb",
-  flexibleMaskPoints: {
-    leftEyeExt: [43.89, 46.21, 66.01],
-    rightEyeExt: [-43.89, 46.21, 66.01],
+  // flexibleMaskURL: "assets/tiger.glb",
+  // flexibleMaskPoints: {
+  //   leftEyeExt: [43.89, 46.21, 66.01],
+  //   rightEyeExt: [-43.89, 46.21, 66.01],
 
-    mouthLeft: [22.53, -25.82, 88.17],
-    mouthRight: [-22.53, -25.82, 88.17],
+  //   mouthLeft: [22.53, -25.82, 88.17],
+  //   mouthRight: [-22.53, -25.82, 88.17],
 
-    upperLipBot: [-0.03, -26.01, 94.81],
-    lowerLipBot: [-0.03, -30.7, 94.04],
+  //   upperLipBot: [-0.03, -26.01, 94.81],
+  //   lowerLipBot: [-0.03, -30.7, 94.04],
 
-    leftEyeBrowInt: [11.7, 64.66, 57.81],
-    rightEyeBrowInt: [-11.7, 64.66, 57.81],
+  //   leftEyeBrowInt: [11.7, 64.66, 57.81],
+  //   rightEyeBrowInt: [-11.7, 64.66, 57.81],
 
-    noseBottom: [-4.319218, 4.211337, 78.767807],
-    chin: [0, -72.11, 87.43],
-  }, // use default points */
+  //   noseBottom: [-4.319218, 4.211337, 78.767807],
+  //   chin: [0, -72.11, 87.43],
+  // }, // use default points */
   kpInfluenceDecay: [30, 90],
 
   // debug flags:
