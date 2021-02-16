@@ -14,6 +14,7 @@ import DemoVTOHelmet from './js/demos/VTOHelmet.js'
 import DemoVTONecklace from './js/demos/VTONecklace.js'
 
 import DemoFlexibleMask2 from './js/demos/FlexibleMask2.js'
+import DemoFlexibleMask2GetMedia from './js/demos/FlexibleMask2-getmedia.js';
 
 import DemoMakeupSport from './js/demos/MakeupSport.js'
 import DemoMakeupTexture from './js/demos/MakeupTexture.js'
@@ -41,6 +42,10 @@ render(
 
         <Route path="/flexibleMask2">
           <DemoFlexibleMask2 />
+        </Route>
+
+        <Route path="/flexibleMask2-getmedia">
+          <DemoFlexibleMask2GetMedia />
         </Route>
 
         <Route path="/makeupSport">

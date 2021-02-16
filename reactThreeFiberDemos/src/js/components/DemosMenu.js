@@ -8,6 +8,7 @@ export default function DemoMenu(props) {
       <ul>
         <li><Link to='/earrings3D'>Earrings 3D virtual try-on</Link></li>
         <li><Link to='/flexibleMask2'>Flexible mask</Link></li>
+        <li><Link to='/flexibleMask2-getmedia'>Flexible mask -- Get Media</Link></li>
         <li><Link to='/VTOGlasses'>Sunglasses virtual try-on</Link></li>
         <li><Link to='/VTOHelmet'>Headphones and motorcycle helmet virtual try-on</Link></li>
         <li><Link to='/VTONecklace'>Necklace virtual try-on</Link></li>
