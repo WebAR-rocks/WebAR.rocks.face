@@ -184,8 +184,8 @@ class VTOGlasses extends Component {
 
     // NOTE: This is how we can access the Device ID
     navigator.mediaDevices.enumerateDevices()
-      .then(function (devices) {
-        devices.forEach(function (device) {
+      .then((devices) => {
+        devices.forEach( (device) => {
           console.log("-------------", device.kind + ": " + device.label +
             " id = " + device.deviceId);
           if (device.kind === 'videoinput') {
@@ -209,7 +209,7 @@ class VTOGlasses extends Component {
               },
               videoSettings: {
                 deviceId: device.deviceId
-      }
+              }
             })   
           }
         });
