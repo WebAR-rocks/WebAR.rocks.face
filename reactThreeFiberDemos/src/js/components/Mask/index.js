@@ -149,6 +149,7 @@ export default function Mask({
                         )
                     }
 
+                    // TODO: Find a better spot/callback for this
                     const canvas = composedCanvasRef.current;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(canvasFace.current, 0, 0);
