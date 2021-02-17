@@ -173,7 +173,7 @@ class VTOGlasses extends Component {
 
     // NOTE: This is how we can link the <video> to a stream
     try {
-      navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(stream => {
+      navigator.mediaDevices.getUserMedia({ audio: false, video: true }).then(stream => {
         this.refs.video.srcObject = stream
       });
       /* use the stream */

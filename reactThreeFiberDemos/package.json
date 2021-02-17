@@ -6,7 +6,7 @@
   "author": "Xavier Bourry",
   "license": "",
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server --host 0.0.0.0 --config config/webpack.dev.js",
+    "start": "cross-env NODE_ENV=development webpack-dev-server --host localhost --config config/webpack.dev.js",
     "build": "cross-env NODE_ENV=production webpack --config config/webpack.prod.js"
   },
   "keywords": [],
@@ -44,6 +44,7 @@
     "url": "git@github.com:xavierjs/WebAR.rocks.face"
   },
   "dependencies": {
+    "@react-hook/window-size": "3.0.7",
     "@react-three/postprocessing": "^1.4.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
