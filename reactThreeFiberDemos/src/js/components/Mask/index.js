@@ -88,11 +88,15 @@ const DirtyHook = ({
     width,
     height,
     lighting,
+    maskRef
 }) => {
     const threeFiber = useThree()
     threeCamera = threeFiber.camera
     useFrame(threeHelper.update_threeCamera.bind(null, {width, height}, threeFiber.camera))
     lightingHelper.set(threeFiber.gl, threeFiber.scene, lighting)
+
+    maskRef.current = threeFiber.gl.domElement;
+
     return null
 }
 
@@ -105,6 +109,7 @@ export default function Mask({
     const canvasFace = useRef(null);
     const wrapper = useRef(null);
     const composedCanvasRef = useRef(null)
+    const maskCanvasRef = useRef(null);
     const [sizing, setSizing] = useState({ width: 100, height: 100 });
     const [windowWidth, windowHeight] = useWindowSize();
 
@@ -130,7 +135,7 @@ export default function Mask({
                 NN,
                 canvas: canvasFace.current,
                 maxFacesDetected: 1,
-                callbackReady: (err, spec) => {
+                callbackReady: (err) => {
                     if (err) throw new Error(err)
                     console.log('threeHelper has been initialized successfully')
                 },
@@ -143,6 +148,11 @@ export default function Mask({
                             landmarksStabilized
                         )
                     }
+
+                    const canvas = composedCanvasRef.current;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(canvasFace.current, 0, 0);
+                    ctx.drawImage(maskCanvasRef.current, 0, 0);
                 }
             })
 
@@ -184,6 +194,8 @@ export default function Mask({
             <canvas 
                 className='merge' 
                 ref={composedCanvasRef}
+                width={sizing.width}
+                height={sizing.height}
             />
             
             {/* Canvas managed by three fiber, for AR: */}
@@ -195,6 +207,7 @@ export default function Mask({
             >
                 <DirtyHook 
                     lighting={lighting} 
+                    maskRef={maskCanvasRef}
                     {...sizing} 
                 />
 
