@@ -91,8 +91,8 @@ const DirtyHook = ({
 
 export default function Mask({
     className,
-    deviceId,   // This will be used to access the right camera
-    maskId,     // This will be used to access mask files
+    deviceId,
+    maskId,
 }) {
 
     const faceCanvasRef = useRef(null);
@@ -147,6 +147,9 @@ export default function Mask({
                         landmarksStabilized
                     )
                 }
+            },
+            videoSettings: {
+                deviceId: deviceId
             }
         })
 
