@@ -25,18 +25,7 @@ import lightingHelper from '../../contrib/WebARRocksFace/helpers/WebARRocksFaceL
 import flexibleMaskHelper from '../../contrib/WebARRocksFace/helpers/WebARRocksFaceFlexibleMaskHelper.js'
 
 // MASK FILES (IMPORT THEM DYNAMICALLY)
-
-// import envMap:
-import envMap from '../../../assets/mask001/envmap.hdr'
-
-// import 3D model:
-import GLTFModel from '../../../assets/mask001/model.glb'
- 
-// import AR Metadatas (tells how to deform GLTFModel)
-import ARTrackingMetadata from '../../../assets/mask001/metadata.json';
-
-// import occluder
-import GLTFOccluderModel from '../../../assets/mask001/occluder.glb'
+import getMask from './getMask';
 
 // import ModelContainer from './ModelContainer';
 import ModelFallback from './ModelFallback';
@@ -106,12 +95,20 @@ export default function Mask({
     maskId,     // This will be used to access mask files
 }) {
 
-    const canvasFace = useRef(null);
+    const faceCanvasRef = useRef(null);
     const wrapper = useRef(null);
     const composedCanvasRef = useRef(null)
     const maskCanvasRef = useRef(null);
     const [sizing, setSizing] = useState({ width: 100, height: 100 });
     const [windowWidth, windowHeight] = useWindowSize();
+    const [ isMaskReady, setIsMaskReady ] = useState(false);
+
+    const {
+        envMap,
+        model,
+        metadata,
+        occluder
+    } = getMask(maskId);
 
     const lighting = {
         envMap,
@@ -120,8 +117,9 @@ export default function Mask({
         hemiLightIntensity: 0.8
     }
 
+
     // look for Face tracking metadata among ARMetadata:
-    const ARTrackingFaceMetadata = ARTrackingMetadata['ARTRACKING'].filter((ARTrackingExperience) => {
+    const ARTrackingFaceMetadata = metadata['ARTRACKING'].filter((ARTrackingExperience) => {
         return (ARTrackingExperience['TYPE'] === "FACE")
     })
     if (ARTrackingFaceMetadata.length === 0) {
@@ -130,58 +128,65 @@ export default function Mask({
     const ARTrackingExperience = ARTrackingFaceMetadata[0]
 
     useEffect( () => {
-        if (canvasFace.current) {
-            threeHelper.init(WEBARROCKSFACE, {
-                NN,
-                canvas: canvasFace.current,
-                maxFacesDetected: 1,
-                callbackReady: (err) => {
-                    if (err) throw new Error(err)
-                    console.log('threeHelper has been initialized successfully')
-                },
-                callbackTrack: (detectStates, landmarksStabilized) => {
-                    if (flexibleMaskMesh && threeCamera) {
-                        flexibleMaskHelper.update_flexibleMask(
-                            threeCamera, 
-                            flexibleMaskMesh, 
-                            detectStates, 
-                            landmarksStabilized
-                        )
-                    }
 
-                    // TODO: Find a better spot/callback for this
-                    const canvas = composedCanvasRef.current;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(canvasFace.current, 0, 0);
-                    ctx.drawImage(maskCanvasRef.current, 0, 0);
+        threeHelper.init(WEBARROCKSFACE, {
+            NN,
+            canvas: faceCanvasRef.current,
+            maxFacesDetected: 1,
+            callbackReady: (err) => {
+                if (err) throw new Error(err)
+                console.log('threeHelper has been initialized successfully')
+                setIsMaskReady(true);
+            },
+            callbackTrack: (detectStates, landmarksStabilized) => {
+                if (flexibleMaskMesh && threeCamera) {
+                    flexibleMaskHelper.update_flexibleMask(
+                        threeCamera, 
+                        flexibleMaskMesh, 
+                        detectStates, 
+                        landmarksStabilized
+                    )
                 }
-            })
-
-        }
+            }
+        })
 
         return () => {
             flexibleMaskMesh = null;
             threeCamera = null;
             WEBARROCKSFACE.destroy();
         }   
-    }, [canvasFace])
+    }, [faceCanvasRef])
 
-    // FIXME: This has a bug -- when you resize it breaks
+    useEffect(() => {
+        let requestId;
+        const render = () => {
+
+            const canvas = composedCanvasRef.current;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(faceCanvasRef.current, 0, 0);
+            ctx.drawImage(maskCanvasRef.current, 0, 0);
+
+            requestId = requestAnimationFrame(render);
+        };
+
+        if (isMaskReady) render();
+
+        return () => {
+            cancelAnimationFrame(requestId);
+        };
+    }, [composedCanvasRef, faceCanvasRef, maskCanvasRef, isMaskReady]);
+
     useLayoutEffect( () => {
-        if (wrapper.current) {
-            const wrapperSizing = wrapper.current.getBoundingClientRect()
-            setSizing({
-                width: wrapperSizing.width,
-                height: wrapperSizing.height,
-            })
-        }
+        const wrapperSizing = wrapper.current.getBoundingClientRect()
+        setSizing({
+            width: wrapperSizing.width,
+            height: wrapperSizing.height,
+        })
     }, [windowWidth, windowHeight, wrapper])
 
     useEffect( () => {
-        if (wrapper.current) {
-            threeHelper.resize()
-        }
-    }, [sizing, wrapper])
+        threeHelper.resize()
+    }, [sizing])
 
     let classNames = ['camera']
     if (className) classNames.push(className)
@@ -195,18 +200,17 @@ export default function Mask({
             <canvas 
                 className='merge' 
                 ref={composedCanvasRef}
-                width={sizing.width}
-                height={sizing.height}
+                {...sizing}
             />
             
             {/* Canvas managed by three fiber, for AR: */}
-            <Canvas 
+            <Canvas
                 className='mask' 
                 gl={{
                     preserveDrawingBuffer: true // allow image capture
                 }}
             >
-                <DirtyHook 
+                <DirtyHook
                     lighting={lighting} 
                     maskRef={maskCanvasRef}
                     {...sizing} 
@@ -214,8 +218,8 @@ export default function Mask({
 
                 <Suspense fallback={<ModelFallback />}>
                     <ModelContainer
-                        GLTFModel={GLTFModel}
-                        GLTFOccluderModel={GLTFOccluderModel}
+                        GLTFModel={model}
+                        GLTFOccluderModel={occluder}
                         faceIndex={0} 
                         ARTrackingExperience={ARTrackingExperience}
                     />
@@ -225,9 +229,8 @@ export default function Mask({
             {/* Canvas managed by WebAR.rocks, just displaying the video (and used for WebGL computations) */}
             <canvas 
                 className='face' 
-                ref={canvasFace} 
-                width={sizing.width} 
-                height={sizing.height} 
+                ref={faceCanvasRef} 
+                {...sizing}
             />
         </div>
     )
