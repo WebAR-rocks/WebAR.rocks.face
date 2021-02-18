@@ -103,6 +103,8 @@ export default function Mask({
     const [windowWidth, windowHeight] = useWindowSize();
     const [ isMaskReady, setIsMaskReady ] = useState(false);
 
+    const exampleVideo = useRef(null);
+
     const {
         envMap,
         model,
@@ -172,7 +174,11 @@ export default function Mask({
             requestId = requestAnimationFrame(render);
         };
 
-        if (isMaskReady) render();
+        if (isMaskReady) {
+            render();
+            const stream = composedCanvasRef.current.captureStream(); // TODO: Send this stream to Chime
+            exampleVideo.current.srcObject = stream; // TODO: Remove this line
+        }
 
         return () => {
             cancelAnimationFrame(requestId);
@@ -235,6 +241,9 @@ export default function Mask({
                 ref={faceCanvasRef} 
                 {...sizing}
             />
+
+            <video ref={exampleVideo} autoPlay/>
+
         </div>
     )
 }
