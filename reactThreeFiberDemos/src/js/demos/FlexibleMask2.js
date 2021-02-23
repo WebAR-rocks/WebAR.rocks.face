@@ -67,7 +67,7 @@ const compute_sizing = () => {
 
 const VTOModelContainer = (props) => {
   const objRef = useUpdate((threeObject3DParent) => {
-    const threeObject3D = threeObject3DParent.children[0]    
+    const threeObject3D = threeObject3DParent.children[0]
     const allLandmarksLabels = WEBARROCKSFACE.get_LMLabels()
     if (_flexibleMaskMesh && _flexibleMaskMesh.parent){
       _flexibleMaskMesh.parent.remove(_flexibleMaskMesh)

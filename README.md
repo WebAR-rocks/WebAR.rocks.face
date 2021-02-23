@@ -63,6 +63,7 @@ Here are the static JavaScript demos:
 
 * basic debug view (displays the face landmarks): [live demo](https://webar.rocks/demos/face/demos/basic/), [source code](/demos/basic/)
 * advanced debug view: [live demo](https://webar.rocks/demos/face/demos/debug/), [source code](/demos/debug/)
+* expressions detection debug view: [live demo](https://webar.rocks/demos/face/demos/expressionsDetection/), [source code](/demos/expressionsDetection/)
 * earrings VTO 2D: [live demo](https://webar.rocks/demos/face/demos/earrings2D/), [source code](/demos/earrings2D/)
 * earrings VTO 3D: [live demo](https://webar.rocks/demos/face/demos/earrings3D/), [source code](/demos/earrings3D/)
 * glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTOGlasses/), [source code and specific documentation](/demos/VTOGlasses/),
