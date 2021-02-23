@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <meta http-equiv="content-language" content="en-EN" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+    />
 
     <title>WebAR.rocks.face flexible mask demo 2</title>
-    
+
     <!-- INCLUDE WebAR.rocks.face MAIN SCRIPT -->
     <script src="../../dist/WebARRocksFace.js"></script>
-    
+
     <!-- INCLUDE MAIN HELPER -->
     <script src="../../helpers/WebARRocksFaceThreeHelper.js"></script>
 
@@ -17,8 +20,8 @@
     <script src="../../helpers/WebARRocksFaceFlexibleMaskHelper.js"></script>
 
     <!-- INCLUDE LANDMARKS STABILIZER -->
-    <script src="../../helpers/stabilizers/WebARRocksLMStabilizer2.js"></script>
-    
+    <script src="../../helpers/stabilizers/WebARRocksLMStabilizer.js"></script>
+
     <!-- THREE.JS, FOR THE RENDERING -->
     <!-- WARNING: for production you should replace three.js by three.min.js -->
     <script src="../../libs/three/v119/three.js"></script>
@@ -27,13 +30,14 @@
     <!-- INCLUDE DEMO SCRIPT AND GLASSES CREATOR -->
     <script src="./main.js"></script>
 
-    <style type='text/css'>
+    <style type="text/css">
       body {
         margin: 0;
         background-color: black;
         color: white;
       }
-      #WebARRocksFaceCanvas, #threeCanvas {
+      #WebARRocksFaceCanvas,
+      #threeCanvas {
         position: fixed;
         width: 100vw;
         top: 0;
@@ -51,7 +55,7 @@
     </style>
   </head>
   <body onload="main()">
-     <!--
+    <!--
       The first canvas is used by WebAR.rocks.face
       It is linked to a WebGL context used by the deep learning engine
       And it displays the video of the webcam.
@@ -62,13 +66,11 @@
       You can tweak the rendering of the video in WebARRocksFaceThreeHelper.js,
       by editing the fragment shader of _shps.copy
     -->
-    <canvas id='WebARRocksFaceCanvas'></canvas>
-
+    <canvas id="WebARRocksFaceCanvas"></canvas>
 
     <!--
       The second canvas is used by THREE.js for 3D rendering:
     -->
-    <canvas id='threeCanvas'></canvas>
+    <canvas id="threeCanvas"></canvas>
   </body>
 </html>
- 
