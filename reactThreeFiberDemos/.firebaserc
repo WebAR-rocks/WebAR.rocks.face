@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "piepacker-staging"
+  },
+  "targets": {
+    "piepacker-staging": {
+      "hosting": {
+        "jeeliz-demo": [
+          "jeeliz-demo"
+        ]
+      }
+    }
+  }
+}
