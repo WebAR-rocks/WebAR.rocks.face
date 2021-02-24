@@ -2,7 +2,7 @@
  * 
  * Use OneEuroFilter to minimize jitter and lag when tracking landmarks
  * OneEuroFilter Details: http://www.lifl.fr/~casiez/1euro
- * mincutoff : decrease to minimize jitter
+ * mincutoff: decrease to minimize jitter
  * beta: increate to minimize lag
  */
 
