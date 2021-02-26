@@ -1,67 +1,93 @@
-
-function init_evaluators(){
+function init_evaluators() {
   // run WEBARROCKSFACE.get_LMLabels() in the web console
   // to get landmarks labels provided by the current neural network
-  
+
   // MOUTH:
-  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('OPEN_MOUTH', {
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator("OPEN_MOUTH", {
     refLandmarks: ["lowerLipTop", "chin"],
     landmarks: ["lowerLipTop", "upperLipBot"],
     range: [0.05, 0.45],
     isInv: false,
-    isDebug: true
+    isDebug: true,
   });
 
   // OPEN/CLOSE EYES:
   const closeEyeEvaluatorParams = {
     isInv: true,
     isDebug: true,
-    delayMinMs: 500
+    delayMinMs: 500,
   };
-  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('CLOSE_LEFT_EYE', Object.assign({
-    range: [0.18, 0.21],
-    refLandmarks: ["leftEyeInt", "leftEyeExt"],
-    landmarks: ["leftEyeTop", "leftEyeBot"]
-  }, closeEyeEvaluatorParams));
-  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('CLOSE_RIGHT_EYE', Object.assign({
-    range: [0.23, 0.25],
-    refLandmarks: ["rightEyeInt", "rightEyeExt"],
-    landmarks: ["rightEyeTop", "rightEyeBot"]
-  }, closeEyeEvaluatorParams));
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator(
+    "CLOSE_LEFT_EYE",
+    Object.assign(
+      {
+        range: [0.18, 0.21],
+        refLandmarks: ["leftEyeInt", "leftEyeExt"],
+        landmarks: ["leftEyeTop", "leftEyeBot"],
+      },
+      closeEyeEvaluatorParams
+    )
+  );
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator(
+    "CLOSE_RIGHT_EYE",
+    Object.assign(
+      {
+        range: [0.23, 0.25],
+        refLandmarks: ["rightEyeInt", "rightEyeExt"],
+        landmarks: ["rightEyeTop", "rightEyeBot"],
+      },
+      closeEyeEvaluatorParams
+    )
+  );
 }
 
-function init_triggers(){
-  WebARRocksFaceExpressionsEvaluator.add_trigger('OPEN_MOUTH', {
+function init_triggers() {
+  WebARRocksFaceExpressionsEvaluator.add_trigger("OPEN_MOUTH", {
     threshold: 0.5,
     hysteresis: 0.1,
-    onStart: function(){
-      console.log('TRIGGER FIRED - MOUTH OPEN');
+    onStart: function () {
+      console.log("TRIGGER FIRED - MOUTH OPEN");
     },
-    onEnd: function(){
-      console.log('TRIGGER FIRED - MOUTH CLOSED');
-    }
-  })
+    onEnd: function () {
+      console.log("TRIGGER FIRED - MOUTH CLOSED");
+    },
+  });
 }
 
-
-function start(){
+function start() {
   WebARRocksFaceDebugHelper.init({
     spec: {}, // keep default specs
-    callbackReady: function(err, spec){
+    callbackReady: function (err, spec) {
       init_evaluators();
       init_triggers();
     },
-    callbackTrack: function(detectState){
-      const expressionsValues = WebARRocksFaceExpressionsEvaluator.evaluate_expressions(detectState);
+    callbackTrack: function (detectState) {
+      const expressionsValues = WebARRocksFaceExpressionsEvaluator.evaluate_expressions(
+        detectState
+      );
       //console.log(expressionsValues.OPEN_MOUTH);
-      WebARRocksFaceExpressionsEvaluator.run_triggers(expressionsValues);      
-    }
-  })
+      WebARRocksFaceExpressionsEvaluator.run_triggers(expressionsValues);
+    },
+  });
 }
 
-function main(){
+function main() {
   WebARRocksResizer.size_canvas({
-    canvasId: 'WebARRocksFaceCanvas',
-    callback: start
-  })
+    canvasId: "WebARRocksFaceCanvas",
+    callback: start,
+  });
 }
+
+// const gltfLoader = new THREE.GLTFLoader();
+// gltfLoader.load("MESHPATH", function(gltf){
+
+// 	gltf.scene.traverse(function(node){
+// 		if (node.isSkinnedMesh){
+// 			mesh = node;}
+// 		if (node.isBone) {
+// 			node = new THREE.Bone();
+// 			bones.push(node);
+// 			);
+// 		}
+// 	});
+// 	<script type="text/javascript" src="../../libs/three/v119/GLTFLoader.js"></script>

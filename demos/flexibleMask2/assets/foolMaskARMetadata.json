@@ -6,7 +6,7 @@
       "TYPE": "FACE",
       "MATRIX": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
 
-      "DEFORMEDID": "exportMesh",
+      "DEFORMEDID": "The_Hood",
       "DEFORMEDKEYPOINTS": [
         {
           "label": "LEFT_EYEBROW_INSIDE",

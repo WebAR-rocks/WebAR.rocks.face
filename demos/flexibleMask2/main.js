@@ -1,6 +1,6 @@
 // settings:
 const _spec = {
-  maskURL: "assets/Coincoin.glb",
+  maskURL: "assets/HeroMage.glb",
   maskARMetadataURL: "assets/foolMaskARMetadata.json",
 
   occluderURL: "assets/occluder.glb",
@@ -15,6 +15,7 @@ let _threeInstances = null;
 let _flexibleMaskHelper = null;
 let _flexibleMaskMesh = null;
 let _ARTrackingRootObject = null;
+let i = 0;
 
 function main() {
   // get the 2 canvas from the DOM:
@@ -33,13 +34,22 @@ function main() {
       if (_flexibleMaskMesh === null) {
         return;
       }
-      // _flexibleMaskMesh.scale.multiplyScalar(100);
+      // _flexibleMaskMesh.skeleton.bones[0].apply(rotation);
+      // _flexibleMaskMesh.scale.multiplyScalar(multiplyScalar);
+      // let multiplyScalar;
+      // if (i % 2 == 0) {
+      //   multiplyScalar = 0.9;
+      // } else {
+      //   multiplyScalar = 1.1;
+      // }
+      // _flexibleMaskMesh.scale.multiplyScalar(multiplyScalar);
       // _flexibleMaskHelper.update_flexibleMask(
       //   _threeInstances.threeCamera,
       //   _flexibleMaskMesh,
       //   detectStates,
       //   landmarksStabilized
       // );
+      i++;
     },
 
     callbackReady: function (err, threeInstances) {
