@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Bones animations test</title>
+		<style>
+				div.absolute {
+				  position: absolute;
+				  top: 10px;
+				  right: auto;
+				  width: auto;
+				  height: auto;
+				  border: 3px solid #73AD21;
+				}
+		</style>
+	</head>
+	<body>
+		<script src="/build/three.js"></script>
+		<script src="examples/js/controls/OrbitControls.js"></script>
+		<script src="examples/js/loaders/GLTFLoader.js"></script>
+		<script src="build/bonesAnimation.js"></script>
+
+		<div class="absolute">
+		<button onclick="loadMesh()">Click to load the mesh</button></div>
+	</body>
+</html>
