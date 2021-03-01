@@ -51,7 +51,8 @@ Here are the main features of the library:
 * `/helpers/`: scripts which can help you to use this library in some specific use cases,
 * `/neuralNets/`: neural networks models,
 * `/libs/`: 3rd party libraries and 3D engines used in the demos,
-* `/reactThreeFiberDemos`: Demos with Webpack/NPM/React/Three Fiber.
+* `/reactThreeFiberDemos`: Demos with Webpack/NPM/React/Three Fiber,
+* `/blenderPluginFlexibleMaskExporter`: Blender plugin to export the metadata JSON file used in the *flexibleMask2* demo.
 
 
 ## Demonstrations
@@ -69,7 +70,6 @@ Here are the static JavaScript demos:
 * glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTOGlasses/), [source code and specific documentation](/demos/VTOGlasses/),
 * headphones/helmet VTO: [live demo](https://webar.rocks/demos/face/demos/VTOHelmet/), [source code](/demos/VTOHelmet/)
 * necklace VTO: [live demo](https://webar.rocks/demos/face/demos/VTONecklace/), [source code](/demos/VTONecklace/)
-* 3D flexible mask: [live demo](https://webar.rocks/demos/face/demos/flexibleMask/), [source code](/demos/flexibleMask/)
 * 3D flexible mask 2: [live demo](https://webar.rocks/demos/face/demos/flexibleMask2/), [source code](/demos/flexibleMask2/)
 * makeup lipstick VTO: [live demo](https://webar.rocks/demos/face/demos/makeupLipstick/), [source code](/demos/makeupLipstick/)
 * makeup shapes based VTO: [live demo](https://webar.rocks/demos/face/demos/makeupShapes/), [source code](/demos/makeupShapes/)
