@@ -13,7 +13,7 @@ Facial landmarks positions are also among the neuron network outputs. There is s
 * [Demonstrations](#demonstrations)
 * [Specifications](#specifications)
   * [Get started](#get-started)
-  * [Optional init arguments](#optionnal-init-arguments)
+  * [Optional init arguments](#optional-init-arguments)
   * [Error codes](#error-codes)
   * [The returned objects](#the-returned-objects)
   * [Miscellaneous methods](#miscellaneous-methods)
