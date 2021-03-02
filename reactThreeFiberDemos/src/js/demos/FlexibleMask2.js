@@ -65,7 +65,12 @@ const compute_sizing = () => {
   return {width, height, top, left}
 }
 
-const VTOModelContainer = (props) => {
+const ModelContainer = (props) => {
+
+  if (!props.isVisible){
+    return null
+  }
+
   const objRef = useUpdate((threeObject3DParent) => {
     const threeObject3D = threeObject3DParent.children[0]
     const allLandmarksLabels = WEBARROCKSFACE.get_LMLabels()
@@ -191,6 +196,10 @@ class FlexibleMask extends Component {
     })
   }
 
+  shouldComponentUpdate(nextProps, nextState){
+    return true
+  }
+
   componentWillUnmount() {
     _timerResize = null
     _flexibleMaskMesh = null
@@ -199,16 +208,24 @@ class FlexibleMask extends Component {
   }
 
   componentDidUpdate() {
-    if (!this.state.isMaskEnabled) {
+    const isMaskVisible = this.state.isMaskEnabled && this.state.isTrackingEnabled
+
+    // number of face detection per rendering loop. 0 -> auto (adaptative)
+    const nDetectsPerLoop = (isMaskVisible) ? 0 : 1
+    console.log('INFO in FlexibleMask2.js - componentDidUpdate(): set nDetectsPerLoop =', nDetectsPerLoop)
+    WEBARROCKSFACE.set_scanSettings({
+      'nDetectsPerLoop': nDetectsPerLoop
+    });
+    /*if (!this.state.isMaskEnabled) {
       // Cleaning up some resources
       // Expected behaviour: release the Object mesh resources. We may need to enable/disable/change the masks
       _flexibleMaskMesh = null;
-    }
+    }*/
     
     // FIXME: This will stop the camera render in the canvas 
     // Expected behaviour: disable face tracking features (stop callbackTrack) but continue render the camera feed in the canvas so it won't freeze
     // The second parameter is not working -- the camera light is green in both situations (second parameter = true|false)
-    WEBARROCKSFACE.toggle_pause(!this.state.isTrackingEnabled, false);
+    //WEBARROCKSFACE.toggle_pause(!this.state.isTrackingEnabled, false);
   }
 
   render(){
@@ -216,26 +233,25 @@ class FlexibleMask extends Component {
     return (
       <div>
         {/* Canvas managed by three fiber, for AR: */}
-        { this.state.isMaskEnabled && (
-          <Canvas className='mirrorX' style={{
-            position: 'fixed',
-            zIndex: 2,
-            ...this.state.sizing
-          }}
-          gl={{
-            preserveDrawingBuffer: true // allow image capture
-          }}>
-            <DirtyHook sizing={this.state.sizing} lighting={this.state.lighting} />
-            
-            <Suspense fallback={<DebugCube />}>
-              <VTOModelContainer
-                GLTFModel={this.state.GLTFModel}
-                GLTFOccluderModel={this.state.GLTFOccluderModel}
-                faceIndex={0} ARTrackingExperience={this.state.ARTrackingExperience} 
-              />
-            </Suspense>
-          </Canvas>
-        )}
+        <Canvas className='mirrorX' style={{
+          position: 'fixed',
+          zIndex: 2,
+          ...this.state.sizing
+        }}
+        gl={{
+          preserveDrawingBuffer: true // allow image capture
+        }}>
+          <DirtyHook sizing={this.state.sizing} lighting={this.state.lighting} />
+          
+          <Suspense fallback={<DebugCube />}>
+            <ModelContainer
+              isVisible={this.state.isMaskEnabled && this.state.isTrackingEnabled}
+              GLTFModel={this.state.GLTFModel}
+              GLTFOccluderModel={this.state.GLTFOccluderModel}
+              faceIndex={0} ARTrackingExperience={this.state.ARTrackingExperience} 
+            />
+          </Suspense>
+        </Canvas>
 
       {/* Canvas managed by WebAR.rocks, just displaying the video (and used for WebGL computations) */}
         <canvas className='mirrorX' ref='canvasFace' style={{
@@ -245,6 +261,7 @@ class FlexibleMask extends Component {
         }} width = {this.state.sizing.width} height = {this.state.sizing.height} />
 
         <BackButton />        
+
 
         <button
           className="Button1"
