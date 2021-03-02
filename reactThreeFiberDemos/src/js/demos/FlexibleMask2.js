@@ -108,7 +108,7 @@ const DebugCube = (props) => {
 }
 
 
-class VTOGlasses extends Component {
+class FlexibleMask extends Component {
   constructor(props) {
     super(props)
 
@@ -231,4 +231,4 @@ class VTOGlasses extends Component {
   }
 } 
 
-export default VTOGlasses
+export default FlexibleMask

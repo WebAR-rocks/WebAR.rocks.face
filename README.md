@@ -237,6 +237,8 @@ It only applies to global pose stabilization. Landmarks are stabilized using hel
 
 * `WEBARROCKSFACE.update_videoElement(<video> vid, <function|False> callback)`: changes the video element used for the face detection (which can be provided via `VIDEOSETTINGS.videoElement`) by another video element. A callback function can be called when it is done.
 
+* `JEEFACEFILTERAPI.update_videoSettings(<object> videoSettings)`: dynamically change the video settings (see [Optional init arguments](optional-init-arguments) for the properties of `videoSettings`). It is useful to change the camera from the selfie camera (user) to the back (environment) camera. A `Promise` is returned.
+
 * `WEBARROCKSFACE.destroy()`: Cleans both graphic memory and JavaScript memory, uninit the library. After that you need to init the library again. A `Promise` is returned.
 
 
