@@ -3,6 +3,10 @@ const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.inner
 const renderer = new THREE.WebGLRenderer({alpha: true});
 var clock = new THREE.Clock();
 var mixer = null;
+var openMouth;
+var blinkL;
+var blinkR;
+
 renderer.setClearColor(0xffffff, 0);
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.shadowMap.enabled = true;
@@ -32,12 +36,20 @@ function loadMesh() {
       node.castShadow = true;
       node.receiveShadow = true;}
     });
-    scene.add(gltf.scene);
 
     mixer = new THREE.AnimationMixer( gltf.scene );
-    for (var i = 0; i < gltf.animations.length; i++) {
-      mixer.clipAction( gltf.animations[i]).play();
-    }
+
+    openMouth = mixer.clipAction(gltf.animations[0]);
+    openMouth.setLoop( THREE.LoopOnce);
+    blinkL = mixer.clipAction(gltf.animations[1]);
+    blinkL.setLoop( THREE.LoopOnce);
+    blinkR = mixer.clipAction(gltf.animations[2]);
+    blinkR.setLoop( THREE.LoopOnce);
+
+    scene.add(gltf.scene);
+    //for (var i = 0; i < gltf.animations.length; i++) {
+    //  mixer.clipAction( gltf.animations[i]).play();
+    //}
   });
 }
 
@@ -54,24 +66,137 @@ pointLight.shadow.camera.near = 0.5; // default
 pointLight.shadow.camera.far = 500; // default
 scene.add(pointLight);
 
-//setup orbiControl
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
 camera.position.z = 200;
-controls.update();
-controls.autoRotate = true;
-controls.enableDamping = true;
-controls.enableZoom = false;
-controls.enablePan = false;
 
 //rebdering each frame
 const animate = function () {
   requestAnimationFrame( animate );
 
-  controls.update();
   if ( mixer ) {
     mixer.update( clock.getDelta() );}
   renderer.render( scene, camera );
 };
+
+function init_evaluators() {
+  // run WEBARROCKSFACE.get_LMLabels() in the web console
+  // to get landmarks labels provided by the current neural network
+
+  // MOUTH:
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator("OPEN_MOUTH", {
+    refLandmarks: ["lowerLipTop", "chin"],
+    landmarks: ["lowerLipTop", "upperLipBot"],
+    range: [0.05, 0.45],
+    isInv: false,
+    isDebug: true,
+  });
+
+  // OPEN/CLOSE EYES:
+  const closeEyeEvaluatorParams = {
+    isInv: true,
+    isDebug: true,
+    delayMinMs: 500,
+  };
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator(
+    "CLOSE_LEFT_EYE",
+    Object.assign(
+      {
+        range: [0.18, 0.21],
+        refLandmarks: ["leftEyeInt", "leftEyeExt"],
+        landmarks: ["leftEyeTop", "leftEyeBot"],
+      },
+      closeEyeEvaluatorParams
+    )
+  );
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator(
+    "CLOSE_RIGHT_EYE",
+    Object.assign(
+      {
+        range: [0.23, 0.25],
+        refLandmarks: ["rightEyeInt", "rightEyeExt"],
+        landmarks: ["rightEyeTop", "rightEyeBot"],
+      },
+      closeEyeEvaluatorParams
+    )
+  );
+}
+
+function init_triggers() {
+  WebARRocksFaceExpressionsEvaluator.add_trigger("OPEN_MOUTH", {
+    threshold: 0.5,
+    hysteresis: 0.1,
+    onStart: function () {
+      if ( openMouth !== null ) {
+
+        openMouth.stop();
+        openMouth.play();
+
+      }
+      console.log("TRIGGER FIRED - MOUTH OPEN");
+    },
+    onEnd: function () {
+      console.log("TRIGGER FIRED - MOUTH CLOSED");
+    },
+  });
+
+  WebARRocksFaceExpressionsEvaluator.add_trigger("CLOSE_LEFT_EYE", {
+    threshold: 0.5,
+    hysteresis: 0.1,
+    onStart: function () {
+      if ( blinkL !== null ) {
+
+        blinkL.stop();
+        blinkL.play();
+
+      }
+      console.log("TRIGGER FIRED - L EYE CLOSED");
+    },
+    onEnd: function () {
+      console.log("TRIGGER FIRED - L EYE OPEN");
+    },
+  });
+
+  WebARRocksFaceExpressionsEvaluator.add_trigger("CLOSE_RIGHT_EYE", {
+    threshold: 0.5,
+    hysteresis: 0.1,
+    onStart: function () {
+      if ( blinkR !== null ) {
+
+        blinkR.stop();
+        blinkR.play();
+
+      }
+      console.log("TRIGGER FIRED - R EYE CLOSED");
+    },
+    onEnd: function () {
+      console.log("TRIGGER FIRED - R EYE OPEN");
+    },
+  });
+}
+
+function start() {
+  loadMesh();
+  WebARRocksFaceDebugHelper.init({
+    spec: {}, // keep default specs
+    callbackReady: function (err, spec) {
+      init_evaluators();
+      init_triggers();
+    },
+    callbackTrack: function (detectState) {
+      const expressionsValues = WebARRocksFaceExpressionsEvaluator.evaluate_expressions(
+        detectState
+      );
+      //console.log(expressionsValues.OPEN_MOUTH);
+      WebARRocksFaceExpressionsEvaluator.run_triggers(expressionsValues);
+    },
+  });
+}
+
+function main() {
+  WebARRocksResizer.size_canvas({
+    canvasId: "WebARRocksFaceCanvas",
+    callback: start,
+  });
+}
+
 
 animate();
