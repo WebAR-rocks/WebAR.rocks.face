@@ -137,6 +137,9 @@ class FlexibleMask extends Component {
       // occluder 3D model:
       GLTFOccluderModel,
 
+      isMaskEnabled: false,
+      isTrackingEnabled: true,
+
       lighting: {
         envMap,
         pointLightIntensity: 0.8,
@@ -195,28 +198,44 @@ class FlexibleMask extends Component {
     return WEBARROCKSFACE.destroy()
   }
 
+  componentDidUpdate() {
+    if (!this.state.isMaskEnabled) {
+      // Cleaning up some resources
+      // Expected behaviour: release the Object mesh resources. We may need to enable/disable/change the masks
+      _flexibleMaskMesh = null;
+    }
+    
+    // FIXME: This will stop the camera render in the canvas 
+    // Expected behaviour: disable face tracking features (stop callbackTrack) but continue render the camera feed in the canvas so it won't freeze
+    // The second parameter is not working -- the camera light is green in both situations (second parameter = true|false)
+    WEBARROCKSFACE.toggle_pause(!this.state.isTrackingEnabled, false);
+  }
+
   render(){
     // generate canvases:
     return (
       <div>
         {/* Canvas managed by three fiber, for AR: */}
-        <Canvas className='mirrorX' style={{
-          position: 'fixed',
-          zIndex: 2,
-          ...this.state.sizing
-        }}
-        gl={{
-          preserveDrawingBuffer: true // allow image capture
-        }}>
-          <DirtyHook sizing={this.state.sizing} lighting={this.state.lighting} />
-          
-          <Suspense fallback={<DebugCube />}>
-            <VTOModelContainer
-              GLTFModel={this.state.GLTFModel}
-              GLTFOccluderModel={this.state.GLTFOccluderModel}
-              faceIndex={0} ARTrackingExperience={this.state.ARTrackingExperience} />
-          </Suspense>
-        </Canvas>
+        { this.state.isMaskEnabled && (
+          <Canvas className='mirrorX' style={{
+            position: 'fixed',
+            zIndex: 2,
+            ...this.state.sizing
+          }}
+          gl={{
+            preserveDrawingBuffer: true // allow image capture
+          }}>
+            <DirtyHook sizing={this.state.sizing} lighting={this.state.lighting} />
+            
+            <Suspense fallback={<DebugCube />}>
+              <VTOModelContainer
+                GLTFModel={this.state.GLTFModel}
+                GLTFOccluderModel={this.state.GLTFOccluderModel}
+                faceIndex={0} ARTrackingExperience={this.state.ARTrackingExperience} 
+              />
+            </Suspense>
+          </Canvas>
+        )}
 
       {/* Canvas managed by WebAR.rocks, just displaying the video (and used for WebGL computations) */}
         <canvas className='mirrorX' ref='canvasFace' style={{
@@ -226,6 +245,34 @@ class FlexibleMask extends Component {
         }} width = {this.state.sizing.width} height = {this.state.sizing.height} />
 
         <BackButton />        
+
+        <button
+          className="Button1"
+          onClick={() => {
+            this.setState({ isMaskEnabled: true })
+          }}
+        >
+          Wear Mask
+        </button>
+
+        <button
+          className="Button2"
+          onClick={() => {
+            this.setState({ isMaskEnabled: false })
+          }}
+        >
+          Remove Mask
+        </button>
+
+
+        <button
+          className="Button3"
+          onClick={() => {
+            this.setState({ isTrackingEnabled: !this.state.isTrackingEnabled })
+          }}
+        >
+          { this.state.isTrackingEnabled? "Disable tracking" : "Enable tracking" }
+        </button>
       </div>
     )
   }
