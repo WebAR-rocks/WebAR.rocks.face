@@ -205,7 +205,7 @@ class FlexibleMask extends Component {
           zIndex: 2,
           ...this.state.sizing
         }}
-        gl={{
+        gl = {{
           preserveDrawingBuffer: true // allow image capture
         }}>
           <DirtyHook sizing={this.state.sizing} lighting={this.state.lighting} />

@@ -177,5 +177,5 @@ toggle_pause:function(a,c){if(-1===[ka.play,ka.pause].indexOf(oa))return Promise
 var a=W.Z.width,c=W.Z.height;if(!nb()&&a===S.B&&c===S.G)return!1;S.B=a;S.G=c;S.wb=S.B/S.G;z.T();mb();lb();Sa();Ua();return!0},set_inputTexture:function(a,c,d){B.H[0]=c;B.H[1]=d;B.L=Y.instance({width:c,height:d,Sb:a});B.ab=!0;Sa();ub();Ua()},reset_inputTexture:function(){B.ab=!1;B.L=B.tc;nb();Sa();Ua()},render_video:function(){ua.S();z.set("s55");b.viewport(0,0,S.B,S.G);B.L.g(0);U.l(!0,!0)},get_videoDevices:function(a){return X.He(a)},get_videoUVScaleMat2:function(){return B.C},set_scanSettings:function(a){Object.assign(ra,
 a);0!==ra.nDetectsPerLoop?Ea.Gd(ra.nDetectsPerLoop):Ea.Od();mb();lb()},set_stabilizationSettings:function(a){Object.assign(va,a)},update_videoElement:function(a,c){ab(a,function(){Eb();Sa();c&&c(B.L.get())})},capture_image:function(a){return Ma.ve(a)},get_LMLabels:function(){return la.labels},get_widthPx:function(){return S.B},get_heightPx:function(){return S.G},compute_pose:function(a,c,d,e){null===Za&&(La[0]=d,La[1]=e,Za=new ob.zypSolver({cameraFocals:La,zyp15:ca.rf}));if(La[0]!==
 d||La[1]!==e)La[0]=d,La[1]=e,Za.zyp14(La);a=Za.solve(a,c,!1);return{ok:a.zyp13,repError:a.repError,rotation:a.R,translation:a.t}}};return eb}();
-if(typeof(module)!=='undefined'){module.exports=WEBARROCKSFACE;}
+export default WEBARROCKSFACE;
 /* eslint-enable */
