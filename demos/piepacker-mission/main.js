@@ -6,8 +6,9 @@ var blinkL = null;
 var blinkR = null;
 
 const _spec = {
-  maskURL: "./assets/HeroMageOrange.glb",
-  maskARMetadataURL: "./assets/foolMaskARMetadata.json",
+  maskURL: "./assets/HeroMage.glb",
+  // maskURL: "./assets/HeroMageOrange.glb",
+  maskARMetadataURL: "./assets/armetadata.json",
 
   // debug flags:
   debugCube: false, //display a cube tracking the head
