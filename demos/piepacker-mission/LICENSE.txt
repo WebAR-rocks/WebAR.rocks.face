@@ -1,1 +1,5 @@
-The files under this repository are a property of Piepacker Inc, and hereby rights have been granted for these files to be hosted for testing purposes on the WebAR.rocks.face repository, but NOT to be shared, or reused for any other purpose than that explicitly agreed upon between Piepacker and the WebAR.rocks.face owners.
+The files located in the directory `demos/piepacker-mission/assets` of this 
+repository are a property of Piepacker Inc, and hereby rights have been granted for 
+these files to be hosted for testing purposes on the WebAR.rocks.face repository,
+but NOT to be shared, or reused for any other purpose than that explicitly agreed 
+upon between Piepacker and the WebAR.rocks.face owners.
