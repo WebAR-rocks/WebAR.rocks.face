@@ -47,7 +47,16 @@ const DirtyHook = (props) => {
   _threeCamera = threeFiber.camera
   useFrame(threeHelper.update_threeCamera.bind(null, props.sizing, threeFiber.camera))
   lightingHelper.set(threeFiber.gl, threeFiber.scene, props.lighting)
+
+  // XAVIER: cancel CSS properties set by THREE.js to the canvas:
+  threeFiber.gl.domElement.style.removeProperty('width');
+  threeFiber.gl.domElement.style.removeProperty('height');
+
+  // XAVIER: the THREE.js canvas resolution depends on the device pixel ratio
+  // that's why the canvas resolution is not always = to props.sizing after this call:
   threeFiber.gl.setSize(props.sizing.width, props.sizing.height, false)
+
+  // XAVIER: Only recompute aspect of the video
   threeHelper.resize()
   return null
 }
@@ -144,6 +153,12 @@ class FlexibleMask extends Component {
     threeHelper.init(WEBARROCKSFACE, {
       NN,
       canvas: canvasFace,
+      /*spec:  {
+        videoSettings: {
+          minWidth: 480, maxWidth: 1024, idealWidth: 800,
+          minHeight: 600, maxHeight: 1024, idealHeight: 600
+        }
+      },*/
       maxFacesDetected: 1,
       callbackReady: (err) => {
         if (err) throw new Error(err)
@@ -164,15 +179,36 @@ class FlexibleMask extends Component {
     return WEBARROCKSFACE.destroy()
   }
 
+  shouldComponentUpdate(nextProps, nextState){
+    // XAVIER: the resizing should work even without this optimization
+    // XAVIER: the user has just changed the size of the container
+    // we don't rerender the whole stuff
+    if (nextState.isContainerWide !== this.state.isContainerWide){
+      console.log('Just change the CSS of the container, do not rerender the whole stuff');
+      this.refs.container.className = this.get_containerClass(nextState.isContainerWide);
+      return false;
+    }
+
+    return true;
+  }
+
+  get_containerClass(isContainerWide){
+    return `container ${isContainerWide ? "" : "container--small"}`
+  }
+
   render(){
     // generate canvases:
+    // XAVIER: THREE-Fiber does not append an HTML5 canvas element directly
+    // but it wraps it into a <div> element.
+    // add a ref to the container
     return (
-      <div className={`container ${this.state.isContainerWide ? "" : "container--small"}`}>
+      <div ref='container' className={this.get_containerClass(this.state.isContainerWide)}>
         {/* Canvas managed by three fiber, for AR: */}
         <Canvas className='mirrorX mask'
         gl = {{
           preserveDrawingBuffer: true // allow image capture
         }}
+        updateDefaultCamera = {false}
         width={this.state.sizing.width}
         height={this.state.sizing.height}
         >
@@ -198,6 +234,13 @@ class FlexibleMask extends Component {
         <button 
           className="toggleDivSize"
           onClick={ () => {
+            /*
+            React paradigm is working great with standard DOM elements:
+            When you change the state, only components which need to be re-rendered are re-rendered.
+            Here, without using shouldComponentUpdate, the whole component will be rerendered
+            WebAR.rocks.face and the THREE fiber scene will be re-initialized
+            Which is very costly
+             */
             this.setState((state) => { return {
               isContainerWide: !state.isContainerWide
             }})

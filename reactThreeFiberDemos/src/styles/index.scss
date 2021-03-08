@@ -76,13 +76,21 @@ p {
   z-index: 1;
 }
 
+
+/* XAVIER: we need to apply objet-fit cover to the THREE Fiber canvas element, not its div wrapper: */
+.mask > canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .mask {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /*object-fit: cover;*/
   z-index: 2;
 }
 
