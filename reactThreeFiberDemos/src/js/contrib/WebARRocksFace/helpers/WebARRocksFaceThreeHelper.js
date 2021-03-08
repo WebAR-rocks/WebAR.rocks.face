@@ -357,6 +357,7 @@ const WebARRocksFaceThreeHelper = (function(){
         NN: null,
         canvas: null,
 
+        isKeepRunningOnWinFocusLost: false,
         maxFacesDetected: 1,
 
         // pose computation (SolvePnP):
@@ -378,7 +379,8 @@ const WebARRocksFaceThreeHelper = (function(){
       const specLM = Object.assign({}, defaultSpecLM, {
         canvas: _spec.canvas,
         NN: _spec.NN,
-        maxFacesDetected: _spec.maxFacesDetected
+        maxFacesDetected: _spec.maxFacesDetected,
+        isKeepRunningOnWinFocusLost: _spec.isKeepRunningOnWinFocusLost
       });
 
       Object.assign(_previousSizing, {

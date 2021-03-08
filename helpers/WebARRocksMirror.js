@@ -14,7 +14,7 @@ const WebARRocksMirror = (function(){
     height: window.innerHeight,
 
     specWebARRocksFace: {
-      NNCPath: '../../neuralNets/NN_GLASSES_2.json',
+      NNCPath: '../../neuralNets/NN_GLASSES_3.json',
       scanSettings: { // harden detection:
         threshold: 0.9
       }

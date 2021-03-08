@@ -13,7 +13,7 @@ Facial landmarks positions are also among the neuron network outputs. There is s
 * [Demonstrations](#demonstrations)
 * [Specifications](#specifications)
   * [Get started](#get-started)
-  * [Optional init arguments](#optionnal-init-arguments)
+  * [Optional init arguments](#optional-init-arguments)
   * [Error codes](#error-codes)
   * [The returned objects](#the-returned-objects)
   * [Miscellaneous methods](#miscellaneous-methods)
@@ -51,7 +51,8 @@ Here are the main features of the library:
 * `/helpers/`: scripts which can help you to use this library in some specific use cases,
 * `/neuralNets/`: neural networks models,
 * `/libs/`: 3rd party libraries and 3D engines used in the demos,
-* `/reactThreeFiberDemos`: Demos with Webpack/NPM/React/Three Fiber.
+* `/reactThreeFiberDemos`: Demos with Webpack/NPM/React/Three Fiber,
+* `/blenderPluginFlexibleMaskExporter`: Blender plugin to export the metadata JSON file used in the *flexibleMask2* demo.
 
 
 ## Demonstrations
@@ -69,7 +70,6 @@ Here are the static JavaScript demos:
 * glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTOGlasses/), [source code and specific documentation](/demos/VTOGlasses/),
 * headphones/helmet VTO: [live demo](https://webar.rocks/demos/face/demos/VTOHelmet/), [source code](/demos/VTOHelmet/)
 * necklace VTO: [live demo](https://webar.rocks/demos/face/demos/VTONecklace/), [source code](/demos/VTONecklace/)
-* 3D flexible mask: [live demo](https://webar.rocks/demos/face/demos/flexibleMask/), [source code](/demos/flexibleMask/)
 * 3D flexible mask 2: [live demo](https://webar.rocks/demos/face/demos/flexibleMask2/), [source code](/demos/flexibleMask2/)
 * makeup lipstick VTO: [live demo](https://webar.rocks/demos/face/demos/makeupLipstick/), [source code](/demos/makeupLipstick/)
 * makeup shapes based VTO: [live demo](https://webar.rocks/demos/face/demos/makeupShapes/), [source code](/demos/makeupShapes/)
@@ -83,6 +83,7 @@ Here are the static JavaScript demos:
 ## Specifications
 
 ### Get started
+
 The best way to get started is to take a look at our [boilerplate demo](/demos/basic/). It uses some handful helpers from [/helpers path](/helpers/). Here we describe the initialization of the core library without the helpers. But we strongly advise to use them.
 
 
@@ -123,6 +124,7 @@ WEBARROCKSFACE.init({
 
 
 ### Optional init arguments
+
 * `<integer> maxFacesDetected`: Only for multiple face detection - maximum number of faces which can be detected and tracked. Should be between `1` (no multiple detection) and `8`. See [Multiple face section](#multiple-faces) for more details,
 * `<integer> animateDelay`: With this statement you can set accurately the number of milliseconds during which the browser wait at the end of the rendering loop before starting another detection. If you use the canvas of this API as a secondary element (for example in *PACMAN* or *EARTH NAVIGATION* demos) you should set a small `animateDelay` value (for example 2 milliseconds) in order to avoid rendering lags.
 * `<function> onWebcamAsk`: Function launched just before asking for the user to allow its webcam sharing,
@@ -147,16 +149,20 @@ WEBARROCKSFACE.init({
   'rotate': 0         // rotation in degrees possible values: 0,90,-90,180
 },
 ```
-* `<dict> scanSettings`: overrides face scan settings - see `set_scanSettings(...)` method for more information.
-* `<dict> stabilizationSettings`: overrides tracking stabilization settings - see `set_stabilizationSettings(...)` method for more information.
-
 
 If the user has a mobile device in portrait display mode, the width and height of these parameters are automatically inverted for the first camera request. If it does not succeed, we invert the width and height.
+
+
+* `<dict> scanSettings`: overrides face scan settings - see `set_scanSettings(...)` method for more information.
+* `<dict> stabilizationSettings`: overrides tracking stabilization settings - see `set_stabilizationSettings(...)` method for more information.
+* `<boolean> isKeepRunningOnWinFocusLost`: Whether we should keep the detection loop running even if the user switches the browser tab or minimizes the browser window. Default value is `false`. This option is useful for a videoconferencing app, where a face mask should be still computed if the *FaceFilter* window is not the active window. Even with this option toggled on, the face tracking is still slowed down when the FaceFilter window is not active.
+
 
 
 
 
 ### Error codes
+
 The initialization function ( `callbackReady` in the code snippet ) will be called with an error code ( `errCode` ). It can have these values:
 * `false`: no error occurs,
 * `"GL_INCOMPATIBLE"`: WebGL is not available, or this WebGL configuration is not enough (there is no WebGL2, or there is WebGL1 without OES_TEXTURE_FLOAT or OES_TEXTURE_HALF_FLOAT extension),
@@ -170,9 +176,11 @@ The initialization function ( `callbackReady` in the code snippet ) will be call
 
 
 ### The returned objects
+
 We detail here the arguments of the callback functions like `callbackReady` or `callbackTrack`. The reference of these objects do not change for memory optimization purpose. So you should copy their property values if you want to keep them unchanged outside the callback functions scopes.
 
 #### The initialization returned object
+
 The initialization callback function ( `callbackReady` in the code snippet ) is called with a second argument, `spec`, if there is no error. `spec` is a dictionnary having these properties:
 * `GL`: the WebGL context. The rendering 3D engine should use this WebGL context,
 * `canvasElement`: the `<canvas>` element,
@@ -184,6 +192,7 @@ The initialization callback function ( `callbackReady` in the code snippet ) is 
 
 
 #### The detection state
+
 At each render iteration a callback function is executed ( `callbackTrack` in the code snippet ). It has one argument ( `detectState` ) which is a dictionnary with these properties:
 * `<float> detected`: the face detection probability, between `0` and `1`,
 * `<float> x`, `<float> y`: The 2D coordinates of the center of the detection frame in the viewport (each between -1 and 1, `x` from left to right and `y` from bottom to top),
@@ -195,6 +204,7 @@ In multiface detection mode, `detectState` is an array. Its size is equal to the
 
 
 ### Miscellaneous methods
+
 After the initialization (ie after that `callbackReady` is launched ) , these methods are available:
 
 * `WEBARROCKSFACE.resize()`: should be called after resizing the `<canvas>` element to adapt the cut of the video,
@@ -227,16 +237,20 @@ It only applies to global pose stabilization. Landmarks are stabilized using hel
 
 * `WEBARROCKSFACE.update_videoElement(<video> vid, <function|False> callback)`: changes the video element used for the face detection (which can be provided via `VIDEOSETTINGS.videoElement`) by another video element. A callback function can be called when it is done.
 
+* `JEEFACEFILTERAPI.update_videoSettings(<object> videoSettings)`: dynamically change the video settings (see [Optional init arguments](optional-init-arguments) for the properties of `videoSettings`). It is useful to change the camera from the selfie camera (user) to the back (environment) camera. A `Promise` is returned.
+
 * `WEBARROCKSFACE.destroy()`: Cleans both graphic memory and JavaScript memory, uninit the library. After that you need to init the library again. A `Promise` is returned.
 
 
 ### Multiple faces
+
 It is possible to detect and track several faces at the same time. To enable this feature, you only have to specify the optional init parameter `maxFacesDetected`. Its maximum value is `8`. Indeed, if you are tracking for example 8 faces at the same time, the detection will be slower because there is 8 times less computing power per tracked face. If you have set this value to `8` but if there is only `1` face detected, it should not slow down too much compared to the single face tracking.
 
 If multiple face tracking is enabled, the `callbackTrack` function is called with an array of detection states (instead of being executed with a simple detection state). The detection state format is still the same.
 
 
 ### Using module
+
 `/dist/WebARRocksFace.module.js` is exactly the same as `/dist/WebARRocksFace.js` except that it works as a module, so you can import it directly using:
 
 ```javascript
@@ -248,6 +262,7 @@ or using `require`.
 
 
 ## Hosting
+
 You should host the content of this repository using a HTTPS static server.
 
 Example:
@@ -270,10 +285,13 @@ Some directories of the latest version of this library are hosted on `https://cd
 
 
 ## About the tech
+
 ### Under the hood
+
 This API uses [WebAR.rocks](https://webar.rocks) WebGL Deep Learning technology to detect and track the user's face using a neural network. The accuracy is adaptative: the best is the hardware, the more detections are processed per second. All is done client-side.
 
 ### Compatibility
+
 * If `WebGL2` is available, it uses `WebGL2` and no specific extension is required,
 * If `WebGL2` is not available but `WebGL1`, we require either `OES_TEXTURE_FLOAT` extension or `OES_TEXTURE_HALF_FLOAT` extension,
 * If `WebGL2` is not available, and if `WebGL1` is not available or neither `OES_TEXTURE_FLOAT` or `OES_HALF_TEXTURE_FLOAT` are implemented, the user is not compatible.
@@ -288,6 +306,7 @@ If a compatibility error is triggered, please post an issue on this repository. 
 
 
 ## License
+
 The license does not apply for all directories, files and subdirectories of `/libs/`.
 
 This application is NOT released under open license.
@@ -295,5 +314,6 @@ The use of this library is granted by specific development contracts in a case b
 
 
 ## References
+
 * [WebAR.rocks website](https://webar.rocks)
 * [Webgl Academy: tutorials about WebGL and THREE.JS](http://www.webglacademy.com)

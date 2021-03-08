@@ -108,7 +108,7 @@ const DebugCube = (props) => {
 }
 
 
-class VTOGlasses extends Component {
+class FlexibleMask extends Component {
   constructor(props) {
     super(props)
 
@@ -205,7 +205,7 @@ class VTOGlasses extends Component {
           zIndex: 2,
           ...this.state.sizing
         }}
-        gl={{
+        gl = {{
           preserveDrawingBuffer: true // allow image capture
         }}>
           <DirtyHook sizing={this.state.sizing} lighting={this.state.lighting} />
@@ -231,4 +231,4 @@ class VTOGlasses extends Component {
   }
 } 
 
-export default VTOGlasses
+export default FlexibleMask

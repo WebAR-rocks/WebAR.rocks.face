@@ -61,6 +61,13 @@ const WebARRocksFaceFlexibleMaskHelper = (function () {
     CHIN_BOTTOM: "chin",
   };
 
+  // pre allocate some element to avoid allocating in rendering loop:
+  const _working = {
+    vec3: null,
+    mat4: null
+  };
+
+
   // BEGIN MISC THREE.JS HELPERS
   function tweak_threeShaderAdd(code, chunk, glslCode) {
     return code.replace(chunk, chunk + "\n" + glslCode);
@@ -629,9 +636,8 @@ const WebARRocksFaceFlexibleMaskHelper = (function () {
         decayEnd = decayRange[1];
       const positions = geom.attributes.position.array;
       const n = keypointsMorphInfluences.indices.length;
-      const position = new THREE.Vector3();
-      for (let i = 0; i < n; ++i) {
-        // loop on mesh points:
+      const position = _working.vec3.set(0,0,0);
+      for (let i=0; i<n; ++i){ // loop on mesh points:
         const pointIndice = Math.floor(i / 3);
 
         // decay each weight independantly:
@@ -838,12 +844,11 @@ const WebARRocksFaceFlexibleMaskHelper = (function () {
       return flexibleMaskMesh;
     },
 
-    build_flexibleMask: function (
-      allLandmarksLabels,
-      geom,
-      face3DKeypointsPositions,
-      optionsArg
-    ) {
+
+    build_flexibleMask: function(allLandmarksLabels, geom, face3DKeypointsPositions, optionsArg){
+      _working.vec3 = new THREE.Vector3();
+      _working.mat4 = new THREE.Matrix4();
+      
       const options = Object.assign({}, _defaultBuildOptions, optionsArg);
 
       if (_settings.debugMaskMesh) {
@@ -943,7 +948,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function () {
     compute_keypointsDisplacements: function (camera, mesh) {
       const keypoints = mesh.userData.keypoints;
       const matProj = camera.projectionMatrix;
-      const matMVInv = new THREE.Matrix4().getInverse(mesh.modelViewMatrix);
+      const matMVInv = _working.mat4.copy(mesh.modelViewMatrix).invert();
 
       keypoints.forEach(function (kp) {
         // compute the displacement of the keypoint in the viewport:
