@@ -38,10 +38,7 @@ import GLTFOccluderModel from '../../assets/flexibleMask2/occluder.glb'
 // import envMap:
 import envMap from '../../assets/flexibleMask2/venice_sunset_512.hdr'
 
-
-
-let _timerResize = null, _flexibleMaskMesh = null, _threeCamera = null
-
+let _flexibleMaskMesh = null, _threeCamera = null
 
 // fake component, display nothing
 // just used to get the Camera and the renderer used by React-fiber:
@@ -50,19 +47,9 @@ const DirtyHook = (props) => {
   _threeCamera = threeFiber.camera
   useFrame(threeHelper.update_threeCamera.bind(null, props.sizing, threeFiber.camera))
   lightingHelper.set(threeFiber.gl, threeFiber.scene, props.lighting)
+  threeFiber.gl.setSize(props.sizing.width, props.sizing.height, false)
+  threeHelper.resize()
   return null
-}
-
-const compute_sizing = () => {
-  // compute  size of the canvas:
-  const height = window.innerHeight
-  const wWidth = window.innerWidth
-  const width = Math.min(wWidth, height)
-
-  // compute position of the canvas:
-  const top = 0
-  const left = (wWidth - width ) / 2
-  return {width, height, top, left}
 }
 
 const VTOModelContainer = (props) => {
@@ -126,7 +113,12 @@ class FlexibleMask extends Component {
       isPaused: false,
 
       // size of the canvas:
-      sizing: compute_sizing(),
+      sizing: {
+        width: 640,
+        height: 360,
+      },
+
+      isContainerWide: true,
 
       // 3D model:
       GLTFModel,
@@ -144,29 +136,6 @@ class FlexibleMask extends Component {
         hemiLightIntensity: 0.8
       }
     }
-
-    // handle resizing / orientation change:
-    this.handle_resize = this.handle_resize.bind(this)
-    this.do_resize = this.do_resize.bind(this)
-    window.addEventListener('resize', this.handle_resize)
-    window.addEventListener('orientationchange', this.handle_resize)
-  }
-
-  handle_resize() {
-    // do not resize too often:
-    if (_timerResize){
-      clearTimeout(_timerResize)
-    }
-    _timerResize = setTimeout(this.do_resize, 200)
-  }
-
-  do_resize(){
-    _timerResize = null
-    const newSizing = compute_sizing()
-    this.setState({sizing: newSizing}, () => {
-      if (_timerResize) return
-      threeHelper.resize()
-    })
   }
 
   componentDidMount(){
@@ -198,16 +167,15 @@ class FlexibleMask extends Component {
   render(){
     // generate canvases:
     return (
-      <div>
+      <div className={`container ${this.state.isContainerWide ? "" : "container--small"}`}>
         {/* Canvas managed by three fiber, for AR: */}
-        <Canvas className='mirrorX' style={{
-          position: 'fixed',
-          zIndex: 2,
-          ...this.state.sizing
-        }}
+        <Canvas className='mirrorX mask'
         gl = {{
           preserveDrawingBuffer: true // allow image capture
-        }}>
+        }}
+        width={this.state.sizing.width}
+        height={this.state.sizing.height}
+        >
           <DirtyHook sizing={this.state.sizing} lighting={this.state.lighting} />
           
           <Suspense fallback={<DebugCube />}>
@@ -219,13 +187,24 @@ class FlexibleMask extends Component {
         </Canvas>
 
       {/* Canvas managed by WebAR.rocks, just displaying the video (and used for WebGL computations) */}
-        <canvas className='mirrorX' ref='canvasFace' style={{
-          position: 'fixed',
-          zIndex: 1,
-          ...this.state.sizing
-        }} width = {this.state.sizing.width} height = {this.state.sizing.height} />
+        <canvas 
+          className='mirrorX face' 
+          ref='canvasFace'
+          width={this.state.sizing.width} 
+          height={this.state.sizing.height} 
+        />
 
         <BackButton />        
+        <button 
+          className="toggleDivSize"
+          onClick={ () => {
+            this.setState((state) => { return {
+              isContainerWide: !state.isContainerWide
+            }})
+          }}
+        >
+          Toggle Container size
+        </button>
       </div>
     )
   }
