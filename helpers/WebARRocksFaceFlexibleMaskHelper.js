@@ -163,7 +163,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
     extract_flexibleMaskGeometry: function(scene, geomName){
       let threeGeom = null, threeGeomParent = null, err = null;
       scene.traverse(function(threeStuff){
-        if (threeStuff.type !== 'Mesh' || !threeStuff.geometry){
+        if ((threeStuff.type !== "Mesh" && threeStuff.type !== "SkinnedMesh") || !threeStuff.geometry){
           return;
         }
         const isNameValid = ( !geomName || ( geomName && geomName === threeStuff.name ));
