@@ -15,6 +15,8 @@ import DemoVTONecklace from './js/demos/VTONecklace.js'
 
 import DemoFlexibleMask2 from './js/demos/FlexibleMask2.js'
 
+import DemoPiepacker from './js/demos/Piepacker.js'
+
 import DemoMakeupSport from './js/demos/MakeupSport.js'
 import DemoMakeupTexture from './js/demos/MakeupTexture.js'
 
@@ -41,6 +43,10 @@ render(
 
         <Route path="/flexibleMask2">
           <DemoFlexibleMask2 />
+        </Route>
+
+        <Route path="/piepacker">
+          <DemoPiepacker />
         </Route>
 
         <Route path="/makeupSport">

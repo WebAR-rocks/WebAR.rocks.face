@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * Copyright 2020 WebAR.rocks ( https://webar.rocks )
  * 
@@ -11,6 +13,7 @@
  * OR TO ADDRESS A SPECIFIC USE CASE.
  */
 
+
 const WebARRocksFaceExpressionsEvaluator = (function(){
 
 
@@ -18,7 +21,7 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
 
 
   // private funcs:
-  function compute_distancePx(relPos0, relPos1){
+  function compute_distancePx(WEBARROCKSFACE, relPos0, relPos1){
     const wPx = WEBARROCKSFACE.get_widthPx();
     const hPx = WEBARROCKSFACE.get_heightPx();
 
@@ -77,7 +80,7 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
       easeInOutQuint: function (t) { return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t }
     }, // end EASING
 
-    evaluate_expressions: function(detectState){
+    evaluate_expressions: function(WEBARROCKSFACE, detectState){
       if (!detectState.isDetected){
         return _expressions;
       }
@@ -89,8 +92,8 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
         const id = evaluator.id;
 
         // compute distances between landmarks in pixels:
-        const distance = compute_distancePx(landmarkRelPos[evaluator.landmarksInd[0]], landmarkRelPos[evaluator.landmarksInd[1]]);
-        let refDistance = compute_distancePx(landmarkRelPos[evaluator.refLandmarksInd[0]], landmarkRelPos[evaluator.refLandmarksInd[1]]);
+        const distance = compute_distancePx(WEBARROCKSFACE, landmarkRelPos[evaluator.landmarksInd[0]], landmarkRelPos[evaluator.landmarksInd[1]]);
+        let refDistance = compute_distancePx(WEBARROCKSFACE, landmarkRelPos[evaluator.refLandmarksInd[0]], landmarkRelPos[evaluator.refLandmarksInd[1]]);
         
         // refDistance should be at least 0.5 pixel to avoid a division by 0:
         refDistance = Math.max(0.5, refDistance);
@@ -117,7 +120,7 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
       return _expressions;
     },
 
-    add_expressionEvaluator: function(id, argParams){
+    add_expressionEvaluator: function(WEBARROCKSFACE, id, argParams){
       // params properties:
       //  * <[<string>, <string>]> refLandmarks: reference face landmarks labels
       //  * <[<string>, <string>]> landmarks: measured face landmarks labels
@@ -239,3 +242,5 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
 
   return that;
 })();
+
+export default WebARRocksFaceExpressionsEvaluator;
