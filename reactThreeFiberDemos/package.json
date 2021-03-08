@@ -6,7 +6,7 @@
   "author": "Xavier Bourry",
   "license": "",
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack serve --host 0.0.0.0 --config config/webpack.dev.js",
+    "start": "cross-env NODE_ENV=development webpack serve --host localhost --config config/webpack.dev.js",
     "build": "cross-env NODE_ENV=production webpack --config config/webpack.prod.js"
   },
   "keywords": [],
