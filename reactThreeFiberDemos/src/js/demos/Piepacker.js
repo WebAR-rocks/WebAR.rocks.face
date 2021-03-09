@@ -51,7 +51,7 @@ let _ARTrackingMetadata = null
 
 let _GLTFOccluderModel = null
 
-let _timerResize = null, _flexibleMaskMesh = null, _threeCamera = null, _threeScene = null
+let _timerResize = null, _flexibleMaskMesh = null, _threeCamera = null, _threeScene = null, _threeRenderer = null
 let _threeObject3D = null
 let _physics = null
 
@@ -68,8 +68,9 @@ const DirtyHook = (props) => {
   const threeFiber = useThree()
   _threeCamera = threeFiber.camera
   _threeScene = threeFiber.scene
+  _threeRenderer = threeFiber.gl
   useFrame(threeHelper.update_threeCamera.bind(null, props.sizing, threeFiber.camera))
-  lightingHelper.set(threeFiber.gl, threeFiber.scene, props.lighting)
+  lightingHelper.set(_threeRenderer, threeFiber.scene, props.lighting)
   return null
 }
 
@@ -341,6 +342,10 @@ class FlexibleMask extends Component {
     const canvasFace = this.refs.canvasFace
     threeHelper.init(WEBARROCKSFACE, {
       NN,
+      isKeepRunningOnWinFocusLost: true,
+      scanSettings: {
+        threshold: 0.8
+      },
       canvas: canvasFace,
       maxFacesDetected: 1,
       callbackReady: (err) => {
@@ -364,6 +369,11 @@ class FlexibleMask extends Component {
         // update flexible geometry (follow face landmarks):
         if (_flexibleMaskMesh && _threeCamera){
           flexibleMaskHelper.update_flexibleMask(_threeCamera, _flexibleMaskMesh, detectStates, landmarksStabilized)
+        }
+
+        // force rendering of the scene if the tab has lost focus:
+        if (!WEBARROCKSFACE.is_winFocus()){
+          _threeRenderer.render(_threeScene, _threeCamera);
         }
       }
     })
