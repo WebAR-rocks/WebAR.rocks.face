@@ -8,8 +8,9 @@ import { GLTFLoader } from '../contrib/three/v119/GLTFLoader.js'
 // import SkeletonUtils, useful to clone a THREE instance with a skeleton
 import { SkeletonUtils } from '../contrib/three/v126/examples/jsm/utils/SkeletonUtils.js'
 
-// import components:
+// import some UI components:
 import BackButton from '../components/BackButton.js'
+import VTOButton from '../components/VTOButton.js'
 
 // import neural network model:
 import NN from '../contrib/WebARRocksFace/neuralNets/NN_FACE_0.json'
@@ -35,7 +36,8 @@ import expressionsDetector from '../misc/PiepackerExpressionsDetector'
 
 // ASSETS:
 // import 3D model:
-import GLTFModel from '../../assets/piepacker/HeroMage.glb'
+import GLTFModel1 from '../../assets/piepacker/HeroMage.glb'
+import GLTFModel2 from '../../assets/piepacker/HeroMageOrange.glb'
 
 // import AR Metadatas (tells how to deform GLTFModel)
 //import ARTrackingMetadata from '../../assets/flexibleMask2/foolMaskARMetadata.json'
@@ -43,8 +45,6 @@ import GLTFModel from '../../assets/piepacker/HeroMage.glb'
 // import occluder
 //import GLTFOccluderModel from '../../assets/flexibleMask2/occluder.glb'
 
-// import envMap:
-import envMap from '../../assets/flexibleMask2/venice_sunset_512.hdr'
 
 
 let _ARTrackingMetadata = null
@@ -52,6 +52,7 @@ let _ARTrackingMetadata = null
 let _GLTFOccluderModel = null
 
 let _timerResize = null, _flexibleMaskMesh = null, _threeCamera = null, _threeScene = null
+let _threeObject3D = null
 let _physics = null
 
 const _animationActions = {
@@ -177,6 +178,8 @@ const ModelContainer = (props) => {
     })
 
     // append to face follower object:
+    _threeObject3D = threeObject3D
+    _threeObject3D.visible = props.isVisible
     threeHelper.set_faceFollower(threeObject3DParent, threeObject3D, props.faceIndex)
   })
   
@@ -255,13 +258,13 @@ class FlexibleMask extends Component {
 
     // initialize state:
     this.state = {
-      isPaused: false,
+      isVisible: true,
 
       // size of the canvas:
       sizing: compute_sizing(),
 
       // 3D model:
-      GLTFModel,
+      GLTFModel: GLTFModel1,
 
       // AR Metadatas
       ARTrackingExperience,
@@ -270,8 +273,7 @@ class FlexibleMask extends Component {
       GLTFOccluderModel: _GLTFOccluderModel,
 
       lighting: {
-        envMap,
-        pointLightIntensity: 0.8,
+        pointLightIntensity: 0,
         pointLightY: 200, // larger -> move the pointLight to the top
         hemiLightIntensity: 0.8
       },
@@ -280,9 +282,17 @@ class FlexibleMask extends Component {
         skinnedMeshName: 'The_Hood', // physics should be applied to this skinnedMesh
         bonesSettings: {
           The_Hood_Rig: null, // this bone should not move
+          Tail_2: {
+            damper: 0.02,
+            spring: 0.00004
+          },
+          Tail_3: {
+            damper: 0.01,
+            spring: 0.00003
+          },
           DEFAULT: { // applied to all other bones:
-            damper: 0.0004,
-            spring: 0.000004
+            damper: 0.002,
+            spring: 0.00002
           }
         }
       }
@@ -293,6 +303,17 @@ class FlexibleMask extends Component {
     this.do_resize = this.do_resize.bind(this)
     window.addEventListener('resize', this.handle_resize)
     window.addEventListener('orientationchange', this.handle_resize)
+  }
+
+
+  switch_mask() {
+    const newGLTFModel = (this.state.GLTFModel === GLTFModel1) ? GLTFModel2 : GLTFModel1
+    this.setState({GLTFModel: newGLTFModel})
+  }
+
+
+  toggle_maskVisibility(){
+    this.setState({isVisible: !this.state.isVisible})
   }
 
 
@@ -349,6 +370,21 @@ class FlexibleMask extends Component {
   }
 
 
+  shouldComponentUpdate(nextProps, nextState){
+    if (nextState.isVisible !== this.state.isVisible){
+      const nDetectsPerLoop = (nextState.isVisible) ? 0 : 1
+      WEBARROCKSFACE.set_scanSettings({
+        'nDetectsPerLoop': nDetectsPerLoop
+      })
+      if (_threeObject3D){
+        _threeObject3D.visible = nextState.isVisible
+      }
+      return false
+    }
+    return true
+  }
+
+
   componentWillUnmount() {
     _timerResize = null
     _flexibleMaskMesh = null
@@ -379,6 +415,7 @@ class FlexibleMask extends Component {
               faceIndex={0}
               ARTrackingExperience={this.state.ARTrackingExperience}
               physics={this.state.physics}
+              isVisible={this.state.isVisible}
               />
           </Suspense>
         </Canvas>
@@ -390,7 +427,11 @@ class FlexibleMask extends Component {
           ...this.state.sizing
         }} width = {this.state.sizing.width} height = {this.state.sizing.height} />
 
-        <BackButton />        
+        <BackButton />
+        <div className="VTOButtons">
+          <VTOButton onClick = {this.switch_mask.bind(this)} >Switch mask</VTOButton>
+          <VTOButton onClick = {this.toggle_maskVisibility.bind(this)} >Toggle visibility</VTOButton>
+        </div>
       </div>
     )
   }
