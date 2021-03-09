@@ -33,7 +33,7 @@ import expressionsDetector from '../misc/PiepackerExpressionsDetector'
 
 // ASSETS:
 // import 3D model:
-import GLTFModel1 from '../../assets/piepacker/HeroMage.glb'
+import GLTFModel1 from '../../assets/piepacker/HeroMageWithUselessBone.glb'
 import GLTFModel2 from '../../assets/piepacker/HeroMageOrange.glb'
 
 // import AR Metadatas (tells how to deform GLTFModel)
@@ -292,17 +292,17 @@ class FlexibleMask extends Component {
         skinnedMeshName: 'The_Hood', // physics should be applied to this skinnedMesh
         bonesSettings: {
           The_Hood_Rig: null, // this bone should not move
-          Tail_2: {
+          /*Tail_2: {
             damper: 0.02,
             spring: 0.00004
           },
           Tail_3: {
             damper: 0.01,
             spring: 0.00003
-          },
+          },*/
           DEFAULT: { // applied to all other bones:
-            damper: 0.002,
-            spring: 0.00002
+            damper: 0.0005,
+            spring: 0.000001
           }
         }
       }
