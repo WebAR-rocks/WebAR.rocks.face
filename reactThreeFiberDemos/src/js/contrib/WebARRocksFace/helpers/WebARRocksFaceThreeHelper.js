@@ -277,9 +277,13 @@ const WebARRocksFaceThreeHelper = (function(){
       
       compute_pose(landmarksStabilized, faceSlot);
       
-      faceSlot.faceFollowerParent.visible = true;      
+      if (_spec.isVisibilityAuto){
+        faceSlot.faceFollowerParent.visible = true;
+      }
     } else if (faceSlot.faceFollowerParent.visible){
-      faceSlot.faceFollowerParent.visible = false;
+      if (_spec.isVisibilityAuto){
+        faceSlot.faceFollowerParent.visible = false;
+      }
       if (_stabilizers && _stabilizers[slotIndex]){
         _stabilizers[slotIndex].reset();
       }
@@ -357,6 +361,8 @@ const WebARRocksFaceThreeHelper = (function(){
         NN: null,
         canvas: null,
 
+        isVisibilityAuto: true,        
+
         isKeepRunningOnWinFocusLost: false,
         maxFacesDetected: 1,
 
@@ -380,6 +386,7 @@ const WebARRocksFaceThreeHelper = (function(){
         canvas: _spec.canvas,
         NN: _spec.NN,
         maxFacesDetected: _spec.maxFacesDetected,
+        scanSettings: _spec.scanSettings,
         isKeepRunningOnWinFocusLost: _spec.isKeepRunningOnWinFocusLost
       });
 
@@ -393,7 +400,9 @@ const WebARRocksFaceThreeHelper = (function(){
 
     set_faceFollower: function(faceFollowerParent, faceFollower, faceIndex){
       faceFollowerParent.frustumCulled = false;
-      faceFollowerParent.visible = false;
+      if (_spec.isVisibilityAuto){
+        faceFollowerParent.visible = false;
+      }
       faceFollowerParent.matrixAutoUpdate = false;
       _three.faceSlots[faceIndex] ={
         faceFollower: faceFollower,

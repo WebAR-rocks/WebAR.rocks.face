@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@react-three/postprocessing": "^1.4.1",
+    "@tweenjs/tween.js": "^18.6.4",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",

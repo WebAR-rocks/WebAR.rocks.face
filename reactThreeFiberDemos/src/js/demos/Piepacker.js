@@ -42,6 +42,7 @@ import GLTFModel2 from '../../assets/piepacker/HeroMageOrange.glb'
 // import occluder
 //import GLTFOccluderModel from '../../assets/flexibleMask2/occluder.glb'
 
+import TWEEN from '@tweenjs/tween.js'
 
 
 let _ARTrackingMetadata = null
@@ -309,15 +310,42 @@ class FlexibleMask extends Component {
 
     this.compositeCtx = null
     this.update_compositeCanvas = this.update_compositeCanvas.bind(this)
+
+    this.isFaceDetected = false
+    this.onFaceDetected = this.onFaceDetected.bind(this)
+    this.faceDetectedTweenAlpha = {
+      value: 1
+    }
+  }
+
+
+  onFaceDetected(isFaceDetected){
+    this.isFaceDetected = isFaceDetected
+    TWEEN.removeAll()
+
+    if (isFaceDetected){
+      console.log('FACE DETECTED')
+      this.faceDetectedTweenAlpha.value = 1
+    } else { 
+      console.log('FACE LOST')
+
+      const tweenMaskFadeOut = new TWEEN.Tween(this.faceDetectedTweenAlpha)
+        .to({value: 0}, 600)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .onUpdate(() => {console.log(this.faceDetectedTweenAlpha)})
+        .start()
+    }
   }
 
 
   update_compositeCanvas(){
     const ctx = this.compositeCtx
     // draw the video:
+    ctx.globalAlpha = 1
     ctx.drawImage(this.refs.canvasFace, 0, 0)
 
     // draw the 3D:
+    ctx.globalAlpha = this.faceDetectedTweenAlpha.value
     ctx.drawImage(_threeRenderer.domElement, 0, 0)
   }
 
@@ -341,6 +369,7 @@ class FlexibleMask extends Component {
     const canvasFace = this.refs.canvasFace
     threeHelper.init(WEBARROCKSFACE, {
       NN,
+      isVisibilityAuto: false,
       isKeepRunningOnWinFocusLost: true,
       scanSettings: {
         threshold: 0.8
@@ -375,7 +404,16 @@ class FlexibleMask extends Component {
           _threeRenderer.render(_threeScene, _threeCamera)
         }
 
-        // update composite canvas
+        if (detectStates.isDetected && !this.isFaceDetected){
+          this.onFaceDetected(true)
+        } else if (!detectStates.isDetected && this.isFaceDetected){
+          this.onFaceDetected(false)
+        }
+
+        // update TWEEN:
+        TWEEN.update()
+
+        // update composite canvas:
         this.update_compositeCanvas()
       }
     })
