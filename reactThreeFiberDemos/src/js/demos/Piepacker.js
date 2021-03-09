@@ -25,9 +25,6 @@ import threeHelper from '../contrib/WebARRocksFace/helpers/WebARRocksFaceThreeHe
 // import flexible mask helper
 import flexibleMaskHelper from '../contrib/WebARRocksFace/helpers/WebARRocksFaceFlexibleMaskHelper.js'
 
-// lighting helper
-import lightingHelper from '../contrib/WebARRocksFace/helpers/WebARRocksFaceLightingHelper.js'
-
 // ZboingZboing physics:
 import { ZboingZboingPhysics } from '../contrib/threeZboingZboing/ZboingZboingPhysics.js'
 
@@ -62,6 +59,7 @@ const _animationActions = {
 }
 let _threeAnimationMixer = null, _threeClock = null
 
+
 // fake component, display nothing
 // just used to get the Camera and the renderer used by React-fiber:
 const DirtyHook = (props) => {
@@ -69,22 +67,24 @@ const DirtyHook = (props) => {
   _threeCamera = threeFiber.camera
   _threeScene = threeFiber.scene
   _threeRenderer = threeFiber.gl
+  _threeRenderer.setSize(props.sizing.width, props.sizing.height, false)
   useFrame(threeHelper.update_threeCamera.bind(null, props.sizing, threeFiber.camera))
-  lightingHelper.set(_threeRenderer, threeFiber.scene, props.lighting)
   return null
 }
 
 
-const compute_sizing = () => {
-  // compute  size of the canvas:
-  const height = window.innerHeight
-  const wWidth = window.innerWidth
-  const width = Math.min(wWidth, height)
-
-  // compute position of the canvas:
-  const top = 0
-  const left = (wWidth - width ) / 2
-  return {width, height, top, left}
+// create a toon material with outline effect from a random material
+// see https://threejs.org/examples/?q=toon#webgl_materials_variations_toon
+const create_toonMaterial = (mat) => {
+  if (mat.isMeshToonMaterial) return mat
+  const colorWhite = new THREE.Color(0xffffff)
+  return new THREE.MeshToonMaterial({
+    color: mat.color || colorWhite,
+    map: mat.map,
+    normalMap: mat.normalMap,
+    skinning: mat.skinning,
+    name: mat.name
+  })
 }
 
 
@@ -145,6 +145,15 @@ const ModelContainer = (props) => {
       threeObject3D.add(_flexibleMaskMesh)
     }
 
+    // set toon shading:
+    if (props.isToonShaded){
+      threeObject3D.traverse(function(node){
+        if (node.material){
+          node.material = create_toonMaterial(node.material)
+        }
+      })
+    }
+
     // set shadows and extract skinnedMesh:
     let skinnedMesh = null
     threeObject3D.traverse(function (node) {      
@@ -180,7 +189,7 @@ const ModelContainer = (props) => {
 
     // append to face follower object:
     _threeObject3D = threeObject3D
-    _threeObject3D.visible = props.isVisible
+    _threeObject3D.visible = props.isMaskVisible
     threeHelper.set_faceFollower(threeObject3DParent, threeObject3D, props.faceIndex)
   })
   
@@ -259,10 +268,15 @@ class FlexibleMask extends Component {
 
     // initialize state:
     this.state = {
-      isVisible: true,
+      isMaskVisible: true,
+
+      isToonShaded: true,
 
       // size of the canvas:
-      sizing: compute_sizing(),
+      sizing: {
+        width: 640,
+        height: 480
+      },
 
       // 3D model:
       GLTFModel: GLTFModel1,
@@ -272,12 +286,6 @@ class FlexibleMask extends Component {
 
       // occluder 3D model:
       GLTFOccluderModel: _GLTFOccluderModel,
-
-      lighting: {
-        pointLightIntensity: 0,
-        pointLightY: 200, // larger -> move the pointLight to the top
-        hemiLightIntensity: 0.8
-      },
 
       physics: {
         skinnedMeshName: 'The_Hood', // physics should be applied to this skinnedMesh
@@ -299,11 +307,18 @@ class FlexibleMask extends Component {
       }
     }
 
-    // handle resizing / orientation change:
-    this.handle_resize = this.handle_resize.bind(this)
-    this.do_resize = this.do_resize.bind(this)
-    window.addEventListener('resize', this.handle_resize)
-    window.addEventListener('orientationchange', this.handle_resize)
+    this.compositeCtx = null
+    this.update_compositeCanvas = this.update_compositeCanvas.bind(this)
+  }
+
+
+  update_compositeCanvas(){
+    const ctx = this.compositeCtx
+    // draw the video:
+    ctx.drawImage(this.refs.canvasFace, 0, 0)
+
+    // draw the 3D:
+    ctx.drawImage(_threeRenderer.domElement, 0, 0)
   }
 
 
@@ -314,30 +329,14 @@ class FlexibleMask extends Component {
 
 
   toggle_maskVisibility(){
-    this.setState({isVisible: !this.state.isVisible})
-  }
-
-
-  handle_resize() {
-    // do not resize too often:
-    if (_timerResize){
-      clearTimeout(_timerResize)
-    }
-    _timerResize = setTimeout(this.do_resize, 200)
-  }
-
-
-  do_resize(){
-    _timerResize = null
-    const newSizing = compute_sizing()
-    this.setState({sizing: newSizing}, () => {
-      if (_timerResize) return
-      threeHelper.resize()
-    })
+    this.setState({isMaskVisible: !this.state.isMaskVisible})
   }
 
 
   componentDidMount(){
+    // create a 2D context for the composite canvas:
+    this.compositeCtx = this.refs.canvasComposite.getContext('2d')
+
     // init WEBARROCKSFACE through the helper:
     const canvasFace = this.refs.canvasFace
     threeHelper.init(WEBARROCKSFACE, {
@@ -373,21 +372,24 @@ class FlexibleMask extends Component {
 
         // force rendering of the scene if the tab has lost focus:
         if (!WEBARROCKSFACE.is_winFocus()){
-          _threeRenderer.render(_threeScene, _threeCamera);
+          _threeRenderer.render(_threeScene, _threeCamera)
         }
+
+        // update composite canvas
+        this.update_compositeCanvas()
       }
     })
   }
 
 
   shouldComponentUpdate(nextProps, nextState){
-    if (nextState.isVisible !== this.state.isVisible){
-      const nDetectsPerLoop = (nextState.isVisible) ? 0 : 1
+    if (nextState.isMaskVisible !== this.state.isMaskVisible){
+      const nDetectsPerLoop = (nextState.isMaskVisible) ? 0 : 1
       WEBARROCKSFACE.set_scanSettings({
         'nDetectsPerLoop': nDetectsPerLoop
       })
       if (_threeObject3D){
-        _threeObject3D.visible = nextState.isVisible
+        _threeObject3D.visible = nextState.isMaskVisible
       }
       return false
     }
@@ -407,35 +409,39 @@ class FlexibleMask extends Component {
     // generate canvases:
     return (
       <div>
-        {/* Canvas managed by three fiber, for AR: */}
-        <Canvas className='mirrorX' style={{
-          position: 'fixed',
-          zIndex: 2,
-          ...this.state.sizing
-        }}
-        gl = {{
-          preserveDrawingBuffer: true // allow image capture
-        }}>
-          <DirtyHook sizing={this.state.sizing} lighting={this.state.lighting} />
-          
-          <Suspense fallback={<DebugCube />}>
-            <ModelContainer
-              GLTFModel={this.state.GLTFModel}
-              GLTFOccluderModel={this.state.GLTFOccluderModel}
-              faceIndex={0}
-              ARTrackingExperience={this.state.ARTrackingExperience}
-              physics={this.state.physics}
-              isVisible={this.state.isVisible}
-              />
-          </Suspense>
-        </Canvas>
+        {/* We hide the 2 canvas since we only display the compositing canvas */}
+        <div ref='layerCanvases'>
+          {/* Canvas managed by three fiber, for AR: */}
+          <Canvas
+            gl = {{
+              preserveDrawingBuffer: true // allow image capture
+            }}
+            updateDefaultCamera = {false}
+            onCreated = {() => { this.refs.layerCanvases.style.display = 'none' }}>
+            <DirtyHook sizing={this.state.sizing} />
+            
+            <Suspense fallback={<DebugCube />}>
+              <ModelContainer
+                GLTFModel={this.state.GLTFModel}
+                GLTFOccluderModel={this.state.GLTFOccluderModel}
+                faceIndex={0}
+                ARTrackingExperience={this.state.ARTrackingExperience}
+                physics={this.state.physics}
+                isMaskVisible={this.state.isMaskVisible}
+                isToonShaded={this.state.isToonShaded}
+                />
+            </Suspense>
 
-      {/* Canvas managed by WebAR.rocks, just displaying the video (and used for WebGL computations) */}
-        <canvas className='mirrorX' ref='canvasFace' style={{
-          position: 'fixed',
-          zIndex: 1,
-          ...this.state.sizing
-        }} width = {this.state.sizing.width} height = {this.state.sizing.height} />
+            <ambientLight />
+            <pointLight position={[0, 200, 0]} />
+          </Canvas>
+
+          {/* Canvas managed by WebAR.rocks, just displaying the video (and used for WebGL computations) */}
+          <canvas ref='canvasFace' width = {this.state.sizing.width} height = {this.state.sizing.height} />
+        </div>
+
+        { /* Compositing canvas */}
+        <canvas className='mirrorX' ref='canvasComposite' width = {this.state.sizing.width} height = {this.state.sizing.height} />
 
         <BackButton />
         <div className="VTOButtons">

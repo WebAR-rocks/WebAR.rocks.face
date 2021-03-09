@@ -243,7 +243,9 @@ class VTOGlasses extends Component {
         }}
         gl={{
           preserveDrawingBuffer: true // allow image capture
-        }}>
+        }}
+        updateDefaultCamera = {false}
+        >
           <DirtyHook sizing={this.state.sizing} lighting={this.state.lighting} />
           
           <Suspense fallback={<DebugCube />}>
