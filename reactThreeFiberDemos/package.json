@@ -6,7 +6,7 @@
   "author": "Xavier Bourry",
   "license": "",
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server --host 0.0.0.0 --config config/webpack.dev.js",
+    "start": "cross-env NODE_ENV=development webpack serve --host 0.0.0.0 --config config/webpack.dev.js",
     "build": "cross-env NODE_ENV=production webpack --config config/webpack.prod.js"
   },
   "keywords": [],
@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@react-three/postprocessing": "^1.5.2",
+    "@tweenjs/tween.js": "^18.6.4",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",

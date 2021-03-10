@@ -1,7 +1,20 @@
+/**
+ * Copyright 2020 WebAR.rocks ( https://webar.rocks )
+ * 
+ * WARNING: YOU SHOULD NOT MODIFY THIS FILE OTHERWISE WEBAR.ROCKS
+ * WON'T BE RESPONSIBLE TO MAINTAIN AND KEEP YOUR ADDED FEATURES
+ * WEBAR.ROCKS WON'T BE LIABLE FOR BREAKS IN YOUR ADDED FUNCTIONNALITIES
+ *
+ * WEBAR.ROCKS KEEP THE RIGHT TO WORK ON AN UNMODIFIED VERSION OF THIS SCRIPT.
+ * 
+ * THIS FILE IS A HELPER AND SHOULD NOT BE MODIFIED TO IMPLEMENT A SPECIFIC USER SCENARIO
+ * OR TO ADDRESS A SPECIFIC USE CASE.
+ */
+
 const WebARRocksFaceExpressionsEvaluator = (function(){
 
 
-  const _evaluators = [], _expressions = {}, _triggers = {};
+  let _evaluators = [], _expressions = {}, _triggers = {};
 
 
   // private funcs:
@@ -217,6 +230,10 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
           trigger.state = targetState;
         });
       }
+    },
+
+    destroy: function(){
+      _evaluators = [], _expressions = {}, _triggers = {};
     }
   };
 
