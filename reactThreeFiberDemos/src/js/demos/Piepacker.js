@@ -34,7 +34,7 @@ import expressionsDetector from '../misc/PiepackerExpressionsDetector'
 // ASSETS:
 // import 3D model:
 import GLTFModel1 from '../../assets/piepacker/HeroMageWithUselessBone.glb'
-import GLTFModel2 from '../../assets/piepacker/HeroMageOrange.glb'
+import GLTFModel2 from '../../assets/piepacker/HeroMageNew.glb'
 
 // import AR Metadatas (tells how to deform GLTFModel)
 //import ARTrackingMetadata from '../../assets/flexibleMask2/foolMaskARMetadata.json'
@@ -132,8 +132,8 @@ const onEyeRightOpen = () => {
 
 const ModelContainer = (props) => {
   const objRef = useUpdate((threeObject3DParent) => {
-    const threeObject3D = threeObject3DParent.children[0]    
-    
+    const threeObject3D = threeObject3DParent.children[0]
+
     // remove previous flexible mask:
     if (_flexibleMaskMesh && _flexibleMaskMesh.parent){
       _flexibleMaskMesh.parent.remove(_flexibleMaskMesh)
@@ -157,16 +157,16 @@ const ModelContainer = (props) => {
 
     // set shadows and extract skinnedMesh:
     let skinnedMesh = null
-    threeObject3D.traverse(function (node) {      
+    threeObject3D.traverse(function (node) {
       if (node.isSkinnedMesh || node.isMesh) {
         node.castShadow = true
-        node.receiveShadow = true        
-      }     
+        node.receiveShadow = true
+      }
       if (node.isSkinnedMesh && node.name === props.physics.skinnedMeshName){
         skinnedMesh = node
       }
     })
-   
+
     // set physics:
     if (_physics){
       _physics.destroy()
@@ -193,7 +193,7 @@ const ModelContainer = (props) => {
     _threeObject3D.visible = props.isMaskVisible
     threeHelper.set_faceFollower(threeObject3DParent, threeObject3D, props.faceIndex)
   })
-  
+
   // import main model:
   const gltf = useLoader(GLTFLoader, props.GLTFModel)
   const model = SkeletonUtils.clone(gltf.scene)
@@ -229,7 +229,7 @@ const ModelContainer = (props) => {
     <object3D ref={objRef}>
       <object3D>
         <primitive object={model} />
-        { (occluderMesh) && 
+        { (occluderMesh) &&
           <primitive object={occluderMesh} />
         }
       </object3D>
@@ -292,17 +292,22 @@ class FlexibleMask extends Component {
         skinnedMeshName: 'The_Hood', // physics should be applied to this skinnedMesh
         bonesSettings: {
           The_Hood_Rig: null, // this bone should not move
-          /*Tail_2: {
-            damper: 0.02,
-            spring: 0.00004
+        /*  Tail_2: {
+            damper: 0.00005,
+            spring: 0.0000005
           },
           Tail_3: {
-            damper: 0.01,
-            spring: 0.00003
-          },*/
-          DEFAULT: { // applied to all other bones:
             damper: 0.0005,
             spring: 0.000001
+          },
+          Tail_3: {
+            damper: 0.0005,
+            spring: 0.000001
+          },*/
+
+          DEFAULT: { // applied to all other bones:
+            damper: 0.005,
+            spring: 0.000015
           }
         }
       }
@@ -326,7 +331,7 @@ class FlexibleMask extends Component {
     if (isFaceDetected){
       console.log('FACE DETECTED')
       this.faceDetectedTweenAlpha.value = 1
-    } else { 
+    } else {
       console.log('FACE LOST')
 
       const tweenMaskFadeOut = new TWEEN.Tween(this.faceDetectedTweenAlpha)
@@ -457,7 +462,7 @@ class FlexibleMask extends Component {
             updateDefaultCamera = {false}
             onCreated = {() => { this.refs.layerCanvases.style.display = 'none' }}>
             <DirtyHook sizing={this.state.sizing} />
-            
+
             <Suspense fallback={<DebugCube />}>
               <ModelContainer
                 GLTFModel={this.state.GLTFModel}
@@ -489,6 +494,6 @@ class FlexibleMask extends Component {
       </div>
     )
   }
-} 
+}
 
 export default FlexibleMask
