@@ -29,8 +29,6 @@ module.exports = merge(common, {
     open: true,
     compress: true,
     hot: true,
-    https: true,
-    port: 8443,
   },
 
   plugins: [
