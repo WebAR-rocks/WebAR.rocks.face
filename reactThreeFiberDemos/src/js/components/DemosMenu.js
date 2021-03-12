@@ -13,6 +13,12 @@ export default function DemoMenu(props) {
         <li><Link to='/VTONecklace'>Necklace virtual try-on</Link></li>
         <li><Link to='/makeupSport'>Sport makeup</Link></li>
         <li><Link to='/makeupTexture'>Texture based makeup</Link></li>
+      </ul>
+      <p>
+      Demos relying on third party assets.<br/>
+      Do not share, deploy or reuse without the explicit permission of the assets owner:
+      </p>
+      <ul>
         <li><Link to='/piepacker'>Piepacker</Link></li>
       </ul> 
     </div>
