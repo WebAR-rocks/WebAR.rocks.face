@@ -1,0 +1,86 @@
+{
+  "ARTRACKING": [
+    {
+      "ID": "trackingParentMask",
+      "NAME": "Try-on this amazing Venitian fool mask", 
+      "TYPE": "FACE",
+      "MATRIX": [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1],
+
+      "DEFORMEDID": "deformedMask",
+      "DEFORMEDKEYPOINTS": [
+        {
+          "label": "LEFT_EYEBROW_INSIDE",
+          "co": [18.183937,56,41.949951]
+        },
+        {
+          "label": "RIGHT_EYEBROW_INSIDE",
+          "co": [-12.497417,56,43.718994]
+        },
+        {
+          "label": "LEFT_EYE_INSIDE",
+          "co": [21.078716,36,37]
+        },
+        {
+          "label": "RIGHT_EYE_INSIDE",
+          "co": [-20.229191,36,37]
+        },
+        {
+          "label": "LEFT_EYE_OUTSIDE",
+          "co": [53.641514,44,27]
+        },
+        {
+          "label": "RIGHT_EYE_OUTSIDE",
+          "co": [-53.162403,44,27]
+        },
+        {
+          "label":  "LEFT_EYE_BOTTOM",
+          "co": [37.989784,43.42,39]
+        },
+        {
+          "label":  "RIGHT_EYE_BOTTOM",
+          "co": [-37.379337,43.42,39]
+        },
+        {
+          "label": "LEFT_EAR_BOTTOM",
+          "co": [80.608971,-21.405029,1.508667]
+        },
+        {
+          "label":  "RIGHT_EAR_BOTTOM",
+          "co": [-78.250656,-37.815857,15.834808]
+        },
+        {
+          "label": "LEFT_NOSE",
+          "co": [23.413511,-2.465973,66.372314]
+        },
+        {
+          "label": "RIGHT_NOSE",
+          "co": [-18.641468,-3.285614,69.049408]
+        },
+        {
+          "label": "NOSE_BOTTOM",
+          "co": [2.793015,-3.460663,80.815033]
+        },
+        {
+          "label": "LEFT_MOUTH",
+          "co": [24.393620,-28.273546,72.518982]
+        },
+        {
+          "label": "RIGHT_MOUTH",
+          "co": [-23.886246,-26.696651,68.420990]
+        },
+        {
+          "label": "MOUTH_TOP",
+          "co": [0.882774,-26.593943,86.142944]
+        },
+        {
+          "label": "MOUTH_BOTTOM",
+          "co": [0.624486,-30.890165,86.358414]
+        },
+        {
+          "label": "CHIN_BOTTOM",
+          "co": [0.884756,-82.519897,84.414291]
+        }
+      ]
+    }
+  ]
+}

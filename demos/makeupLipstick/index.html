@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-language" content="en-EN" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+
+    <title>WebAR.rocks.face lipstick demo</title>
+    
+    <!-- INCLUDE WebAR.rocks.face MAIN SCRIPT -->
+    <script src="../../dist/WebARRocksFace.js"></script>
+
+    <!-- INCLUDE MAIN HELPER -->
+    <script src="../../helpers/WebARRocksFaceShape2DHelper.js"></script>
+
+    <!-- INCLUDE RESIZER HELPER -->
+    <script src="../../helpers/WebARRocksResizer.js"></script>
+
+    <!-- INCLUDE LANDMARKS STABILIZER -->
+    <script src="../../helpers/stabilizers/WebARRocksLMStabilizer2.js"></script>
+    
+    <!-- INCLUDE DEMO SCRIPT -->
+    <script src="./main.js"></script>
+
+    <style type="text/css">
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+
+      #WebARRocksFaceCanvasAR, #WebARRocksFaceCanvasVideo {
+        position: fixed;
+        width: 100vw;
+        top: 0;
+        left: 0;
+        /* mirror the canvas: */
+        transform: rotateY(180deg);
+      }
+
+      #WebARRocksFaceCanvasVideo {
+        z-index: 0;
+      }
+      #WebARRocksFaceCanvasAR {
+        z-index: 1;
+      }
+
+      .controls {
+        position: fixed;
+        bottom: 0;
+        z-index: 2;
+        width: 100vw;
+        min-height: 96px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .controlButton {
+        margin-left: 16px;
+        margin-right: 16px;
+        height: 80px;
+        width: 80px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition-duration: 500ms;
+        user-select: none;
+      }
+
+      #colorRed {
+        background-color: #ff0000;        
+      }
+      #colorBlue {
+        background-color: #5555ff;
+      }
+      #colorYellow {
+        background-color: #333333;
+      }
+      .controlButtonSelected {
+        transform: scale(1.2, 1.2);
+      }
+    </style>
+
+  </head>
+  <body onload="main()">
+    <canvas width="600" height="600" id='WebARRocksFaceCanvasAR'></canvas>
+    <canvas width="600" height="600" id='WebARRocksFaceCanvasVideo'></canvas>
+    <controls class='controls'>
+      <a class='controlButton controlButtonSelected' id='colorRed' onclick='change_lipstickColor([1.0, 0.0, 0.3], event)'></a>
+      <a class='controlButton' id='colorBlue' onclick='change_lipstickColor([0.0, 0.0, 1.0], event)'></a>
+      <a class='controlButton' id='colorYellow' onclick='change_lipstickColor([0.0, 0.0, 0.0], event)'></a>
+    </controls>
+  </body>
+</html>
+ 

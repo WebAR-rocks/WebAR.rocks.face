@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-language" content="en-EN" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>WebAR.rocks.face 2D earrings demo</title>
+    
+    <!-- INCLUDE WebAR.rocks.face MAIN SCRIPT -->
+    <script src="../../dist/WebARRocksFace.js"></script>
+
+    <!-- INCLUDE CANVAS2D HELPER -->
+    <script src="../../helpers/WebARRocksFaceCanvas2DHelper.js"></script>
+
+    <!-- INCLUDE RESIZER HELPER -->
+    <script src="../../helpers/WebARRocksResizer.js"></script>
+
+    <!-- INCLUDE LANDMARKS STABILIZER -->
+    <script src="../../helpers/stabilizers/WebARRocksLMStabilizer.js"></script>
+
+    <!-- INCLUDE DEMO SCRIPT -->
+    <script src="./main.js"></script>
+
+    <style type="text/css">
+      body {
+        margin: 0;
+      }
+      canvas {
+        transform: scaleX(-1); /* flip horizontally (mirror mode) */
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      #overlayCanvas {
+        z-index: 10;
+      }
+      #WebARRocksFaceCanvas {
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body onload="main()">
+    <!-- canvas where the earring will be displayed: -->
+    <canvas width="600" height="600" id='overlayCanvas'></canvas>
+
+    <!-- canvas where the video will be displayed: -->
+    <canvas width="600" height="600" id='WebARRocksFaceCanvas'></canvas>
+  </body>
+</html>
+ 
