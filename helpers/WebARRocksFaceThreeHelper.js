@@ -69,17 +69,17 @@ const WebARRocksFaceThreeHelper = (function(){
     'leftEyeInt': [16,36,40], // 6026
     'rightEyeInt':[-16,36,40], // 5855
 
-    'leftEyeExt': [44,34,38],  // 1808
-    'rightEyeExt':[-44,34,38], // 2214
+    'leftEyeExt': [42,34,38],  // 1808
+    'rightEyeExt':[-42,34,38], // 2214
 
     'leftEyeBot': [33,31,45], // 2663
     'rightEyeBot':[-33,31,45], // 4462
 
-    'leftEarBottom': [76,-18.6,-18], // 65
-    'rightEarBottom': [-76,-18.6,-18], // 245
+    'leftEarBottom': [70,-18.6,-18], // 65
+    'rightEarBottom': [-70,-18.6,-18], // 245
 
-    'leftEarEarring': [81, -37, -24.8], // 3874
-    'rightEarEarring': [-81, -37, -24.8], // 5625
+    'leftEarEarring': [75, -37, -24.8], // 3874
+    'rightEarEarring': [-75, -37, -24.8], // 5625
     
     'noseLeft': [21,-0.1,67], // 1791
     'noseRight': [-21,-0.1,67], // 2198
@@ -154,6 +154,7 @@ const WebARRocksFaceThreeHelper = (function(){
     matMov: null
   };
 
+
   // compile a shader:
   function compile_shader(source, glType, typeString) {
     const glShader = _gl.createShader(glType);
@@ -166,6 +167,7 @@ const WebARRocksFaceThreeHelper = (function(){
     }
     return glShader;
   };
+
 
   // build the shader program:
   function build_shaderProgram(shaderVertexSource, shaderFragmentSource, id) {
@@ -189,6 +191,7 @@ const WebARRocksFaceThreeHelper = (function(){
     };
   }
 
+
   function update_focals(){
     // COMPUTE CAMERA PARAMS (FOCAL LENGTH)
     // see https://docs.opencv.org/3.0-beta/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html?highlight=projectpoints
@@ -207,6 +210,7 @@ const WebARRocksFaceThreeHelper = (function(){
     console.log('INFO in WebARRocksFaceThreeHelper - focal_y =', fy);
     _focals[0] = fy, _focals[1] = fy;
   }
+
 
   function init_PnPSolver(imgPointsLabels, objPointsPositions){
     const imgPointsPx = [];
@@ -239,6 +243,7 @@ const WebARRocksFaceThreeHelper = (function(){
       });      
     } //end if center obj points
   }
+
 
   function init_three(maxFacesDetected){
     console.log('INFO in WebARRocksFaceThreeHelper - init_three(). Max faces detected = ', maxFacesDetected);
@@ -369,7 +374,8 @@ const WebARRocksFaceThreeHelper = (function(){
       spec.threeCamera = _three.camera;
       _spec.callbackReady(err, spec);
     }
-  } //end callbackReady()
+  }
+
 
   function callbackTrack(detectStates){
     _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
@@ -389,7 +395,8 @@ const WebARRocksFaceThreeHelper = (function(){
     if (_spec.callbackTrack){
       _spec.callbackTrack(detectStates, landmarksStabilized);
     }
-  } //end callbackTrack
+  }
+
   
   function draw_video(){
     // use the head draw shader program and sync uniforms:
@@ -404,6 +411,7 @@ const WebARRocksFaceThreeHelper = (function(){
     _gl.drawElements(_gl.TRIANGLES, 3, _gl.UNSIGNED_SHORT, 0);
   }
 
+
   function process_faceSlot(detectState, slotIndex){
     let landmarksStabilized = null;
     const faceSlot = _three.faceSlots[slotIndex];
@@ -414,7 +422,7 @@ const WebARRocksFaceThreeHelper = (function(){
         landmarksStabilized = detectState.landmarks;
       } else {
         if (!_stabilizers[slotIndex]){
-          _stabilizers[slotIndex] = WebARRocksLMStabilizer.instance({});
+          _stabilizers[slotIndex] = WebARRocksLMStabilizer.instance(_spec.stabilizerSpec);
         };
         landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
       }
@@ -431,6 +439,7 @@ const WebARRocksFaceThreeHelper = (function(){
 
     return landmarksStabilized;
   }
+
 
   function compute_pose(landmarks, faceSlot){
     const w2 = that.get_viewWidth() / 2;
@@ -467,6 +476,7 @@ const WebARRocksFaceThreeHelper = (function(){
     }
   }
 
+
   function render_three(){
     if (_three.isPostProcessing){
       _three.composer.render();
@@ -474,6 +484,7 @@ const WebARRocksFaceThreeHelper = (function(){
       _three.renderer.render(_three.scene, _three.camera);
     }    
   }
+
 
   // build shader programs:
   function init_shps(){
@@ -496,6 +507,7 @@ const WebARRocksFaceThreeHelper = (function(){
     _shps.copyCrop.uniforms.transformMat2 = _gl.getUniformLocation(_shps.copyCrop.program, 'transform');
   }
 
+
   function start(domVideo){
     if (domVideo){
       _spec.spec.videoSettings = {videoElement: domVideo};
@@ -514,6 +526,9 @@ const WebARRocksFaceThreeHelper = (function(){
         solvePnPObjPointsPositions: _defaultSolvePnPObjPointsPositions,
         solvePnPImgPointsLabels: _defaultSolvePnPImgPointsLabels,
         isCenterObjPoints: true,
+
+        // stabilizer options:
+        stabilizerSpec: {},
 
         // THREE specifics:
         canvasThree: null,

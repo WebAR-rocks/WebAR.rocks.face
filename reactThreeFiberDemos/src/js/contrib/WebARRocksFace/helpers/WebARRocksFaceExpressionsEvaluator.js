@@ -31,6 +31,7 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
     return Math.sqrt(dxPx*dxPx + dyPx*dyPx);
   }
 
+
   function clamp(x, min, max){ // analog to GLSL clamp function
     return Math.min(Math.max(x, min), max);
   }
@@ -80,8 +81,9 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
       easeInOutQuint: function (t) { return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t }
     }, // end EASING
 
+
     evaluate_expressions: function(WEBARROCKSFACE, detectState){
-      if (!detectState.isDetected){
+       if (!detectState.isDetected){
         return _expressions;
       }
       
@@ -91,16 +93,41 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
       _evaluators.forEach(function(evaluator){
         const id = evaluator.id;
 
-        // compute distances between landmarks in pixels:
-        const distance = compute_distancePx(WEBARROCKSFACE, landmarkRelPos[evaluator.landmarksInd[0]], landmarkRelPos[evaluator.landmarksInd[1]]);
-        let refDistance = compute_distancePx(WEBARROCKSFACE, landmarkRelPos[evaluator.refLandmarksInd[0]], landmarkRelPos[evaluator.refLandmarksInd[1]]);
-        
-        // refDistance should be at least 0.5 pixel to avoid a division by 0:
-        refDistance = Math.max(0.5, refDistance);
+        let rawVal = 0.0;
+        if (evaluator.isComposite){
+          rawVal = {
+            'MEAN': 0.0,
+            'MAX': -Infinity,
+            'MIN': Infinity
+          }[evaluator.operator];
+          evaluator.computeFrom.forEach(function(evaluatorComponentId){
+            const componentValue = _expressions[evaluatorComponentId];
+            switch(evaluator.operator){
+              case 'MEAN':
+                rawVal += componentValue / evaluator.computeFrom.length;
+                break;
+              case 'MAX':
+                rawVal = Math.max(rawVal, componentValue);
+                break;
+              case 'MIN':
+                rawVal = Math.min(rawVal, componentValue);
+                break;
+            }
+          });
+        } else { // evaluator is not a composite, compute it from landmark positions
+          // compute distances between landmarks in pixels:
+          const distance = compute_distancePx(WEBARROCKSFACE, landmarkRelPos[evaluator.landmarksInd[0]], landmarkRelPos[evaluator.landmarksInd[1]]);
+          let refDistance = compute_distancePx(WEBARROCKSFACE, landmarkRelPos[evaluator.refLandmarksInd[0]], landmarkRelPos[evaluator.refLandmarksInd[1]]);
+          
+          // refDistance should be at least 0.5 pixel to avoid a division by 0:
+          refDistance = Math.max(0.5, refDistance);
 
-        // compute clamped distances ratio:
-        const distanceRatio = distance / refDistance;
-        const distanceRatioNormalized = (distanceRatio - evaluator.range[0]) / (evaluator.range[1] - evaluator.range[0]);
+          // compute clamped distances ratio:
+          const distanceRatio = distance / refDistance;
+          rawVal = distanceRatio;
+        }
+
+        const distanceRatioNormalized = (rawVal - evaluator.range[0]) / (evaluator.range[1] - evaluator.range[0]);
         const distanceRatioClamped = clamp(distanceRatioNormalized, 0, 1);
 
         // apply easing:
@@ -120,10 +147,16 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
       return _expressions;
     },
 
+
     add_expressionEvaluator: function(WEBARROCKSFACE, id, argParams){
       // params properties:
+      // For composite evaluators:
+      //  * [<string>, ...] computeFrom: compute this evaluator from this array of other evaluators
+      //  * <string> operator: can be MEAN, MAX or MIN - how to compute this evaluator
+      // For non composite evaluators:
       //  * <[<string>, <string>]> refLandmarks: reference face landmarks labels
       //  * <[<string>, <string>]> landmarks: measured face landmarks labels
+      //  For all evaluators:
       //  * <[<float>, <float>]> range: range where the distance ratios will be clamped
       //  * <function> easing: easing function to apply
       //  * <bool> isInv: whether we should invert the value or not
@@ -136,21 +169,30 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
       // and apply easing function (if provided)
       
       const params = Object.assign({
+        computeFrom: null,
+        operator: 'MEAN',
         refLandmarks: null,
         landmarks: null,
-        range: [0, 1],
+        range: [0.0, 1.0],
         easing: that.EASING.linear,
         isInv: false,
         isDebug: false
       }, argParams);
 
-      const get_LMInd = function(label){
-        const landmarksLabels = WEBARROCKSFACE.get_LMLabels();
-        const ind = landmarksLabels.indexOf(label);
-        if (ind === -1){
-          throw new Error('ERROR in WebARRocksFaceExpressionsEvaluator - add_expressionEvaluator(): cannot find landmark whose label = ' + label);
+      let refLandmarksInd = null, landmarksInd = null;
+      const isComposite = (params.computeFrom !== null);
+
+      if (!isComposite){
+        const get_LMInd = function(label){
+          const landmarksLabels = WEBARROCKSFACE.get_LMLabels();
+          const ind = landmarksLabels.indexOf(label);
+          if (ind === -1){
+            throw new Error('ERROR in WebARRocksFaceExpressionsEvaluator - add_expressionEvaluator(): cannot find landmark whose label = ' + label);
+          }
+          return ind;
         }
-        return ind;
+        refLandmarksInd = [get_LMInd(params.refLandmarks[0]), get_LMInd(params.refLandmarks[1])];
+        landmarksInd = [get_LMInd(params.landmarks[0]), get_LMInd(params.landmarks[1])];
       }
 
       let debugInputRange = null;
@@ -166,19 +208,29 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
         document.body.appendChild(debugInputRange);
       }
 
-      _evaluators.push ({
+      const evaluator = {
         id: id,
-        refLandmarksInd: [get_LMInd(params.refLandmarks[0]), get_LMInd(params.refLandmarks[1])],
-        landmarksInd: [get_LMInd(params.landmarks[0]), get_LMInd(params.landmarks[1])],
+        isComposite: isComposite,
+        
+        // for composite evaluators only:
+        computeFrom: params.computeFrom,
+        operator: params.operator,
+
+        // for non composite evaluators:
+        refLandmarksInd: refLandmarksInd,
+        landmarksInd: landmarksInd,
+        
         range: params.range,
         isInv: params.isInv,
         easing: params.easing,
         debugInputRange: debugInputRange
-      });
+      };
+      _evaluators.push(evaluator);
 
       _expressions[id] = -1;
       _triggers[id] = [];
     },
+
 
     add_trigger: function(id, params){
       const trigger = Object.assign({
@@ -193,6 +245,7 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
 
       _triggers[id].push(trigger);
     },
+
 
     run_triggers: function(expressionsValues){
       for (let expressionId in expressionsValues){
@@ -234,6 +287,7 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
         });
       }
     },
+
 
     destroy: function(){
       _evaluators = [], _expressions = {}, _triggers = {};

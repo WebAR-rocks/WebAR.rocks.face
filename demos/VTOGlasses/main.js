@@ -7,17 +7,26 @@ function main(){
   // init WebAR.rock.mirror:
   WebARRocksMirror.init({
     solvePnPImgPointsLabels: [
-      'chinLeft', 'chinRight',
-
-      'templeTopRight', 'templeTopLeft',
-      'templeBotRight','templeBotLeft',
+      //'chinLeft', 'chinRight',
 
       'leftEarBottom',
       'rightEarBottom',
-      'noseOuter',
+      'noseBottom',
+      'noseLeft', 'noseRight',
       'leftEyeExt',
       'rightEyeExt'
     ],
+
+    specWebARRocksFace: {
+      NNCPath: '../../neuralNets/NN_GLASSES_6.json',
+      scanSettings: {
+        threshold: 0.9
+      }
+    },
+
+    stabilizerSpec: {
+
+    },
     
     canvasFace: canvasFace,
     canvasThree: canvasThree,

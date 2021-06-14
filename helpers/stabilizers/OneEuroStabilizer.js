@@ -40,6 +40,7 @@ function OneEuroFilter(freq, mincutoff, beta, dcutoff){
   return that;
 }
 
+
 function LowPassFilter(alpha, initval){
   let y = initval || 0;
   let s = y;

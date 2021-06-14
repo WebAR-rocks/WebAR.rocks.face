@@ -21,6 +21,9 @@ const WebARRocksMirror = (function(){
       //,maxFacesDetected: 2 // Experimental: add glasses on multiple detected faces
     },
 
+
+    stabilizerSpec: {},
+    
     isGlasses: true,
     modelURL: null, // initial 3D model
     occluderURL: null, // occluder
@@ -66,11 +69,13 @@ const WebARRocksMirror = (function(){
 
   let _timerResize = null;
 
+
   // private functions:
   function insert_GLSLAfter(GLSLSource, GLSLSearched, GLSLInserted){
     return GLSLSource.replace(GLSLSearched, GLSLSearched + '\n' + GLSLInserted);
   }
  
+
   function tweak_material(threeMat, isGlassesBranch){
 
     const newMat = threeMat.clone();
@@ -159,6 +164,7 @@ const WebARRocksMirror = (function(){
     }); //end traverse objects with material
   }
   
+
   function load_glasses(modelURL, callback){
     if (!modelURL){
       remove_glasses();
@@ -196,6 +202,7 @@ const WebARRocksMirror = (function(){
     }); // end GLTFLoader callback
   } //end load_glasses()
 
+
   function remove_glasses(){
     // remove previous model:
     if (_WARFObjects.threeFaceFollowers && _threeInstances.glasses){
@@ -211,6 +218,7 @@ const WebARRocksMirror = (function(){
       _threeInstances.glasses = null;
     }
   }
+
 
   function build_scene(){
     const renderer = _WARFObjects.threeRenderer; // instance of THREE.WebGLRenderer
@@ -318,6 +326,8 @@ const WebARRocksMirror = (function(){
           isPostProcessing: (_spec.bloom) ? true : false,
           taaLevel: _spec.taaLevel,
 
+          stabilizerSpec: _spec.stabilizerSpec,
+
           callbackReady: function(err, threeInstances){
             if (err){
               reject(err);
@@ -340,9 +350,11 @@ const WebARRocksMirror = (function(){
       }); //end returned promise
     }, //end init()
 
+
     load: function(modelURL, callback){
       load_glasses(modelURL, callback);
     },
+
 
     pause: function(isStopVideoStream){
       if (_state !== _states.idle){
@@ -353,6 +365,7 @@ const WebARRocksMirror = (function(){
       return true;
     },
 
+
     resume: function(isStopVideoStream){
       if (_state !== _states.pause){
         return false;
@@ -361,6 +374,7 @@ const WebARRocksMirror = (function(){
       _state = _states.idle;
       return true;
     },
+
 
     capture_image: function(callback){
       if (_state !== _states.pause && _state !== _states.idle){
@@ -386,6 +400,7 @@ const WebARRocksMirror = (function(){
       callback(cv);
     },
 
+
     resize: function(width, height){
       if (_state !== _states.pause && _state !== _states.idle){
         return false;
@@ -403,6 +418,7 @@ const WebARRocksMirror = (function(){
       }, _spec.resizeDelay);
       return true;
     },
+
 
     destroy: function(){
       return new Promise(function(accept, reject){

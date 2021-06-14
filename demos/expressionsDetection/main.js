@@ -22,40 +22,76 @@ function init_evaluators(){
   });
 
   // OPEN/CLOSE EYES:
-  /*const closeEyeEvaluatorParams = {
+  const closeEyeEvaluatorParams = {
+    range: [0.15, 0.25],
     isInv: true,
     isDebug: true,
     delayMinMs: 500
   };
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('CLOSE_LEFT_EYE', Object.assign({
-    range: [0.18, 0.21],
     refLandmarks: ["leftEyeInt", "leftEyeExt"],
     landmarks: ["leftEyeTop", "leftEyeBot"]
   }, closeEyeEvaluatorParams));
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('CLOSE_RIGHT_EYE', Object.assign({
-    range: [0.23, 0.25],
     refLandmarks: ["rightEyeInt", "rightEyeExt"],
     landmarks: ["rightEyeTop", "rightEyeBot"]
   }, closeEyeEvaluatorParams));
   //*/
 
-  // EYEBROWS
-  const eyebrowEvaluatorParams = {
+  // EYEBROWS UP:
+  const eyebrowUpEvaluatorParams = {
+    range: [1.2, 1.5],
+    isDebug: true,
+    delayMinMs: 500
+  };
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_RIGHT_UP', Object.assign({
+    refLandmarks: ["rightEyeInt", "rightEyeExt"],
+    landmarks: ["rightEyeBot", "rightEyeBrowCenter"]
+  }, eyebrowUpEvaluatorParams));
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_LEFT_UP', Object.assign({
+    refLandmarks: ["leftEyeInt", "leftEyeExt"],
+    landmarks: ["leftEyeBot", "leftEyeBrowCenter"]
+  }, eyebrowUpEvaluatorParams));
+
+  // EYEBROWS DOWN:
+  const eyebrowDownEvaluatorParams = {
+    range: [1.0, 1.15],
     isInv: true,
     isDebug: true,
     delayMinMs: 500
   };
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_RIGHT_DOWN', Object.assign({
-    range: [0.9, 1.1],
     refLandmarks: ["rightEyeInt", "rightEyeExt"],
-    landmarks: ["rightEyeTop", "rightEyeBrowCenter"]
-  }, eyebrowEvaluatorParams));
-  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_RIGHT_DOWN', Object.assign({
-    range: [0.9, 1.1],
+    landmarks: ["rightEyeBot", "rightEyeBrowCenter"]
+  }, eyebrowDownEvaluatorParams));
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_LEFT_DOWN', Object.assign({
     refLandmarks: ["leftEyeInt", "leftEyeExt"],
-    landmarks: ["leftEyeTop", "leftEyeBrowCenter"]
-  }, eyebrowEvaluatorParams));
+    landmarks: ["leftEyeBot", "leftEyeBrowCenter"]
+  }, eyebrowDownEvaluatorParams));
+
+  // COMPOSITE EVALUATORS:
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('WINK', {
+    computeFrom: ['CLOSE_LEFT_EYE', 'CLOSE_RIGHT_EYE'],
+    operator: 'MEAN',
+    isDebug: true,
+    delayMinMs: 500
+  });
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROWS_UP', {
+    computeFrom: ['EYEBROW_RIGHT_UP', 'EYEBROW_LEFT_UP'],
+    operator: 'MEAN',
+    isDebug: true,
+    delayMinMs: 500
+  });
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROWS_DOWN', {
+    computeFrom: ['EYEBROW_RIGHT_DOWN', 'EYEBROW_LEFT_DOWN'],
+    operator: 'MEAN',
+    isDebug: true,
+    delayMinMs: 500
+  });
+
 }
+
+
 
 function init_triggers(){
   WebARRocksFaceExpressionsEvaluator.add_trigger('OPEN_MOUTH', {
@@ -78,13 +114,43 @@ function init_triggers(){
       console.log('TRIGGER FIRED - NOT SMILE');
     }
   });
+  WebARRocksFaceExpressionsEvaluator.add_trigger('WINK', {
+    threshold: 0.5,
+    hysteresis: 0.1,
+    onStart: function(){
+      console.log('TRIGGER FIRED - WINK');
+    },
+    onEnd: function(){
+      console.log('TRIGGER FIRED - NOT WINK');
+    }
+  });
+  WebARRocksFaceExpressionsEvaluator.add_trigger('EYEBROWS_UP', {
+    threshold: 0.5,
+    hysteresis: 0.1,
+    onStart: function(){
+      console.log('TRIGGER FIRED - EYEBROWS UP');
+    },
+    onEnd: function(){
+      console.log('TRIGGER FIRED - NOT EYEBROWS UP');
+    }
+  });
+  WebARRocksFaceExpressionsEvaluator.add_trigger('EYEBROWS_DOWN', {
+    threshold: 0.5,
+    hysteresis: 0.1,
+    onStart: function(){
+      console.log('TRIGGER FIRED - EYEBROWS DOWN');
+    },
+    onEnd: function(){
+      console.log('TRIGGER FIRED - NOT EYEBROWS DOWN');
+    }
+  });
 }
 
 
 function start(){
   WebARRocksFaceDebugHelper.init({
     spec: {
-      NNCPath: '../../neuralNets/NN_AUTOBONES_1.json'
+      NNCPath: '../../neuralNets/NN_AUTOBONES_3.json'
     }, // keep default specs
     callbackReady: function(err, spec){
       init_evaluators();
