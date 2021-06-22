@@ -144,7 +144,7 @@ const WebARRocksFaceExpressionsEvaluator = (function(){
       return _expressions;
     },
 
-    add_expressionEvaluator: function(WEBARROCKSFACE, id, argParams){
+    add_expressionEvaluator: function(id, argParams){
       // params properties:
       // For composite evaluators:
       //  * [<string>, ...] computeFrom: compute this evaluator from this array of other evaluators

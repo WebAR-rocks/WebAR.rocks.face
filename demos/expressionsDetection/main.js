@@ -23,6 +23,20 @@ function init_evaluators(){
 
   // OPEN/CLOSE EYES:
   const closeEyeEvaluatorParams = {
+    range: [0.5, 0.8],
+    isInv: true,
+    isDebug: true,
+    delayMinMs: 500
+  };
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('CLOSE_LEFT_EYE', Object.assign({
+    refLandmarks: ["leftEyeTopFixed", "leftEyeBot"],
+    landmarks: ["leftEyeTop", "leftEyeBot"]
+  }, closeEyeEvaluatorParams));
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('CLOSE_RIGHT_EYE', Object.assign({
+    refLandmarks: ["rightEyeTopFixed", "rightEyeBot"],
+    landmarks: ["rightEyeTop", "rightEyeBot"]
+  }, closeEyeEvaluatorParams));
+  /*const closeEyeEvaluatorParams = {
     range: [0.15, 0.25],
     isInv: true,
     isDebug: true,
@@ -40,6 +54,19 @@ function init_evaluators(){
 
   // EYEBROWS UP:
   const eyebrowUpEvaluatorParams = {
+    range: [1.0, 1.5],
+    isDebug: true,
+    delayMinMs: 500
+  };
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_RIGHT_UP', Object.assign({
+    refLandmarks: ["rightEyeTopFixed", "rightEyeBrowCenterFixed"],
+    landmarks: ["rightEyeTopFixed", "rightEyeBrowCenter"]
+  }, eyebrowUpEvaluatorParams));
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_LEFT_UP', Object.assign({
+    refLandmarks: ["leftEyeTopFixed", "leftEyeBrowCenterFixed"],
+    landmarks: ["leftEyeTopFixed", "leftEyeBrowCenter"]
+  }, eyebrowUpEvaluatorParams));
+  /*const eyebrowUpEvaluatorParams = {
     range: [1.2, 1.5],
     isDebug: true,
     delayMinMs: 500
@@ -51,10 +78,24 @@ function init_evaluators(){
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_LEFT_UP', Object.assign({
     refLandmarks: ["leftEyeInt", "leftEyeExt"],
     landmarks: ["leftEyeBot", "leftEyeBrowCenter"]
-  }, eyebrowUpEvaluatorParams));
+  }, eyebrowUpEvaluatorParams)); //*/
 
   // EYEBROWS DOWN:
   const eyebrowDownEvaluatorParams = {
+    range: [0.8, 1.0],
+    isInv: true,
+    isDebug: true,
+    delayMinMs: 500
+  };
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_RIGHT_DOWN', Object.assign({
+    refLandmarks: ["rightEyeTopFixed", "rightEyeBrowCenterFixed"],
+    landmarks: ["rightEyeTopFixed", "rightEyeBrowCenter"]
+  }, eyebrowDownEvaluatorParams));
+  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_LEFT_DOWN', Object.assign({
+    refLandmarks: ["leftEyeTopFixed", "leftEyeBrowCenterFixed"],
+    landmarks: ["leftEyeTopFixed", "leftEyeBrowCenter"]
+  }, eyebrowDownEvaluatorParams));
+  /*const eyebrowDownEvaluatorParams = {
     range: [1.0, 1.15],
     isInv: true,
     isDebug: true,
@@ -67,7 +108,7 @@ function init_evaluators(){
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_LEFT_DOWN', Object.assign({
     refLandmarks: ["leftEyeInt", "leftEyeExt"],
     landmarks: ["leftEyeBot", "leftEyeBrowCenter"]
-  }, eyebrowDownEvaluatorParams));
+  }, eyebrowDownEvaluatorParams)); //*/
 
   // COMPOSITE EVALUATORS:
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('WINK', {
@@ -150,7 +191,7 @@ function init_triggers(){
 function start(){
   WebARRocksFaceDebugHelper.init({
     spec: {
-      NNCPath: '../../neuralNets/NN_AUTOBONES_3.json'
+      NNCPath: '../../neuralNets/NN_AUTOBONES_5.json'
     }, // keep default specs
     callbackReady: function(err, spec){
       init_evaluators();

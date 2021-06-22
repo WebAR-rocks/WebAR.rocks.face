@@ -7,7 +7,8 @@
  * 
 */
 
-/* eslint-disable */
+/* eslint-disable no-eval */
+/* prettier-ignore */
 const WEBARROCKSFACE=function(){function Mb(a){var b=null,d=null,e=null,n=0;this.v=function(p){this.If(p.ob);e.Fe({Bc:p.Bc,yc:p.yc})};this.$e=function(p){return b[p]};this.If=function(p){var q=null;n=p.length;b=p.map(function(r,l){r=Object.assign({},r,{index:l,parent:this,ub:q,mf:l===n-1});return q=l=0===l?Nb.instance(r):Ob.instance(r)});d=b[0];e=b[n-1];b.forEach(function(r,l){0!==l&&r.Af()})};this.X=function(p){var q=p;b.forEach(function(r){q=r.X(q,!1)});return q};this.Ze=function(){return d.F()};
 this.cf=function(){return e.F()};this.bc=function(){return e.bf()};this.yd=function(){return e.yd()};this.m=function(){b&&(b.forEach(function(p){p.m()}),e=d=b=null,n=0)};"undefined"!==typeof a&&this.v(a)}function hb(a,b){var d=b%8;return a[(b-d)/8]>>7-d&1}function Pb(a){var b=JSON.parse(a);a=b.ne;var d=b.nf,e=b.n;var n="undefined"===typeof btoa?Buffer.from(b.data,"base64").toString("latin1"):atob(b.data);var p=n.length;b=new Uint8Array(p);for(var q=0;q<p;++q)b[q]=n.charCodeAt(q);n=new Float32Array(e);
 p=new Float32Array(d);q=a+d+1;for(var r=0;r<e;++r){for(var l=q*r,u=0===hb(b,l)?1:-1,C=l+1,D=1,g=0,t=C+a-1;t>=C;--t)g+=D*hb(b,t),D*=2;C=g;l=l+1+a;D=p.length;g=0;for(t=l;t<l+D;++t)p[g]=hb(b,t,!0),++g;for(D=l=0;D<d;++D)l+=p[D]*Math.pow(2,-D-1);n[r]=0===l&&0===C?0:u*(1+l)*Math.pow(2,1+C-Math.pow(2,a-1))}return n}function ab(){if(ea===da.play)return!1;if(null===A.element)return ea=da.Sf,!1;ea=da.play;sa.ge();Ma.stop();ib();wb(0);return!0}function jb(){if(ea!==da.play)return!1;Ma.stop();ea=da.pause;return!0}
@@ -180,4 +181,3 @@ Q.B/Q.G;B.T();ob();nb();Sa();Ua();return!0},set_inputTexture:function(a,b,d){A.J
 sa.Fc(ma.nDetectsPerLoop):sa.Qc();ob();nb()},set_stabilizationSettings:function(a){Object.assign(xa,a)},update_videoElement:function(a,b){bb(a,function(){Gb();Sa();b&&b(A.I.get())})},capture_image:function(a){return Na.Se(a)},get_LMLabels:function(){return na.labels},get_widthPx:function(){return Q?Q.B:-1},get_heightPx:function(){return Q?Q.G:-1},compute_pose:function(a,b,d,e){null===$a&&(La[0]=d,La[1]=e,$a=new qb.zypSolver({cameraFocals:La,zyp15:fa.Qf}));if(La[0]!==d||La[1]!==e)La[0]=
 d,La[1]=e,$a.zyp14(La);a=$a.solve(a,b,!1);return{ok:a.zyp13,repError:a.repError,rotation:a.R,translation:a.t}}};return gb}();
 export default WEBARROCKSFACE;
-/* eslint-enable */

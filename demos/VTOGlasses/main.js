@@ -6,6 +6,8 @@ function main(){
 
   // init WebAR.rock.mirror:
   WebARRocksMirror.init({
+    //videoURL: '../../../../testVideos/1056010826-hd.mp4', // use a video from a file instead of camera video
+    
     solvePnPImgPointsLabels: [
       //'chinLeft', 'chinRight',
 
