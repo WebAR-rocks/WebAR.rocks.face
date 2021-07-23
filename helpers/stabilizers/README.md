@@ -8,11 +8,13 @@ There is always a balance between stabilization and responsiveness. If the outpu
 
 To use a stabilizer, just call:
 ```
-<array> stabilizedLandmarks = WebARRocksLMStabilizer.update(<array>landmarks, <int>widthPx, <int>heightPx);
+const stabilizerInstance = WebARRocksLMStabilizer.instance({...options});
+<array> stabilizedLandmarks = stabilizerInstance.update(<array>landmarks, <int>widthPx, <int>heightPx);
 ```
 
 Where:
 
+* `options` are stabilizer option, depending on the stabilizer. It can be `{}` to keep default options,
 * `landmarks` is the array of landmarks position provided by *WebAR.rocks.face*, usually `detectState.landmarks`,
 * `widthPx` and `heightPx` are the dimensions of the rendering canvas.
 
