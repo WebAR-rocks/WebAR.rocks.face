@@ -599,6 +599,10 @@ const WebARRocksFaceThreeHelper = (function(){
 
 
     resize: function(w, h){ //should be called after resize
+      if (_gl){
+        // Fix a bug with IOS14.7 and WebGL2
+        _gl.bindFramebuffer(_gl.FRAMEBUFFER, null);
+      }
       _cv.width = w, _cv.height = h;
       _three.canvas.width = w;
       _three.canvas.height = h;

@@ -816,7 +816,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
     compute_keypointsDisplacements: function(camera, mesh){
       const keypoints = mesh.userData.keypoints;
       const matProj = camera.projectionMatrix;
-      const matMVInv = _working.mat4.getInverse(mesh.modelViewMatrix);
+      const matMVInv = _working.mat4.copy(mesh.modelViewMatrix).invert();
 
       keypoints.forEach(function(kp){
         // compute the displacement of the keypoint in the viewport:

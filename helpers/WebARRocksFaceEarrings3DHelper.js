@@ -89,6 +89,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
   // degrees to radians:
   const _deg2rad = Math.PI / 180;
 
+
   // draw video on the WebAR.rocks.face canvas:
   function draw_video(){
     // use the head draw shader program and sync uniforms:
@@ -102,6 +103,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
     // fill the viewPort
     _gl.drawElements(_gl.TRIANGLES, 3, _gl.UNSIGNED_SHORT, 0);
   }
+
 
   // build shader program to display video:
   function init_drawVideoShp(){
@@ -228,17 +230,20 @@ const WebARRocksFaceEarrings3DHelper = (function(){
     });
   }
 
+
   function init_landmarks(){
     WEBARROCKSFACE.get_LMLabels().forEach(function(lmLabel, lmInd){
       _lmIndPerLabel[lmLabel] = lmInd;
     });    
   }
 
+
   function update_earringVisibility(threeObject, wayFactor, ry){
     const visibleFactor = (threeObject.visible) ? 1 : -1;
     const angleHide = -(_spec.angleHide + _spec.angleHysteresis * visibleFactor);
     threeObject.visible = (wayFactor * ry > angleHide * _deg2rad);
   }
+
 
   function compute_headPose(rx, ry, rz){
     _headPose.euler.set(rx, ry, rz, "ZXY");
@@ -249,6 +254,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
     K.applyEuler(_headPose.euler);
     K.multiplyScalar(_spec.earsDistance);
   }
+
 
   function extract_earringPosition(earBottomLandmark, earEarringLandmark, ear){
     // get projected position of the earring:
@@ -360,6 +366,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
     }); //end returned promise
   }
 
+
   // public methods:
   const that = {
     init: function(spec){
@@ -397,24 +404,33 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       
     },
 
+
     get_sourceWidth: function(){
       return _videoElement.videoWidth;
     },
+
 
     get_sourceHeight: function(){
       return _videoElement.videoHeight;
     },
 
+
     get_viewWidth: function(){
       return _spec.canvasThree.width;
     },
+
 
     get_viewHeight: function(){
       return _spec.canvasThree.height;
     },
 
+
     resize: function(w, h){
       // resize WebAR.face canvas:
+      if (_gl){
+        // Fix a bug with IOS14.7 and WebGL2
+        _gl.bindFramebuffer(_gl.FRAMEBUFFER, null);
+      }
       _spec.canvasFace.width = w;
       _spec.canvasFace.height = h;
       WEBARROCKSFACE.resize();
@@ -424,6 +440,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       _spec.canvasThree.height = h;
       that.update_threeCamera();
     },
+
 
     add_threeEarsOccluders: function(geomRight){
       const set_occluderMesh = function(earring, geom){
@@ -439,6 +456,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       geomLeft.applyMatrix4(invXMatrix);
       set_occluderMesh(_three.earringLeft, geomLeft);
     },
+
 
     update_threeCamera: function(){
       if (!_videoElement) return;
