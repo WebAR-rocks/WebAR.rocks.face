@@ -220,11 +220,15 @@ const WebARRocksFaceThreeHelper = (function(){
     }
     _computePose.imgPointsPx = imgPointsPx;
     _computePose.imgPointsLMIndices = imgPointsLabels.map(
-      function(label, ind){
-        return _landmarks.labels.indexOf(label);
+      function(label){
+        const ind = _landmarks.labels.indexOf(label);
+        if (ind === -1){
+          throw new Error('This neuron network model does not have any point with label=' + label);
+        }
+        return ind;
       });
     _computePose.objPoints = imgPointsLabels.map(
-      function(label, ind){
+      function(label){
         return objPointsPositions[label].slice(0);
       }); 
 

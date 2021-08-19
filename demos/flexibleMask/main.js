@@ -80,6 +80,7 @@ let _threeInstances = null;
 let _flexibleMaskHelper = null;
 let _flexibleMaskMesh = null;
 
+
 function main(){
   // get the 2 canvas from the DOM:
   const canvasFace = document.getElementById('WebARRocksFaceCanvas');
@@ -96,7 +97,7 @@ function main(){
     },
     canvas: canvasFace,
     canvasThree: canvasThree,
-    isCenterObjPoints: false,
+    //isCenterObjPoints: false,
     
     callbackTrack: function(detectStates, landmarksStabilized){
       if (_flexibleMaskMesh === null){
@@ -118,7 +119,8 @@ function main(){
       build_scene(threeInstances);
     }
   }); //end WebARRocksFaceThreeHelper.init() 
-} //end main()
+}
+
 
 function build_scene(threeInstances){
   _threeInstances = threeInstances;
@@ -133,7 +135,7 @@ function build_scene(threeInstances){
   }
 
   // add the occluder:
-  //WebARRocksFaceThreeHelper.add_occluderFromFile('assets/occluder.glb', null, threeLoadingManager);
+  WebARRocksFaceThreeHelper.add_occluderFromFile('assets/occluder.glb', null, threeLoadingManager);
 
   // build and add the flexible mask:
   _flexibleMaskHelper.load_geometryFromGLTF(threeLoadingManager, _spec.flexibleMaskURL, null).then(function(geom){
@@ -158,11 +160,14 @@ function build_scene(threeInstances){
   threeLoadingManager.onLoad = start;
 }
 
+
 function tweak_maskMaterial(mat){
   //mat.opacity.value = 0.6; // make the mask half transparent, for debug
+  mat.side = THREE.FrontSide;
   mat.metalness.value = 0;
   mat.roughness.value = 1; 
 }
+
 
 function start(){
   console.log('INFO in main.js: start()');
