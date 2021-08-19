@@ -153,6 +153,7 @@ const WebARRocksFaceThreeHelper = (function(){
     faceSlots: [],
     matMov: null
   };
+  window.debugThree = _three;
 
 
   // compile a shader:
@@ -606,8 +607,13 @@ const WebARRocksFaceThreeHelper = (function(){
       _cv.width = w, _cv.height = h;
       _three.canvas.width = w;
       _three.canvas.height = h;
+
+      //_three.renderer.setSize(w, h, false);
       WEBARROCKSFACE.resize();
       that.update_threeCamera();
+      if (_three.composer){
+        _three.composer.setSize(w, h);
+      }
       update_focals();
     },
 
@@ -727,12 +733,13 @@ const WebARRocksFaceThreeHelper = (function(){
         fov = 2 * Math.atan( (cvh / cvhs) * Math.tan(0.5 * fov * _deg2rad)) / _deg2rad;
       }
       _cameraFoVY = fov;
-       console.log('INFO in WebARRocksFaceThreeHelper.update_threeCamera(): camera vertical estimated FoV is', fov, 'deg');
-
+      
       // update projection matrix:
       threeCamera.aspect = canvasAspectRatio;
       threeCamera.fov = fov;
       threeCamera.updateProjectionMatrix();
+
+      console.log('INFO in WebARRocksFaceThreeHelper.update_threeCamera(): vFoV=', fov, 'deg, canvasAspectRatio=', canvasAspectRatio);
 
       // update drawing area:
       threeRenderer.setSize(cvw, cvh, false);

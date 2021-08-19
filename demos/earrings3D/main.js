@@ -39,6 +39,7 @@ const _canvases = {
 
 let _three = null;
 
+
 function start(){
   // Init WebAR.rocks.face through the earrings 3D helper:
   WebARRocksFaceEarrings3DHelper.init({
@@ -84,12 +85,15 @@ function start(){
   });
 }
 
+
 function set_postprocessing(){
   // bloom:
   if (_settings.bloom){ // see https://threejs.org/examples/#webgl_postprocessing_unreal_bloom
     // create the bloom postprocessing pass:
     const bloom = _settings.bloom;
-    const bloomPass = new THREE.UnrealBloomPass( _three.renderer.getSize(),
+    const rendererSize = new THREE.Vector2();
+    _three.renderer.getSize(rendererSize);
+    const bloomPass = new THREE.UnrealBloomPass( rendererSize,
        bloom.strength,
        bloom.radius,
        bloom.threshold);
@@ -97,6 +101,7 @@ function set_postprocessing(){
     _three.composer.addPass( bloomPass );
   }
 }
+
 
 function set_lighting(){
   if (_settings.envmapURL){
@@ -139,6 +144,7 @@ function load_GLTF(modelURL, isRight, isLeft){
   });
 }
 
+
 function set_shinyMetal(model){
   model.traverse(function(threeStuff){
     if (!threeStuff.isMesh){
@@ -151,6 +157,7 @@ function set_shinyMetal(model){
   });
 }
 
+
 function set_occluders(){
   const occluderRightGeom = new THREE.CylinderGeometry(_settings.earsOccluderCylinderRadius, _settings.earsOccluderCylinderRadius, _settings.earsOccluderCylinderHeight);
   const matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler().fromArray(_settings.earsOccluderCylinderEuler));
@@ -158,6 +165,7 @@ function set_occluders(){
   occluderRightGeom.applyMatrix4(matrix);
   WebARRocksFaceEarrings3DHelper.add_threeEarsOccluders(occluderRightGeom);
 }
+
 
 function main(){
   // get the 2 canvas from the DOM:

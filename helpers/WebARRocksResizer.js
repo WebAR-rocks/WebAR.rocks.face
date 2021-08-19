@@ -17,16 +17,17 @@ const WebARRocksResizer = (function(){
   let _domCanvas = null, _whCanvasPx = null, _resizeAttemptsCounter = 0, _overSamplingFactor = 1,
       _isFullScreen = false, _timerFullScreen = false, _callbackResize = null;
   const _cameraResolutions = [ // all resolutions should be in landscape mode
-    [640,480],
-    [768,480],
-    [800,600],
-    [960,640],
-    [960,720],
-    [1024,768],
-    [1280,720]
+    [640, 480],
+    [768, 480],
+    [800, 600],
+    [960, 640],
+    [960, 720],
+    [1024, 768],
+    [1280, 720]
   ];
   let _isInvFullscreenWH = false;
   let _allCanvas = [];
+
 
   // private functions:
   function add_CSStransform(domElement, CSS){
@@ -34,6 +35,7 @@ const WebARRocksResizer = (function(){
     if (CSStransform.indexOf(CSS)!==-1) return;
     domElement.style.transform = CSS + ' ' + CSStransform;
   }
+
 
   // compute overlap between 2 rectangles A and B
   // characterized by their width and their height in pixels
@@ -63,7 +65,8 @@ const WebARRocksResizer = (function(){
     }
 
     return areaOverlap / areaTotal;
-  } //end compute_overlap()
+  }
+
 
   function update_sizeCanvas(){
     const domRect = _domCanvas.getBoundingClientRect();
@@ -74,12 +77,14 @@ const WebARRocksResizer = (function(){
     apply_size();
   }
 
+
   function on_windowResize(){
     if (_timerFullScreen){
       clearTimeout(_timerFullScreen);
     }
     _timerFullScreen = setTimeout(resize_fullScreen, 50);
   }
+
 
   function resize_canvasToFullScreen(){
     const s = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
@@ -90,12 +95,14 @@ const WebARRocksResizer = (function(){
     apply_size();
   }
 
+
   function apply_size(){
     _allCanvas.forEach(function(domCanvas){
       domCanvas.setAttribute('width',  _whCanvasPx[0]);
       domCanvas.setAttribute('height', _whCanvasPx[1]);
     });
   }
+
 
   function resize_fullScreen(){
     resize_canvasToFullScreen();
@@ -105,6 +112,7 @@ const WebARRocksResizer = (function(){
       _callbackResize(_whCanvasPx[0], _whCanvasPx[1]);
     }
   }
+
 
   // public methods:
   const that = { // return true or false if the device is in portrait or landscape mode
@@ -211,6 +219,7 @@ const WebARRocksResizer = (function(){
       setTimeout(options.callback.bind(null, false, bestCameraResolution), 1);
     }, //end size_canvas()
 
+
     resize_canvas: function(){ // should be called if the canvas is resized to update the canvas resolution
       if (_isFullScreen){
         return;
@@ -218,13 +227,16 @@ const WebARRocksResizer = (function(){
       update_sizeCanvas();
     },
 
+
     get_aspectRatio: function(){
       return _domCanvas.width / _domCanvas.height;
     },
 
+
     get_width: function(){
       return _domCanvas.width;
     },
+
 
     get_height: function(){
       return _domCanvas.height;

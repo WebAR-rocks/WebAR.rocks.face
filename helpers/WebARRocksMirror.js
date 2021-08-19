@@ -18,7 +18,7 @@ const WebARRocksMirror = (function(){
       scanSettings: { // harden detection:
         threshold: 0.9
       }
-      //,maxFacesDetected: 2 // Experimental: add glasses on multiple detected faces
+      //,maxFacesDetected: 2 // Experimental: add face accessory on multiple detected faces
     },
 
 
@@ -51,7 +51,7 @@ const WebARRocksMirror = (function(){
     debugOccluder: false
   };
   const _threeInstances = {
-    glasses: new THREE.Object3D(),
+    faceAccessory: new THREE.Object3D(),
     envMap: null,
     loadingManager: null
   };
@@ -120,31 +120,31 @@ const WebARRocksMirror = (function(){
   } //end tweak_material()
 
 
-  function tweak_glassesModel(threeGlasses){
+  function tweak_faceAccessory(threeFaceAccessory){
     if (_spec.isGlasses){
       // the width of the head in the glasses 3D model is 2
       // and the width of the face in dev/face.obj is 154
       // so we need to scale the 3D model to 154/2 = 70
-      threeGlasses.scale.multiplyScalar(78);
+      threeFaceAccessory.scale.multiplyScalar(78);
 
       // the origin of the glasses 3D model is the point supporting the glasses
       // (on the base of the nose)
       // its position in dev/face.obj is [0, 47, 53]
       // move a bit up (+Y)
-      threeGlasses.position.set(0, 47, 53);
+      threeFaceAccessory.position.set(0, 47, 53);
 
       // in dev/face.obj the face is looking upward,
       // whereas in the glasses model the branches are parallel to the ground
       // so we need to rotate the glasses 3D model to look upward
-      threeGlasses.rotation.set(-0.3,0,0); //X neg -> rotate branches down
+      threeFaceAccessory.rotation.set(-0.3,0,0); //X neg -> rotate branches down
     }
 
     // Tweak materials:
-    threeGlasses.traverse(function(threeStuff){
-      if (!threeStuff.material){
+    threeFaceAccessory.traverse(function(threeNode){
+      if (!threeNode.material){
         return;
       }
-      let mat = threeStuff.material;
+      let mat = threeNode.material;
 
       // take account of Blender custom properties added to materials
       // and exported to GLTF/GLB by checking the "Export extras" exporter option
@@ -160,52 +160,46 @@ const WebARRocksMirror = (function(){
       isGlassesBranch = isGlassesBranch && mat.name && ( mat.name.indexOf('frame') !== -1 );
 
       // Tweak material:
-      threeStuff.material = tweak_material(threeStuff.material, isGlassesBranch);
+      threeNode.material = tweak_material(threeNode.material, isGlassesBranch);
+      threeNode.material.depthWrite = true;
+
     }); //end traverse objects with material
   }
   
 
-  function load_glasses(modelURL, callback){
+  function load_faceAccessory(modelURL, callback){
     if (!modelURL){
-      remove_glasses();
+      remove_faceAccessory();
       if (callback) callback(null);
       return;
     }
 
     new THREE.GLTFLoader(_threeInstances.loadingManager).load(modelURL, function(model){
-      const scene = model.scene;
-      const threeGlasses = new THREE.Object3D();
+      const threeFaceAccessory = model.scene.clone();
 
-      const sceneObjects = scene.children.slice(0);
-      sceneObjects.forEach(function(child){
-        if (child.type === 'Object3D' || child.type === 'Mesh'){
-          threeGlasses.add(child);
-        }
-      });
-
-      tweak_glassesModel(threeGlasses);
+      tweak_faceAccessory(threeFaceAccessory);
       
       // remove previous model:
-      remove_glasses();
+      remove_faceAccessory();
 
       // add new model to face follower object:
-      _threeInstances.glasses = threeGlasses;
+      _threeInstances.faceAccessory = threeFaceAccessory;
       if (_WARFObjects.threeFaceFollowers){
         _WARFObjects.threeFaceFollowers.forEach(function(threeFaceFollower){
-          threeFaceFollower.add(threeGlasses.clone());
+          threeFaceFollower.add(threeFaceAccessory.clone());
         });
       }
 
       if (callback){
-        callback(threeGlasses);
+        callback(threeFaceAccessory);
       }
     }); // end GLTFLoader callback
-  } //end load_glasses()
+  }
 
 
-  function remove_glasses(){
+  function remove_faceAccessory(){
     // remove previous model:
-    if (_WARFObjects.threeFaceFollowers && _threeInstances.glasses){
+    if (_WARFObjects.threeFaceFollowers && _threeInstances.faceAccessory){
       _WARFObjects.threeFaceFollowers.forEach(function(threeFaceFollower){
         if (threeFaceFollower.children.length){
           for (let i = threeFaceFollower.children.length-1; i >= 0; --i){
@@ -215,7 +209,7 @@ const WebARRocksMirror = (function(){
           }
         }
       });
-      _threeInstances.glasses = null;
+      _threeInstances.faceAccessory = null;
     }
   }
 
@@ -260,9 +254,9 @@ const WebARRocksMirror = (function(){
       WebARRocksFaceThreeHelper.add_occluderFromFile(_spec.occluderURL, null, _threeInstances.loadingManager, _spec.debugOccluder);
     }
 
-    // load glasses:
+    // load face accessory:
     if (_spec.modelURL){
-      load_glasses(_spec.modelURL, null);
+      load_faceAccessory(_spec.modelURL, null);
     }
 
     // bloom:
@@ -352,7 +346,7 @@ const WebARRocksMirror = (function(){
 
 
     load: function(modelURL, callback){
-      load_glasses(modelURL, callback);
+      load_faceAccessory(modelURL, callback);
     },
 
 
