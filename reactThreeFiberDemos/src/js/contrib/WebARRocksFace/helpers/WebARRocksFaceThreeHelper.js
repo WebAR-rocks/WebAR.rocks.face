@@ -15,7 +15,8 @@
 
 
 import * as THREE from 'three'
-import WebARRocksLMStabilizer from './stabilizers/WebARRocksLMStabilizer2.js'
+//import stabilizer from './stabilizers/WebARRocksLMStabilizer2.js'
+import stabilizer from './stabilizers/OneEuroStabilizer.js'
 
 
 
@@ -282,7 +283,7 @@ const WebARRocksFaceThreeHelper = (function(){
       if (faceSlot.faceFollowerParent.visible){ // compute pose only if face follower is visible:
         let landmarks = null;      
         if (!_stabilizers[slotIndex]){
-          _stabilizers[slotIndex] = WebARRocksLMStabilizer.instance({});
+          _stabilizers[slotIndex] = stabilizer.instance({});
         };
         landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
         

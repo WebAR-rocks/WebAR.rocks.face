@@ -11,7 +11,7 @@ import BackButton from '../components/BackButton.js'
 import VTOButton from '../components/VTOButton.js'
 
 // import neural network model:
-import NN from '../contrib/WebARRocksFace/neuralNets/NN_GLASSES_3.json'
+import NN from '../contrib/WebARRocksFace/neuralNets/NN_GLASSES_6.json'
 
 // import WebARRocksMirror, a helper
 // This helper is not minified, feel free to customize it (and submit pull requests bro):
@@ -213,6 +213,16 @@ const VTOGlasses = (props) => {
     // init WEBARROCKSFACE through the helper:
     mirrorHelper.init({
       NN,
+      solvePnPImgPointsLabels: [
+        //'chinLeft', 'chinRight',
+
+        'leftEarBottom',
+        'rightEarBottom',
+        'noseBottom',
+        'noseLeft', 'noseRight',
+        'leftEyeExt',
+        'rightEyeExt'
+      ],
       canvasFace: canvasFaceRef.current,
       maxFacesDetected: 1
     }).then(() => {
