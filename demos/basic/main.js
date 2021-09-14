@@ -2,8 +2,8 @@
 function start(){
   WebARRocksFaceDebugHelper.init({
     spec: {
-      GPUThermalThrottlingDetectionEnabled: true
-    }, // keep default specs
+      GPUThermalThrottlingDetectionEnabled: false
+    },
     callbackReady: function(err, spec){
 
     },
@@ -13,9 +13,13 @@ function start(){
   })
 }
 
-function main(){
+
+function main(){ // entry point
   WebARRocksResizer.size_canvas({
     canvasId: 'WebARRocksFaceCanvas',
     callback: start
   })
 }
+
+
+window.addEventListener('load', main);

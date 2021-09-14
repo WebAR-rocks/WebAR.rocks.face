@@ -600,7 +600,8 @@ const WebARRocksFaceThreeHelper = (function(){
 
     update_video: function(video){
       return new Promise(function(accept, reject){
-        _WEBARROCKSFACE.update_videoElement(video, function(){
+        _WEBARROCKSFACE.update_videoElement(video, function(newGlVideoTexture){
+          _glVideoTexture = newGlVideoTexture;
           _WEBARROCKSFACE.resize();
           accept();
         });

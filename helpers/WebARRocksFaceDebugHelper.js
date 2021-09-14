@@ -11,7 +11,6 @@
  * OR TO ADDRESS A SPECIFIC USE CASE.
  */
 
-"use strict"
 
 const WebARRocksFaceDebugHelper = (function(){
   const _settings = {
@@ -42,6 +41,7 @@ const WebARRocksFaceDebugHelper = (function(){
 
   const _stabilizers = [];
 
+
   // compile a shader:
   function compile_shader(source, glType, typeString) {
     const glShader = _gl.createShader(glType);
@@ -54,6 +54,7 @@ const WebARRocksFaceDebugHelper = (function(){
     }
     return glShader;
   };
+
 
   // build the shader program:
   function build_shaderProgram(shaderVertexSource, shaderFragmentSource, id) {
@@ -77,6 +78,7 @@ const WebARRocksFaceDebugHelper = (function(){
     };
   }
   
+
   function init_drawLandmarks(){
     _drawLandmarks.vertices = new Float32Array(_landmarks.labels.length*2);
 
@@ -94,6 +96,7 @@ const WebARRocksFaceDebugHelper = (function(){
     _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, _drawLandmarks.glIndicesVBO);
     _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, indices, _gl.STATIC_DRAW);
   }
+
 
   function callbackReady(err, spec){
     if (err){
@@ -113,7 +116,9 @@ const WebARRocksFaceDebugHelper = (function(){
     _landmarks.labels = spec.landmarksLabels;
     _videoElement = spec.video;
 
-    console.log('INFO in WebARRocksFaceDebugHelper: video resolution =', _videoElement.videoWidth, 'x', _videoElement.videoHeight);
+    if (_videoElement){
+      console.log('INFO in WebARRocksFaceDebugHelper: video resolution =', _videoElement.videoWidth, 'x', _videoElement.videoHeight);
+    }
 
     _landmarks.labels.forEach(function(label, ind){
       _landmarks.indices[label] = ind;
@@ -125,7 +130,8 @@ const WebARRocksFaceDebugHelper = (function(){
     if (_spec.callbackReady){
       _spec.callbackReady(err, spec);
     }
-  } //end callbackReady()
+  }
+
 
   function callbackTrack(detectStates){
     _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
@@ -142,7 +148,8 @@ const WebARRocksFaceDebugHelper = (function(){
     if (_spec.callbackTrack){
       _spec.callbackTrack(detectStates);
     }
-  } //end callbackTrack
+  }
+
 
   function draw_video(){
     // use the head draw shader program and sync uniforms:
@@ -157,6 +164,7 @@ const WebARRocksFaceDebugHelper = (function(){
     _gl.drawElements(_gl.TRIANGLES, 3, _gl.UNSIGNED_SHORT, 0);
   }
 
+
   function get_stabilizer(slotIndex){
     if (!_stabilizers[slotIndex]){
       _stabilizers[slotIndex] = WebARRocksLMStabilizer.instance({});
@@ -164,6 +172,7 @@ const WebARRocksFaceDebugHelper = (function(){
 
     return _stabilizers[slotIndex];
   }
+
 
   function process_faceSlot(detectState, slotIndex){
    if (detectState.isDetected) {
@@ -182,6 +191,7 @@ const WebARRocksFaceDebugHelper = (function(){
     }
   }
 
+
   function draw_landmarks(landmarks){
     // copy landmarks:
     landmarks.forEach(copy_landmark);
@@ -198,10 +208,12 @@ const WebARRocksFaceDebugHelper = (function(){
     _gl.drawElements(_gl.POINTS, _landmarks.labels.length, _gl.UNSIGNED_SHORT, 0);
   }
 
+
   function copy_landmark(lm, lmIndex){
     _drawLandmarks.vertices[lmIndex*2] =     lm[0]; // X
     _drawLandmarks.vertices[lmIndex*2 + 1] = lm[1]; // Y
   }
+
 
   // build shader programs:
   function init_shps(){
@@ -244,7 +256,7 @@ const WebARRocksFaceDebugHelper = (function(){
     init: function(spec){
       _spec = Object.assign({
         spec: {},
-        isStabilized: true,
+        isStabilized: (typeof(WebARRocksLMStabilizer) !== 'undefined'),
 
         // callbacks:
         callbackReady: null,
@@ -324,6 +336,7 @@ const WebARRocksFaceDebugHelper = (function(){
   }; //end that
   return that;
 })();
+
 
 // Export ES6 module:
 try {

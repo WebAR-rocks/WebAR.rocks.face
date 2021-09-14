@@ -3,6 +3,7 @@ function init_evaluators(){
   // run WEBARROCKSFACE.get_LMLabels() in the web console
   // to get landmarks labels provided by the current neural network
   
+
   // MOUTH OPEN:
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('OPEN_MOUTH', {
     refLandmarks: ["lowerLipBot", "chin"],
@@ -11,6 +12,7 @@ function init_evaluators(){
     isInv: false,
     isDebug: true
   });
+
 
   // MOUTH SMILE:
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('SMILE', {
@@ -21,9 +23,10 @@ function init_evaluators(){
     isDebug: true
   });
 
+
   // OPEN/CLOSE EYES:
   const closeEyeEvaluatorParams = {
-    range: [0.5, 0.8],
+    range: [0.4, 0.7],// [0.3, 0.6] --> not sensitive enough [0.5, 0.8] --> too sensitive,
     isInv: true,
     isDebug: true,
     delayMinMs: 500
@@ -36,21 +39,7 @@ function init_evaluators(){
     refLandmarks: ["rightEyeTopFixed", "rightEyeBot"],
     landmarks: ["rightEyeTop", "rightEyeBot"]
   }, closeEyeEvaluatorParams));
-  /*const closeEyeEvaluatorParams = {
-    range: [0.15, 0.25],
-    isInv: true,
-    isDebug: true,
-    delayMinMs: 500
-  };
-  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('CLOSE_LEFT_EYE', Object.assign({
-    refLandmarks: ["leftEyeInt", "leftEyeExt"],
-    landmarks: ["leftEyeTop", "leftEyeBot"]
-  }, closeEyeEvaluatorParams));
-  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('CLOSE_RIGHT_EYE', Object.assign({
-    refLandmarks: ["rightEyeInt", "rightEyeExt"],
-    landmarks: ["rightEyeTop", "rightEyeBot"]
-  }, closeEyeEvaluatorParams));
-  //*/
+
 
   // EYEBROWS UP:
   const eyebrowUpEvaluatorParams = {
@@ -66,19 +55,7 @@ function init_evaluators(){
     refLandmarks: ["leftEyeTopFixed", "leftEyeBrowCenterFixed"],
     landmarks: ["leftEyeTopFixed", "leftEyeBrowCenter"]
   }, eyebrowUpEvaluatorParams));
-  /*const eyebrowUpEvaluatorParams = {
-    range: [1.2, 1.5],
-    isDebug: true,
-    delayMinMs: 500
-  };
-  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_RIGHT_UP', Object.assign({
-    refLandmarks: ["rightEyeInt", "rightEyeExt"],
-    landmarks: ["rightEyeBot", "rightEyeBrowCenter"]
-  }, eyebrowUpEvaluatorParams));
-  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_LEFT_UP', Object.assign({
-    refLandmarks: ["leftEyeInt", "leftEyeExt"],
-    landmarks: ["leftEyeBot", "leftEyeBrowCenter"]
-  }, eyebrowUpEvaluatorParams)); //*/
+
 
   // EYEBROWS DOWN:
   const eyebrowDownEvaluatorParams = {
@@ -95,20 +72,6 @@ function init_evaluators(){
     refLandmarks: ["leftEyeTopFixed", "leftEyeBrowCenterFixed"],
     landmarks: ["leftEyeTopFixed", "leftEyeBrowCenter"]
   }, eyebrowDownEvaluatorParams));
-  /*const eyebrowDownEvaluatorParams = {
-    range: [1.0, 1.15],
-    isInv: true,
-    isDebug: true,
-    delayMinMs: 500
-  };
-  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_RIGHT_DOWN', Object.assign({
-    refLandmarks: ["rightEyeInt", "rightEyeExt"],
-    landmarks: ["rightEyeBot", "rightEyeBrowCenter"]
-  }, eyebrowDownEvaluatorParams));
-  WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROW_LEFT_DOWN', Object.assign({
-    refLandmarks: ["leftEyeInt", "leftEyeExt"],
-    landmarks: ["leftEyeBot", "leftEyeBrowCenter"]
-  }, eyebrowDownEvaluatorParams)); //*/
 
   // COMPOSITE EVALUATORS:
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('WINK', {
@@ -119,13 +82,13 @@ function init_evaluators(){
   });
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROWS_UP', {
     computeFrom: ['EYEBROW_RIGHT_UP', 'EYEBROW_LEFT_UP'],
-    operator: 'MEAN',
+    operator: 'MAX',
     isDebug: true,
     delayMinMs: 500
   });
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROWS_DOWN', {
     computeFrom: ['EYEBROW_RIGHT_DOWN', 'EYEBROW_LEFT_DOWN'],
-    operator: 'MEAN',
+    operator: 'MAX',
     isDebug: true,
     delayMinMs: 500
   });
@@ -191,8 +154,8 @@ function init_triggers(){
 function start(){
   WebARRocksFaceDebugHelper.init({
     spec: {
-      NNCPath: '../../neuralNets/NN_AUTOBONES_5.json'
-    }, // keep default specs
+      NNCPath: '../../neuralNets/NN_AUTOBONES_8.json'
+    },
     callbackReady: function(err, spec){
       init_evaluators();
       init_triggers();
@@ -205,6 +168,8 @@ function start(){
   })
 }
 
+
+// entry point:
 function main(){
   WebARRocksResizer.size_canvas({
     canvasId: 'WebARRocksFaceCanvas',
