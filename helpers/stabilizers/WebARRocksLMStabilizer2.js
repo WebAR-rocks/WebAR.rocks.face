@@ -97,8 +97,9 @@ const WebARRocksLMStabilizer = (function(){
       const _spec = Object.assign({
         dampingRatio: 0.6, // 1 -> critically damped, >1 -> overdamped
         freq0: 5, // filtering frequency in hertz
-        estimateFreq: true, // dynamically estimates filtering frequency in a crappy way. 
+        estimateFreq: false,//true, // dynamically estimates filtering frequency in a crappy way. 
         estimateFreqFactor: 0.07,
+        estimateFreqBlendFactor: 0.1, // lower -> + blending of new freq estimation regarding current estimation. In [0, 1]
         dtMax: 0.3, // in seconds   
         nSimulationLoops: 3, // number of simulation loops
         strengthStallThreshold: 5000, // disable stabilization is strength is > this value
@@ -152,7 +153,7 @@ const WebARRocksLMStabilizer = (function(){
 
       function update_freqEstimation(){
         const newFreq = _spec.estimateFreqFactor * 1 / _dt;
-        const k = 0.1;
+        const k = _spec.estimateFreqBlendFactor;
         _freq = k * newFreq + (1 - k) * _freq;
       }
 
@@ -270,6 +271,7 @@ const WebARRocksLMStabilizer = (function(){
           ++_counter;
           return (_isStalled ? landmarks : _lmsStabilized);
         },
+
 
         reset: function(){
           _counter = 0;

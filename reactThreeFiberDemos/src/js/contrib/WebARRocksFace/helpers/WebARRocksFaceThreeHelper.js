@@ -103,7 +103,7 @@ const WebARRocksFaceThreeHelper = (function(){
     matMov: null,
     preMatrix: null
   };
-  window.debugThree = _three;
+  const _dpr = window.devicePixelRatio || 1;
 
 
   // compile a shader:
@@ -285,7 +285,7 @@ const WebARRocksFaceThreeHelper = (function(){
         if (!_stabilizers[slotIndex]){
           _stabilizers[slotIndex] = stabilizer.instance({});
         };
-        landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
+        landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidthCSSPx(), that.get_viewHeightCSSPx());
         
         compute_pose(landmarksStabilized, faceSlot);
       }
@@ -508,6 +508,15 @@ const WebARRocksFaceThreeHelper = (function(){
       return _videoElement.videoHeight;
     },
 
+
+    get_viewWidthCSSPx: function(){
+      return _cv.width / _dpr;
+    },
+
+
+    get_viewHeightCSSPx: function(){
+      return _cv.height / _dpr;
+    },
 
     get_viewWidth: function(){
       return _cv.width;
