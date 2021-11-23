@@ -3,6 +3,7 @@ let _isVTO = false;
 // entry point:
 function main(){
   VTO4SketchfabHelper.init({
+    uid: '96bb6b6ef7664d2a936192f138fa0507',
     iframe: document.getElementById('api-frame')
   }).then(function(){
     console.log('INFO in main: READY!');
