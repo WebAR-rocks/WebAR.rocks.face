@@ -1,5 +1,3 @@
-"use strict";
-
 const SETTINGS = {
   // detect state in the initial gif to avoid search step (it is logged in the console after a first search)
   
@@ -1120,3 +1118,6 @@ function debug_gifMasks(){
 }
 
 //END DEBUG FUNCTIONS
+
+
+window.addEventListener('load', main);

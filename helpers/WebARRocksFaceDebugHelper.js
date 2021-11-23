@@ -25,7 +25,7 @@ const WebARRocksFaceDebugHelper = (function(){
     copy: null
   };
 
-  let _gl = null, _cv = null, _glVideoTexture = null, _videoTransformMat2 = null;
+  let _gl = null, _cv = null;
   let _videoElement = null;
 
   const _landmarks = {
@@ -111,8 +111,6 @@ const WebARRocksFaceDebugHelper = (function(){
     
     _gl = spec.GL;
     _cv = spec.canvasElement;
-    _glVideoTexture = spec.videoTexture;
-    _videoTransformMat2 = spec.videoTransformMat2;
     _landmarks.labels = spec.landmarksLabels;
     _videoElement = spec.video;
 
@@ -137,7 +135,7 @@ const WebARRocksFaceDebugHelper = (function(){
     _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
    
     // draw the video:
-    draw_video();
+    WEBARROCKSFACE.render_video();
     
     if (detectStates.length){ // multiface detection:
       detectStates.forEach(process_faceSlot);
@@ -148,20 +146,6 @@ const WebARRocksFaceDebugHelper = (function(){
     if (_spec.callbackTrack){
       _spec.callbackTrack(detectStates);
     }
-  }
-
-
-  function draw_video(){
-    // use the head draw shader program and sync uniforms:
-    _gl.useProgram(_shps.copyCrop.program);
-    _gl.uniformMatrix2fv(_shps.copyCrop.uniforms.transformMat2, false, _videoTransformMat2);
-    _gl.activeTexture(_gl.TEXTURE0);
-    _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
-
-    // draw the square looking for the head
-    // the VBO filling the whole screen is still bound to the context
-    // fill the viewPort
-    _gl.drawElements(_gl.TRIANGLES, 3, _gl.UNSIGNED_SHORT, 0);
   }
 
 
@@ -217,24 +201,6 @@ const WebARRocksFaceDebugHelper = (function(){
 
   // build shader programs:
   function init_shps(){
-    
-    // create copy shp, used to display the video on the canvas:
-    _shps.copyCrop = build_shaderProgram('attribute vec2 position;\n\
-      uniform mat2 transform;\n\
-      varying vec2 vUV;\n\
-      void main(void){\n\
-        vUV = 0.5 + transform * position;\n\
-        gl_Position = vec4(position, 0., 1.);\n\
-      }'
-      ,
-      'uniform sampler2D uun_source;\n\
-      varying vec2 vUV;\n\
-      void main(void){\n\
-        gl_FragColor = texture2D(uun_source, vUV);\n\
-      }',
-      'COPY CROP');
-    _shps.copyCrop.uniforms.transformMat2 = _gl.getUniformLocation(_shps.copyCrop.program, 'transform');
-
     // create LM display shader program:
     const shaderVertexSource = "attribute vec2 position;\n\
       uniform float pointSize;\n\
@@ -323,7 +289,7 @@ const WebARRocksFaceDebugHelper = (function(){
     update_video: function(video){
       return new Promise(function(accept, reject){
         WEBARROCKSFACE.update_videoElement(video, function(glVideoTexture){
-          _glVideoTexture = glVideoTexture;
+          WEBARROCKSFACE.reset();
           WEBARROCKSFACE.resize();
           accept();
         });

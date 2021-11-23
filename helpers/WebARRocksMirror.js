@@ -1,5 +1,3 @@
-"use strict";
-
 
 const WebARRocksMirror = (function(){
   // private variables:

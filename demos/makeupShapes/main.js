@@ -467,6 +467,7 @@ function start(){
   });
 }
 
+
 // entry point:
 function main(){
   _canvasAR = document.getElementById('WebARRocksFaceCanvasAR');
@@ -482,3 +483,6 @@ function main(){
 
 // to change lips color, you can run:
 // WebARRocksFaceShape2DHelper.set_uniformValue('LIPS', 'uBaseColor', [0,1,0])
+
+
+window.addEventListener('load', main);

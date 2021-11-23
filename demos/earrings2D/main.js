@@ -1,5 +1,3 @@
-"use strict";
-
 const _canvases = {
   face: null, 
   overlay:null
@@ -21,6 +19,7 @@ const _earringsVisibility = {
   right: false,
   left: false
 };
+
 
 function start(){
   WebARRocksFaceCanvas2DHelper.init({
@@ -51,12 +50,14 @@ function start(){
   });
 }
 
+
 function mix_landmarks(posA, posB, k){
   return [
     posA[0] * (1-k) + posB[0] * k, // X
     posA[1] * (1-k) + posB[1] * k  // Y
   ];
 }
+
 
 function draw_faceCrop(faceCrop){
   _ctx.strokeStyle = 'lime';
@@ -68,6 +69,7 @@ function draw_faceCrop(faceCrop){
   _ctx.closePath();
   _ctx.stroke();
 }
+
 
 function draw_earrings(landmarks, faceWidth, ry){
   const scale = _earringSettings.scale * faceWidth / _earringImage.width
@@ -93,6 +95,7 @@ function draw_earrings(landmarks, faceWidth, ry){
   }
 }
 
+
 function draw_earring(pos, scale){
   const dWidth = scale * _earringImage.width;
   const dHeight = scale * _earringImage.height;
@@ -101,9 +104,11 @@ function draw_earring(pos, scale){
   _ctx.drawImage(_earringImage, dx, dy, dWidth, dHeight);
 }
 
+
 function clear_canvas(){
   _ctx.clearRect(0, 0, _canvases.overlay.width, _canvases.overlay.height);
 }
+
 
 function main(){
   // Create earring image:
@@ -126,3 +131,6 @@ function main(){
     callback: start
   })
 }
+
+
+window.addEventListener('load', main);

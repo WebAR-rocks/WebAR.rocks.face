@@ -609,3 +609,6 @@ function main(){
     isFullScreen: true
   });
 }
+
+
+window.addEventListener('load', main);

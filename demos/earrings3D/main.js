@@ -1,5 +1,3 @@
-"use strict";
-
 const PI = Math.PI;
 const _settings = {
   // 3D model:
@@ -182,3 +180,6 @@ function main(){
     onResize: WebARRocksFaceEarrings3DHelper.resize
   })
 }
+
+
+window.addEventListener('load', main);

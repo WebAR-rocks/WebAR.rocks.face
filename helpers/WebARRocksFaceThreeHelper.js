@@ -220,6 +220,7 @@ const WebARRocksFaceThreeHelper = (function(){
       imgPointsPx.push([0, 0]);
     }
     _computePose.imgPointsPx = imgPointsPx;
+
     _computePose.imgPointsLMIndices = imgPointsLabels.map(
       function(label){
         const ind = _landmarks.labels.indexOf(label);
@@ -228,6 +229,7 @@ const WebARRocksFaceThreeHelper = (function(){
         }
         return ind;
       });
+
     _computePose.objPoints = imgPointsLabels.map(
       function(label){
         return objPointsPositions[label].slice(0);
@@ -448,8 +450,8 @@ const WebARRocksFaceThreeHelper = (function(){
 
 
   function compute_pose(landmarks, faceSlot){
-    const w2 = that.get_viewWidth() / 2;
-    const h2 = that.get_viewHeight() / 2;
+    const w2 = that.get_viewWidth() / 2.0;
+    const h2 = that.get_viewHeight() / 2.0;
     const imgPointsPx = _computePose.imgPointsPx;
 
     _computePose.imgPointsLMIndices.forEach(function(ind, i){

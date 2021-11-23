@@ -17,7 +17,8 @@ let _flexibleMaskHelper = null;
 let _flexibleMaskMesh = null;
 let _ARTrackingRootObject = null;
 
-function main(){
+
+function main(){ // entry point
   // get the 2 canvas from the DOM:
   const canvasFace = document.getElementById('WebARRocksFaceCanvas');
   const canvasThree = document.getElementById('threeCanvas');
@@ -84,6 +85,7 @@ function main(){
   }); //end WebARRocksFaceThreeHelper.init() 
 } //end main()
 
+
 function build_scene(threeInstances){
   _threeInstances = threeInstances;
   const threeLoadingManager = new THREE.LoadingManager();
@@ -146,3 +148,6 @@ function fetch_ARTrackingMetaData(){
   });
 
 }
+
+
+window.addEventListener('load', main);

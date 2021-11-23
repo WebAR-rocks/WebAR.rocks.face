@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-language" content="en-EN" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <title>VTO 4 Sketchfab - Glasses</title>
+
+    <!-- INCLUDE WebAR.rocks.face MAIN SCRIPT -->
+    <script src="./dist/WebARRocksFace.js"></script>
+
+    <!-- INCLUDE MAIN HELPER -->
+    <script src="./helpers/VTO4SketchfabHelper.js"></script>
+
+    <!-- INCLUDE LANDMARKS STABILIZER -->
+    <script src="./helpers/OneEuroStabilizer.js"></script>
+
+    <!-- SKETCHFAB VIEWER API - see https://sketchfab.com/developers/viewer -->
+    <script src="https://static.sketchfab.com/api/sketchfab-viewer-1.10.3.js"></script>
+
+    <!-- main script -->
+    <script src="main.js"></script>
+
+    <style type='text/css'>
+      body {
+        margin: 0;
+        background-color: #DDDDDD;
+        overflow: hidden;
+      }
+
+      #api-frame {
+        border: none;
+        z-index: 4;
+        position: fixed;
+        top: 0;
+        left: 0;
+      }
+
+      #toggleVTOButton {
+        position: fixed;
+        z-index: 100;
+        top: 10px;
+        border-radius: 3.5px;
+        width: 160px;
+        height: 32px;
+        border: none;
+        color: white;
+        left: calc(50% - 80px);
+        background-color: rgba(0,0,0,0.5);
+        cursor: pointer;
+        display: none;
+      }
+
+      .cameraVideo {
+        z-index: 1;
+        position: fixed;
+        object-fit: cover;
+        transform: rotateY(180deg)!important; /*Mirror*/
+        pointer-events: none;
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <!-- IFRAME with Sketchfab viewer: -->
+    <iframe src="" id="api-frame" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" allowtransparency="true"></iframe>
+
+    <button id="toggleVTOButton">Start VTO</button>
+
+  </body>
+</html>

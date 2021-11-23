@@ -12,6 +12,7 @@ const _state = {
   canvas: null
 };
 
+
 function start(){
   WebARRocksFaceDebugHelper.init({
     spec: {}, // keep default specs
@@ -26,10 +27,12 @@ function start(){
   })
 }
 
+
 function change_pointSize(e){
   const v = parseInt(e.target.value);
   WebARRocksFaceDebugHelper.set_pointSize(v);
 }
+
 
 function change_NN(e){
   const newNNURL = e.target.value;
@@ -43,6 +46,7 @@ function change_NN(e){
     _state.NNURL = newNNURL;
   });  
 }
+
 
 function change_video(e){
   const inputFile = e.target;
@@ -73,20 +77,24 @@ function change_video(e){
   });
 }
 
+
 function play_video(){
   if (_state.appState !== _appStates.idle) return;
   _state.video.play();
 }
+
 
 function pause_video(){
   if (_state.appState !== _appStates.idle) return;
   _state.video.pause();
 }
 
+
 function toggle_stabilization(event){
   const isStabilized = event.target.checked;
   WebARRocksFaceDebugHelper.toggle_stabilization(isStabilized);
 }
+
 
 // entry point:
 function main(){
@@ -95,3 +103,6 @@ function main(){
     callback: start
   })
 }
+
+
+window.addEventListener('load', main);

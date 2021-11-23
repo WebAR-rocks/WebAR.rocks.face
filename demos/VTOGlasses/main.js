@@ -105,3 +105,6 @@ function capture_image(){
     }
   });
 }
+
+
+window.addEventListener('load', main);

@@ -8,7 +8,7 @@ function init_evaluators(){
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('OPEN_MOUTH', {
     refLandmarks: ["lowerLipBot", "chin"],
     landmarks: ["lowerLipBot", "upperLipTop"],
-    range: [0.65, 1.2],
+    range: [0.8, 1.3], //[0.65, 1.2]
     isInv: false,
     isDebug: true
   });
@@ -176,3 +176,6 @@ function main(){
     callback: start
   })
 }
+
+
+window.addEventListener('load', main);

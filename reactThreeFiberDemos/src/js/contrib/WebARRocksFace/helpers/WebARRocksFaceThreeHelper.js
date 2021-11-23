@@ -120,6 +120,11 @@ const WebARRocksFaceThreeHelper = (function(){
   };
 
 
+  function destroy_shaderProgram(shp){
+    _gl.deleteProgram(shp.program);
+  };
+
+
   // build the shader program:
   function build_shaderProgram(shaderVertexSource, shaderFragmentSource, id) {
     // compile both shader separately:
@@ -264,6 +269,11 @@ const WebARRocksFaceThreeHelper = (function(){
   function draw_video(){
     // use the head draw shader program and sync uniforms:
     _gl.useProgram(_shps.copyCrop.program);
+
+    if (_spec.callbackRenderVideo){
+      _spec.callbackRenderVideo();
+    }
+    
     _gl.uniformMatrix2fv(_shps.copyCrop.uniforms.transformMat2, false, _videoTransformMat2);
     _gl.activeTexture(_gl.TEXTURE0);
     _gl.bindTexture(_gl.TEXTURE_2D, _glVideoTexture);
@@ -349,22 +359,32 @@ const WebARRocksFaceThreeHelper = (function(){
   // build shader programs:
   function init_shps(){
     
-    // create copy shp, used to display the video on the canvas:
+    const copyFragmentShaderSource = 'uniform sampler2D uun_source;\n\
+      varying vec2 vUV;\n\
+      void main(void){\n\
+        gl_FragColor = texture2D(uun_source, vUV);\n\
+      }';
+    
+    update_copyCropShader(copyFragmentShaderSource);
+  }
+
+
+  function update_copyCropShader(fragmentShaderSource){
+    if (_shps.copyCrop){
+      destroy_shaderProgram(_shps.copyCrop);
+    }
+
     _shps.copyCrop = build_shaderProgram('attribute vec2 position;\n\
       uniform mat2 transform;\n\
       varying vec2 vUV;\n\
       void main(void){\n\
         vUV = 0.5 + transform * position;\n\
         gl_Position = vec4(position, 0., 1.);\n\
-      }'
-      ,
-      'uniform sampler2D uun_source;\n\
-      varying vec2 vUV;\n\
-      void main(void){\n\
-        gl_FragColor = texture2D(uun_source, vUV);\n\
       }',
+      fragmentShaderSource,
       'COPY CROP');
     _shps.copyCrop.uniforms.transformMat2 = _gl.getUniformLocation(_shps.copyCrop.program, 'transform');
+    return _shps.copyCrop.program;
   }
 
 
@@ -398,7 +418,8 @@ const WebARRocksFaceThreeHelper = (function(){
 
         // callbacks:
         callbackReady: null,
-        callbackTrack: null
+        callbackTrack: null,
+        callbackRenderVideo: null
       }, spec);
       
       // init WEBAR.rocks.face: WEBARROCKSFACE
@@ -532,6 +553,9 @@ const WebARRocksFaceThreeHelper = (function(){
       return that.get_viewWidth() / that.get_viewHeight();
     },
 
+    get_videoGL: function(){
+      return _gl;
+    },
 
     update_solvePnP: function(objPointsPositions, imgPointsLabels){
       if (objPointsPositions){
@@ -615,6 +639,16 @@ const WebARRocksFaceThreeHelper = (function(){
           accept();
         });
       });      
+    },
+
+
+    update_renderVideoShader(fragmentShaderSource){
+      return update_copyCropShader(fragmentShaderSource);
+    },
+
+
+    set_defaultRenderVideoShader(){
+      init_shps();
     },
 
 

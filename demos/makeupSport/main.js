@@ -568,6 +568,7 @@ function start(){
   });
 }
 
+
 // entry point:
 function main(){
   _canvasAR = document.getElementById('WebARRocksFaceCanvasAR');
@@ -580,3 +581,6 @@ function main(){
     isFullScreen: true
   });
 }
+
+
+window.addEventListener('load', main);

@@ -273,7 +273,6 @@ function main(){
 }
 
 
-
 function change_lipstickColor(color, event){
   _selectedDOMColorButton.classList.remove('controlButtonSelected');
   const domLink = event.target;
@@ -281,3 +280,6 @@ function change_lipstickColor(color, event){
   _selectedDOMColorButton = domLink;
   WebARRocksFaceShape2DHelper.set_uniformValue('LIPS', 'lipstickColor', color);
 }
+
+
+window.addEventListener('load', main);

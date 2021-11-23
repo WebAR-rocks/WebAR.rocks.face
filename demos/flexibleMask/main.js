@@ -172,3 +172,6 @@ function tweak_maskMaterial(mat){
 function start(){
   console.log('INFO in main.js: start()');
 }
+
+
+window.addEventListener('load', main);
