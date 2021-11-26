@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, Suspense } from 'react'
-import { Canvas, useFrame, useThree, useLoader } from 'react-three-fiber'
+import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 

@@ -26,7 +26,7 @@ function init_evaluators(){
 
   // OPEN/CLOSE EYES:
   const closeEyeEvaluatorParams = {
-    range: [0.4, 0.7],// [0.3, 0.6] --> not sensitive enough [0.5, 0.8] --> too sensitive,
+    range: [0.35, 0.65],//[0.4, 0.7],// [0.3, 0.6] --> not sensitive enough [0.5, 0.8] --> too sensitive,
     isInv: true,
     isDebug: true,
     delayMinMs: 500
@@ -59,7 +59,7 @@ function init_evaluators(){
 
   // EYEBROWS DOWN:
   const eyebrowDownEvaluatorParams = {
-    range: [0.8, 1.0],
+    range: [0.7, 0.9], // [0.8, 1.0] -> too sensitive
     isInv: true,
     isDebug: true,
     delayMinMs: 500
@@ -154,7 +154,7 @@ function init_triggers(){
 function start(){
   WebARRocksFaceDebugHelper.init({
     spec: {
-      NNCPath: '../../neuralNets/NN_AUTOBONES_8.json'
+      NNCPath: '../../neuralNets/NN_AUTOBONES_19.json'
     },
     callbackReady: function(err, spec){
       init_evaluators();
