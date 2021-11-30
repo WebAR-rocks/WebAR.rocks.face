@@ -9,7 +9,7 @@ import BackButton from '../components/BackButton.js'
 import VTOButton from '../components/VTOButton.js'
 
 // import neural network model:
-import NN from '../contrib/WebARRocksFace/neuralNets/NN_HEADPHONES_2.json'
+import NN from '../contrib/WebARRocksFace/neuralNets/NN_HEADPHONES_3.json'
 
 // import WebARRocksMirror, a helper
 // This helper is not minified, feel free to customize it (and submit pull requests bro):

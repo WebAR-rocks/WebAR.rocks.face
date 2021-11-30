@@ -11,7 +11,7 @@ function main(){
     //videoURL: '../../../../testVideos/1056010826-hd.mp4', // use a video from a file instead of camera video
 
     specWebARRocksFace: {
-      NNCPath: '../../neuralNets/NN_HEADPHONES_2.json',
+      NNCPath: '../../neuralNets/NN_HEADPHONES_3.json',
       scanSettings: { // harden detection:
         threshold: 0.9
       }
