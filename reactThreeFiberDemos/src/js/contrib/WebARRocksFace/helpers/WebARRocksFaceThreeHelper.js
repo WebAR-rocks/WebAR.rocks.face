@@ -233,7 +233,9 @@ const WebARRocksFaceThreeHelper = (function(){
     init_shps();
     _three.matMov = new THREE.Matrix4();
     _three.preMatrix = new THREE.Matrix4().makeRotationX(_spec.rxOffset);
-    
+    _three.preMatrix.setPosition(0.0, _spec.translationYZ[0], _spec.translationYZ[1]);
+    _three.preMatrix.scale(new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(_spec.scale));
+
     init_PnPSolver(_spec.solvePnPImgPointsLabels, _spec.solvePnPObjPointsPositions);
     _isInitialized = true;
 
@@ -342,10 +344,8 @@ const WebARRocksFaceThreeHelper = (function(){
       m[1] = -r[1][0], m[5] =  -r[1][1], m[9] =  r[1][2],
       m[2] = -r[2][0], m[6] =  -r[2][1], m[10] =  r[2][2];
 
-      if (_spec.rxOffset !== 0){
-        _three.matMov.multiply(_three.preMatrix);
-      }
-
+      _three.matMov.multiply(_three.preMatrix);
+      
       faceSlot.faceFollowerParent.matrix.copy(_three.matMov);
 
       if (_computePose.isCenterObjPoints){
@@ -404,6 +404,8 @@ const WebARRocksFaceThreeHelper = (function(){
         canvas: null,
         
         rxOffset: 0,
+        translationYZ: [0.0, 0.0], // Y+ -> upper, Z+ -> forward
+        scale: 1.0,
 
         isVisibilityAuto: true,
         isTrackingEnabled: true,

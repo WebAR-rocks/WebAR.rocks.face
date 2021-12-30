@@ -585,7 +585,7 @@ const SHAPEFACE = {
 
 function start(){
   WebARRocksFaceShape2DHelper.init({
-    NNCPath: '../../neuralNets/NN_FULLMAKEUP_3.json',
+    NNCPath: '../../neuralNets/NN_FULLMAKEUP_4.json',
     canvasVideo: _canvasVideo,
     canvasAR:_canvasAR,
     shapes: [SHAPEFACE]
