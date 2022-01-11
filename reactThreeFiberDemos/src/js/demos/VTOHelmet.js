@@ -189,6 +189,9 @@ const VTOHelmet = (props) => {
     mirrorHelper.init({
       NN,
       canvasFace: canvasFaceRef.current,
+      scanSettings: {
+        threshold: 0.7
+      },
       maxFacesDetected: 1,
       solvePnPObjPointsPositions: {
         "noseLeft": [21.862150,-0.121031,67.803383], // 1791

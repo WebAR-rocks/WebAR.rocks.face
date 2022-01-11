@@ -2,7 +2,6 @@
 function start(){
   WebARRocksFaceDebugHelper.init({
     spec: {
-      GPUThermalThrottlingDetectionEnabled: false
     },
     callbackReady: function(err, spec){
 
