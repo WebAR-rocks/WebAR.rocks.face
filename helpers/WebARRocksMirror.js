@@ -296,12 +296,9 @@ const WebARRocksMirror = (function(){
         _spec = Object.assign({}, _defaultSpec, spec);
         _threeInstances.loadingManager = new THREE.LoadingManager();
 
-        // Size the canvas:
-        let w = _spec.width, h = _spec.height;
-        if (window.devicePixelRatio){
-          w *= window.devicePixelRatio;
-          h *= window.devicePixelRatio;
-        }
+        // Size the canvases:
+        const dpr = window.devicePixelRatio || 1.0;
+        const w = _spec.width * dpr, h = _spec.height * dpr;
         _spec.canvasFace.width = w;
         _spec.canvasFace.height = h;
         _spec.canvasThree.width = w;

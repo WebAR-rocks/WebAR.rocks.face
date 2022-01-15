@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-language" content="en-EN" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+
+    <title>WebAR.rocks.face autobones</title>
+    
+    <!-- INCLUDE WebAR.rocks.face MAIN SCRIPT -->
+    <script src="../../dist/WebARRocksFace.js"></script>
+    
+    <!-- INCLUDE MAIN HELPER -->
+    <script src="../../helpers/WebARRocksFaceThreeHelper.js"></script>
+
+    <!-- THREE.JS, FOR THE RENDERING -->
+    <!-- WARNING: for production you should replace three.js by three.min.js -->
+    <script src="../../libs/three/v131/build/three.js"></script>
+    <script src="../../libs/three/v131/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="../../libs/three/v131/examples/js/utils/SkeletonUtils.js"></script>
+
+    <!-- INCLUDE BADGER AUTOBONES -->
+    <script src="../../libs/threeBadgerAutobones/BadgerAutobones.js"></script>
+
+    <!-- INCLUDE MAIN DEMO SCRIPT -->
+    <script src="./main.js"></script>
+
+    <!-- INCLUDE LANDMARKS STABILIZER -->
+    <script src="../../helpers/stabilizers/OneEuroStabilizer.js"></script>
+
+    <style type='text/css'>
+      body {
+        margin: 0;
+        background-color: silver;
+      }
+      #WebARRocksFaceCanvas, #threeCanvas {
+        position: absolute;
+        width: 100vw;
+        top: 0;
+        left: 0;
+
+        /* mirror the canvas: */
+        transform: rotateY(180deg);
+      }
+
+      #WebARRocksFaceCanvas {
+        z-index: 0;
+      }
+      #threeCanvas {
+        z-index: 1;
+      }
+
+      #controls {
+        display: none;
+        position: fixed;
+        z-index: 2;
+        width: 100vw;
+        bottom: 0;
+        left: 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      #controls > div {
+        cursor: pointer;
+        flex-grow: 1;
+        font-variant: small-caps;
+        font-size: 14pt;
+        text-align: center;
+        min-width: 110px;
+        box-sizing: border-box;
+        padding-top: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        height: 40px;
+        color: #eee;
+      }
+
+      #controls > div:hover {
+        background: rgba(50, 50, 50, 0.5);
+        color: #fff;
+      }
+    </style>
+  </head>
+  
+  <body>
+     <!--
+      The first canvas is used by WebAR.rocks.mirror
+      It is linked to a WebGL context used by the deep learning engine
+      And it displays the video of the webcam.
+      
+      Since we need to transfer the video to a texture for face detection,
+      it is not costly at all to use this texture for display.
+
+      You can tweak the rendering of the video in WebARRocksFaceThreeHelper.js,
+      by editing the fragment shader of _shps.copy
+    -->
+    <canvas id='WebARRocksFaceCanvas'></canvas>
+
+
+    <!--
+      The second canvas is used by THREE.js for 3D rendering:
+    -->
+    <canvas id='threeCanvas'></canvas>
+
+    <div id='controls'>
+      <div onclick = 'pause(true)'>Pause</div>
+      <div onclick = 'resume(true)'>Resume</div>
+      <div onclick = 'resize(400, 400)'>Resize</div>
+      <div onclick = 'toggle_mode()' id='toggleModeButton'>Avatar mode</div>
+    </div>
+
+  </body>
+</html>
+ 

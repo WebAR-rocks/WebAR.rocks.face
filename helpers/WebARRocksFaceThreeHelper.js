@@ -155,6 +155,8 @@ const WebARRocksFaceThreeHelper = (function(){
     preMatrix: null
   };
 
+  let _isDrawVideo = true;
+
   const _dpr = window.devicePixelRatio || 1;
   
 
@@ -393,7 +395,9 @@ const WebARRocksFaceThreeHelper = (function(){
     _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
    
     // draw the video:
-    draw_video();
+    if (_isDrawVideo){
+      draw_video();
+    }
     
     let landmarksStabilized = null;
     if (detectStates.length){ // multiface detection:
@@ -725,6 +729,11 @@ const WebARRocksFaceThreeHelper = (function(){
 
     get_viewAspectRatio: function(){
       return that.get_viewWidth() / that.get_viewHeight();
+    },
+
+
+    set_isDrawVideo: function(idv){
+      _isDrawVideo = idv;
     },
 
 

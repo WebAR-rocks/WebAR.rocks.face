@@ -18,7 +18,7 @@ function init_evaluators(){
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('SMILE', {
     refLandmarks: ["mouthLeft", "mouthRight"],
     landmarks: ["lowerLipBot", "upperLipTop"],
-    range: [0.22, 0.35],
+    range: [0.27, 0.35], // originally [0.22, 0.35] but smile was too hard to detect
     isInv: true,
     isDebug: true
   });

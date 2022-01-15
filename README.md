@@ -62,19 +62,28 @@ The best demos have been ported to a modern front-end development environment (N
 
 Here are the static JavaScript demos:
 
-* basic debug view (displays the face landmarks): [live demo](https://webar.rocks/demos/face/demos/basic/), [source code](/demos/basic/)
-* advanced debug view: [live demo](https://webar.rocks/demos/face/demos/debug/), [source code](/demos/debug/)
-* expressions detection debug view: [live demo](https://webar.rocks/demos/face/demos/expressionsDetection/), [source code](/demos/expressionsDetection/)
-* earrings VTO 2D: [live demo](https://webar.rocks/demos/face/demos/earrings2D/), [source code](/demos/earrings2D/)
-* earrings VTO 3D: [live demo](https://webar.rocks/demos/face/demos/earrings3D/), [source code](/demos/earrings3D/)
-* glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTOGlasses/), [source code and specific documentation](/demos/VTOGlasses/),
-* headphones/helmet VTO: [live demo](https://webar.rocks/demos/face/demos/VTOHelmet/), [source code](/demos/VTOHelmet/)
-* necklace VTO: [live demo](https://webar.rocks/demos/face/demos/VTONecklace/), [source code](/demos/VTONecklace/)
-* 3D flexible mask 2: [live demo](https://webar.rocks/demos/face/demos/flexibleMask2/), [source code](/demos/flexibleMask2/)
-* makeup lipstick VTO: [live demo](https://webar.rocks/demos/face/demos/makeupLipstick/), [source code](/demos/makeupLipstick/)
-* makeup shapes based VTO: [live demo](https://webar.rocks/demos/face/demos/makeupShapes/), [source code](/demos/makeupShapes/)
-* makeup texture based VTO: [live demo](https://webar.rocks/demos/face/demos/makeupTexture/), [source code](/demos/makeupTexture/)
-* sport makeup: [live demo](https://webar.rocks/demos/face/demos/makeupSport/), [source code](/demos/makeupSport/)
+* Debug and test views:
+  * basic debug view (displays the face landmarks): [live demo](https://webar.rocks/demos/face/demos/basic/), [source code](/demos/basic/)
+  * advanced debug view: [live demo](https://webar.rocks/demos/face/demos/debug/), [source code](/demos/debug/)
+  * expressions detection debug view: [live demo](https://webar.rocks/demos/face/demos/expressionsDetection/), [source code](/demos/expressionsDetection/)
+
+* Accessories virtual try-on:
+  * earrings VTO 2D: [live demo](https://webar.rocks/demos/face/demos/earrings2D/), [source code](/demos/earrings2D/)
+  * earrings VTO 3D: [live demo](https://webar.rocks/demos/face/demos/earrings3D/), [source code](/demos/earrings3D/)
+  * glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTOGlasses/), [source code and specific documentation](/demos/VTOGlasses/),
+  * headphones/helmet VTO: [live demo](https://webar.rocks/demos/face/demos/VTOHelmet/), [source code](/demos/VTOHelmet/)
+  * necklace VTO: [live demo](https://webar.rocks/demos/face/demos/VTONecklace/), [source code](/demos/VTONecklace/)
+
+* Flexible masks:
+  * 3D flexible mask 2: [live demo](https://webar.rocks/demos/face/demos/flexibleMask2/), [source code](/demos/flexibleMask2/)
+  * 3D flexible mask using a skeleton (autobones): [live demo](https://webar.rocks/demos/face/demos/autobones/), [source code](/demos/autobones/)
+
+* Makeup:
+  * makeup lipstick VTO: [live demo](https://webar.rocks/demos/face/demos/makeupLipstick/), [source code](/demos/makeupLipstick/)
+  * makeup shapes based VTO: [live demo](https://webar.rocks/demos/face/demos/makeupShapes/), [source code](/demos/makeupShapes/)
+  * makeup texture based VTO: [live demo](https://webar.rocks/demos/face/demos/makeupTexture/), [source code](/demos/makeupTexture/)
+  * sport makeup: [live demo](https://webar.rocks/demos/face/demos/makeupSport/), [source code](/demos/makeupSport/)
+
 
 
 * GIF Face replacement: [live demo](https://webar.rocks/demos/face/demos/faceReplacement/gif), [source code](/demos/faceReplacement/gif/)
