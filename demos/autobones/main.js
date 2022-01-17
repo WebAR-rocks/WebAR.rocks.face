@@ -1,6 +1,6 @@
 // settings:
 const _settings = {
-  maskPath: 'assets/readyPlayerMeSkinned3.glb',
+  maskPath: 'assets/readyPlayerMeSkinned5.glb',
   moveFactorEyes: 1.2, // eyebrows movement amplitude
   moveFactorNose: 1.2, // nose side movement amplitude
   moveFactorMouth: 1.5 // mouth movement amplitude
@@ -86,8 +86,9 @@ function init_WebarRocksFace(canvasFace, canvasThree, specWebARRocksFace){
         'rightEarBottom',
         'noseBottom',
         'leftEyeExt',
-        'rightEyeExt']
-      ,
+        'rightEyeExt'],
+
+      //rxOffset: -15 * (Math.PI / 180), // Rotation to reposition the mask tilted down
 
       callbackReady: function(err, threeInstances){
         if (err){
