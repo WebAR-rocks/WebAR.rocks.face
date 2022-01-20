@@ -607,7 +607,7 @@ const WebARRocksFaceThreeHelper = (function(){
             window.addEventListener('click', onUserEvent); // desktop
             window.addEventListener('touchstart', onUserEvent); // mobile
           }
-        });        
+        });
       } else {
         return start(null);
       }      

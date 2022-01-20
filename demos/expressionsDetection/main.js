@@ -43,7 +43,7 @@ function init_evaluators(){
 
   // EYEBROWS UP:
   const eyebrowUpEvaluatorParams = {
-    range: [1.0, 1.5],
+    range: [0.95, 1.4],//[1.0, 1.5],
     isDebug: true,
     delayMinMs: 500
   };
@@ -88,7 +88,7 @@ function init_evaluators(){
   });
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('EYEBROWS_DOWN', {
     computeFrom: ['EYEBROW_RIGHT_DOWN', 'EYEBROW_LEFT_DOWN'],
-    operator: 'MAX',
+    operator: 'MIN',
     isDebug: true,
     delayMinMs: 500
   });
@@ -156,6 +156,7 @@ function start(){
     spec: {
       NNCPath: '../../neuralNets/NN_AUTOBONES_19.json'
     },
+    //videoURL: '../../../../testVideos/sensitivityEyes.mp4',
     callbackReady: function(err, spec){
       init_evaluators();
       init_triggers();

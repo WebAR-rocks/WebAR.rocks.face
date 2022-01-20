@@ -223,6 +223,7 @@ const WebARRocksFaceDebugHelper = (function(){
       _spec = Object.assign({
         spec: {},
         isStabilized: (typeof(WebARRocksLMStabilizer) !== 'undefined'),
+        videoURL: null,
 
         // callbacks:
         callbackReady: null,
@@ -241,8 +242,51 @@ const WebARRocksFaceDebugHelper = (function(){
       if (_spec.spec.canvas === null){
         _spec.spec.canvas = document.getElementById(_spec.spec.canvasId);
       }
-      WEBARROCKSFACE.init(_spec.spec);
+      
+      if (_spec.videoURL){
+        that.load_video(_spec.videoURL).then(function(){
+          WEBARROCKSFACE.init(_spec.spec);
+        })
+      } else {
+        WEBARROCKSFACE.init(_spec.spec);
+      }
     },
+
+
+    load_video: function(videoURL){
+      const domVideo = document.createElement('video');
+      domVideo.setAttribute('src', videoURL);
+      domVideo.setAttribute('autoplay', true);
+      domVideo.setAttribute('loop', true);
+      domVideo.setAttribute('preload', true);
+      domVideo.setAttribute('muted', 'muted');
+      domVideo.setAttribute('playsinline', true); // for IOS
+
+      // append the video to the DOM for debug:
+      document.body.appendChild(domVideo);
+      domVideo.style.maxWidth = '50vw';
+      domVideo.style.border = "1px solid red";
+
+      return new Promise(function(accept, reject){
+        domVideo.oncanplay = function(e){
+          console.log('INFO in WebARRocksFaceThreeHelper: video file can play');
+          domVideo.oncanplay = null;
+          let isPlaying = false;
+          // the user needs to interact with the DOM to start the video (browser security)
+          const onUserEvent = function(){
+            domVideo.play();
+            if (isPlaying) return;
+            domVideo.style.display = 'none';
+            isPlaying = true;
+            _spec.spec.videoSettings = {videoElement: domVideo};
+            accept();              
+          }            
+          window.addEventListener('click', onUserEvent); // desktop
+          window.addEventListener('touchstart', onUserEvent); // mobile
+        }
+      });
+    },
+
 
     resize: function(w, h){
       if (_gl){
@@ -253,29 +297,36 @@ const WebARRocksFaceDebugHelper = (function(){
       WEBARROCKSFACE.resize();      
     },
 
+
     get_sourceWidth: function(){
       return _videoElement.videoWidth;
     },
+
 
     get_sourceHeight: function(){
       return _videoElement.videoHeight;
     },
 
+
     get_viewWidth: function(){
       return _cv.width;
     },
+
 
     get_viewHeight: function(){
       return _cv.height;
     },
 
+
     get_viewAspectRatio: function(){
       return that.get_viewWidth() / that.get_viewHeight();
     },
 
+
     set_pointSize: function(ps){
       _pointSize = ps;
     },
+
 
     change_NN: function(NNUrl){
       return WEBARROCKSFACE.update({
@@ -286,6 +337,7 @@ const WebARRocksFaceDebugHelper = (function(){
       });
     },
 
+
     update_video: function(video){
       return new Promise(function(accept, reject){
         WEBARROCKSFACE.update_videoElement(video, function(glVideoTexture){
@@ -295,6 +347,7 @@ const WebARRocksFaceDebugHelper = (function(){
         });
       });
     },
+
 
     toggle_stabilization: function(isStabilized){
       _spec.isStabilized = isStabilized;
