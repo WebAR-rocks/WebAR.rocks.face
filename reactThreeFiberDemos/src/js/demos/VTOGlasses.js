@@ -4,7 +4,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 
 // import GLTF loader - originally in examples/jsm/loaders/
-import { GLTFLoader } from '../contrib/three/v126/examples/jsm/loaders/GLTFLoader.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 // import components:
 import BackButton from '../components/BackButton.js'

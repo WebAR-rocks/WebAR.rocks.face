@@ -3,10 +3,10 @@ import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber'
 import * as THREE from 'three'
 
 // import GLTF loader - originally in examples/jsm/loaders/
-import { GLTFLoader } from '../contrib/three/v126/examples/jsm/loaders/GLTFLoader.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 // import SkeletonUtils, useful to clone a THREE instance with a skeleton
-import { SkeletonUtils } from '../contrib/three/v126/examples/jsm/utils/SkeletonUtils.js'
+import { SkeletonUtils } from 'three/examples/jsm/utils/SkeletonUtils.js'
 
 // import some UI components:
 import BackButton from '../components/BackButton.js'
@@ -22,9 +22,6 @@ import WEBARROCKSFACE from '../contrib/WebARRocksFace/dist/WebARRocksFace.module
 // This helper is not minified, feel free to customize it (and submit pull requests bro):
 import threeHelper from '../contrib/WebARRocksFace/helpers/WebARRocksFaceThreeHelper.js'
 
-// import flexible mask helper
-import flexibleMaskHelper from '../contrib/WebARRocksFace/helpers/WebARRocksFaceFlexibleMaskHelper.js'
-
 // ZboingZboing physics:
 import { ZboingZboingPhysics } from '../contrib/threeZboingZboing/ZboingZboingPhysics.js'
 
@@ -36,20 +33,13 @@ import expressionsDetector from '../misc/PiepackerExpressionsDetector'
 import GLTFModel1 from '../../assets/piepacker/HeroMageWithUselessBone.glb'
 import GLTFModel2 from '../../assets/piepacker/HeroMageOrange.glb'
 
-// import AR Metadatas (tells how to deform GLTFModel)
-//import ARTrackingMetadata from '../../assets/flexibleMask2/foolMaskARMetadata.json'
-
-// import occluder
-//import GLTFOccluderModel from '../../assets/flexibleMask2/occluder.glb'
-
 import TWEEN from '@tweenjs/tween.js'
 
 
 
-let _ARTrackingMetadata = null
 let _GLTFOccluderModel = null
 
-let _flexibleMaskMesh = null, _threeCamera = null, _threeScene = null, _threeRenderer = null
+let _threeCamera = null, _threeScene = null, _threeRenderer = null
 let _threeObject3D = null
 let _physics = null
 
@@ -147,18 +137,6 @@ const ModelContainer = (props) => {
     const threeObject3DParent = objRef.current
     const threeObject3D = threeObject3DParent.children[0]    
     
-    // remove previous flexible mask:
-    if (_flexibleMaskMesh && _flexibleMaskMesh.parent){
-      _flexibleMaskMesh.parent.remove(_flexibleMaskMesh)
-    }
-
-    // if there is a flexible mask only (fitting to face landmarks):
-    if (props.ARTrackingExperience){
-      const allLandmarksLabels = WEBARROCKSFACE.get_LMLabels()
-      _flexibleMaskMesh = flexibleMaskHelper.build_flexibleMaskFromStdMetadata(allLandmarksLabels, threeObject3D,  props.ARTrackingExperience, false)
-      threeObject3D.add(_flexibleMaskMesh)
-    }
-
     // set toon shading:
     if (props.isToonShaded){
       threeObject3D.traverse(function(node){
@@ -262,22 +240,8 @@ const DebugCube = (props) => {
 }
 
 
-const FlexibleMask = (props) => {
+const Mask = (props) => {
   // XAVIER: not all masks have a flexible part
-  let ARTrackingExperience = null
-
-  if (_ARTrackingMetadata){
-    // look for Face tracking metadata among ARMetadata:
-    const ARTrackingFaceMetadata = _ARTrackingMetadata['ARTRACKING'].filter((ARTrackingExperience) => {
-      return (ARTrackingExperience['TYPE'] === "FACE")
-    })
-    if (ARTrackingFaceMetadata.length === 0){
-      throw new Error('No Face AR tracking experience where found')
-    }
-    ARTrackingExperience = ARTrackingFaceMetadata[0]
-  }
-
-
    // state:
   const [sizing, setSizing] = useState({
       width: 640,
@@ -302,14 +266,6 @@ const FlexibleMask = (props) => {
       skinnedMeshName: 'The_Hood', // physics should be applied to this skinnedMesh
       bonesSettings: {
         The_Hood_Rig: null, // this bone should not move
-        /*Tail_2: {
-          damper: 0.02,
-          spring: 0.00004
-        },
-        Tail_3: {
-          damper: 0.01,
-          spring: 0.00003
-        },*/
         DEFAULT: { // applied to all other bones:
           damper: 20,
           spring: 70
@@ -396,7 +352,7 @@ const FlexibleMask = (props) => {
       scanSettings: {
         threshold: 0.8,
         isCleanGLStateAtEachIteration: false,
-        animateProcessOrder: 'DSR'
+        animateProcessOrder: 'DSAR'
       },
       canvas: canvasFaceRef.current,
       maxFacesDetected: 1,
@@ -417,11 +373,6 @@ const FlexibleMask = (props) => {
           // update predefined animations:
           if (_threeAnimationMixer){
             _threeAnimationMixer.update(_threeClock.getDelta())
-          }
-
-          // update flexible geometry (follow face landmarks):
-          if (_flexibleMaskMesh && _threeCamera){
-            flexibleMaskHelper.update_flexibleMask(_threeCamera, _flexibleMaskMesh, detectStates, landmarksStabilized)
           }
         }
 
@@ -445,7 +396,6 @@ const FlexibleMask = (props) => {
     })
 
     return () => {
-      _flexibleMaskMesh = null
       _threeCamera = null
       return WEBARROCKSFACE.destroy()
     }
@@ -482,7 +432,6 @@ const FlexibleMask = (props) => {
               GLTFModel={GLTFModel}
               GLTFOccluderModel={_settings.GLTFOccluderModel}
               faceIndex={0}
-              ARTrackingExperience={ARTrackingExperience}
               physics={_settings.physics}
               isMaskVisible={_isMaskVisible}
               isToonShaded={_settings.isToonShaded}
@@ -511,4 +460,4 @@ const FlexibleMask = (props) => {
   
 } 
 
-export default FlexibleMask
+export default Mask

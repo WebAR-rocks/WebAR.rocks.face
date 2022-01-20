@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import * as THREE from 'three'
-import { RGBELoader } from '../../three/v126/examples/jsm/loaders/RGBELoader.js'
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 
 
 const WebARRocksFaceLightingHelper = (function(){
