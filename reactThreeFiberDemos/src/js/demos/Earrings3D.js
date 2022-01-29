@@ -14,7 +14,7 @@ import VTOButton from '../components/VTOButton.js'
 import WEBARROCKSFACE from '../contrib/WebARRocksFace/dist/WebARRocksFace.module.js'
 
 // import neural network model:
-import NN from '../contrib/WebARRocksFace/neuralNets/NN_EARS_2.json'
+import NN from '../contrib/WebARRocksFace/neuralNets/NN_EARS_4.json'
 
 // import THREE.js earrings 3D helper, useful to compute pose
 // This helper is not minified, feel free to customize it (and submit pull requests bro):

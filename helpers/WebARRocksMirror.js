@@ -7,7 +7,8 @@ const WebARRocksMirror = (function(){
 
     videoURL: null, // use a video file instead of camera video
 
-    // initial dimensions:
+    // initial dimensions, in CSS pixels (not resolution!):
+    // to provide the resolution, please divide by devicePixelRatio
     width: window.innerWidth,
     height: window.innerHeight,
 
@@ -18,7 +19,6 @@ const WebARRocksMirror = (function(){
       }
       //,maxFacesDetected: 2 // Experimental: add face accessory on multiple detected faces
     },
-
 
     stabilizerSpec: {},
     

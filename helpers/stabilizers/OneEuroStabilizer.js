@@ -1,9 +1,14 @@
 /**
  * 
  * Use OneEuroFilter to minimize jitter and lag when tracking landmarks
- * OneEuroFilter Details: http://www.lifl.fr/~casiez/1euro
- * mincutoff: decrease to minimize jitter
- * beta: increate to minimize lag
+ * 
+ * refs:
+ *   * OneEuroFilter Details: http://www.lifl.fr/~casiez/1euro
+ *   * See also this implementation: https://github.com/jaantollander/OneEuroFilter
+ * 
+ * properties:
+ *   * mincutoff: decrease to minimize jitter
+ *   * beta: increate to minimize lag
  */
 
 function OneEuroFilter(spec){
@@ -14,8 +19,8 @@ function OneEuroFilter(spec){
   const _dx = filter_lowPass(compute_alpha(spec.dcutoff));
   const _dtMin = 1.0 / spec.freqRange[1];
 
-  function compute_alpha(cutoff){
-    const te = 1.0 / _freq;
+  function compute_alpha(cutoff){ // compute smoothing factor
+    const te = 1.0 / _freq;  // = dt
     const tau = 1.0 / (2.0 * Math.PI * cutoff);
     return 1.0 / (1.0 + tau / te);
   }
