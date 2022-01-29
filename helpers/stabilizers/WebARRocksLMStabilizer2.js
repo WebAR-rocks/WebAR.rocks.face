@@ -228,7 +228,7 @@ const WebARRocksLMStabilizer = (function(){
       }
 
       const that = {
-        update: function(landmarks, widthPx, heightPx){
+        update: function(landmarks, widthPx, heightPx, scale){
           // time in seconds
           const t = _timer.now() / 1000;
 

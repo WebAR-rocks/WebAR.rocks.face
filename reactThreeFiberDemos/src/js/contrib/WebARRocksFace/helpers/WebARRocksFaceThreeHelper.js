@@ -297,7 +297,7 @@ const WebARRocksFaceThreeHelper = (function(){
         if (!_stabilizers[slotIndex]){
           _stabilizers[slotIndex] = stabilizer.instance({});
         };
-        landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidthCSSPx(), that.get_viewHeightCSSPx());
+        landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidthCSSPx(), that.get_viewHeightCSSPx(), detectState.s);
         
         compute_pose(landmarksStabilized, faceSlot);
       }

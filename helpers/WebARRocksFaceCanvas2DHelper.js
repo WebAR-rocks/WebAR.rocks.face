@@ -16,7 +16,6 @@
  *
  */ 
 
-"use strict";
 
 const WebARRocksFaceCanvas2DHelper = (function(){
 
@@ -73,6 +72,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
     };
   }
 
+
   // build shader programs:
   function init_shps(){
     // create copy shp, used to display the video on the canvas:
@@ -93,6 +93,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
     _shps.copyCrop.uniforms.transformMat2 = _gl.getUniformLocation(_shps.copyCrop.program, 'transform');
   }
 
+
   function draw_video(){
     // use the head draw shader program and sync uniforms:
     _gl.useProgram(_shps.copyCrop.program);
@@ -105,6 +106,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
     // fill the viewPort
     _gl.drawElements(_gl.TRIANGLES, 3, _gl.UNSIGNED_SHORT, 0);
   }
+
 
   function callbackReady(err, spec){
     if (err){
@@ -128,6 +130,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
     _spec.callbackReady(false, spec);
   }
 
+
   function callbackTrack(detectState){
     // draw the video:
     _gl.viewport(0, 0, _cv.width, _cv.height);
@@ -143,7 +146,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
       const cvw = _cv.width;
       const cvh = _cv.height;
 
-      landmarksStabilized = _stabilizer.update(detectState.landmarks, cvw, cvh);
+      landmarksStabilized = _stabilizer.update(detectState.landmarks, cvw, cvh, detectState.s);
 
       // compute face crop points:
       // size of face crop square in pixels:
@@ -180,6 +183,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
 
     _gl.flush();
   }
+
 
   // public methods:
   const that = {

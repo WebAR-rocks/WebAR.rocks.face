@@ -338,7 +338,7 @@ const WebARRocksLMStabilizer = (function(){
       }
 
       const that = {
-        update: function(landmarks, widthPx, heightPx){
+        update: function(landmarks, widthPx, heightPx, scale){
           // allocate if necessary:
           if (landmarks.length !== _lmCount){
             allocate(landmarks.length);

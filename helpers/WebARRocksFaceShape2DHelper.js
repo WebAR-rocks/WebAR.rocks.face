@@ -59,7 +59,7 @@ const WebARRocksFaceShape2DHelper = (function(){
 
     // draw shapes:
     if (detectState.isDetected){
-      const landmarksStabilized = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
+      const landmarksStabilized = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
       _shapes.forEach(draw_shape.bind(null, landmarksStabilized));
     } else {
       _stabilizer.reset();

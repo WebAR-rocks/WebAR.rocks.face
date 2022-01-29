@@ -163,7 +163,7 @@ const WebARRocksFaceDebugHelper = (function(){
       // stabilize landmarks:
       let landmarks = null;
       if (_spec.isStabilized){
-        landmarks = get_stabilizer(slotIndex).update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
+        landmarks = get_stabilizer(slotIndex).update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
       } else {
         landmarks = detectState.landmarks;
       }

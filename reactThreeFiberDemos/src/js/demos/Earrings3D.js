@@ -39,7 +39,8 @@ let _earrings3DHelper = null
 const DirtyHook = (props) => {
   const threeFiber = useThree()
   useFrame(_earrings3DHelper.update_threeCamera.bind(null, props.sizing, threeFiber.camera))
-  
+  threeFiber.gl.setPixelRatio(window.devicePixelRatio || 1)
+
   lightingHelper.set(threeFiber.gl, threeFiber.scene, props.lighting)
   return null
 }

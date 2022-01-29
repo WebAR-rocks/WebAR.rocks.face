@@ -288,7 +288,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       compute_headPose(detectState.rx, detectState.ry, detectState.rz);
 
       // stabilize landmarks positions:
-      const lms = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
+      const lms = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
 
       // compute earrings 2D positions and director vectors:
       extract_earringPosition(lms[_lmIndPerLabel.rightEarBottom], lms[_lmIndPerLabel.rightEarEarring], _earRight);

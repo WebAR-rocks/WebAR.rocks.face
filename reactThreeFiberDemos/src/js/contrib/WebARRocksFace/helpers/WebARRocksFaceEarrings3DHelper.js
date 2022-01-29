@@ -19,7 +19,9 @@
  */ 
 
 import * as THREE from 'three'
-import WebARRocksLMStabilizer from './stabilizers/WebARRocksLMStabilizer2.js'
+
+//import WebARRocksLMStabilizer from './stabilizers/WebARRocksLMStabilizer2.js'
+import WebARRocksLMStabilizer from './stabilizers/OneEuroStabilizer.js'
 
 
 const WebARRocksFaceEarrings3DHelper = (function(){
@@ -237,7 +239,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       compute_headPose(detectState.rx, detectState.ry, detectState.rz);
 
       // stabilize landmarks positions:
-      const lms = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight());
+      const lms = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
       //const lms = detectState.landmarks; // no stabilization
 
       // compute earrings 2D positions and director vectors:

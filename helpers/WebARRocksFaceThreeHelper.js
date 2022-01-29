@@ -440,7 +440,7 @@ const WebARRocksFaceThreeHelper = (function(){
         if (!_stabilizers[slotIndex]){
           _stabilizers[slotIndex] = WebARRocksLMStabilizer.instance(_spec.stabilizerSpec);
         };
-        landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidthCSSPx(), that.get_viewHeightCSSPx());
+        landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidthCSSPx(), that.get_viewHeightCSSPx(), detectState.s);
       }
 
       compute_pose(landmarksStabilized, faceSlot);
