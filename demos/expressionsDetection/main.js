@@ -18,7 +18,8 @@ function init_evaluators(){
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('SMILE', {
     refLandmarks: ["mouthLeft", "mouthRight"],
     landmarks: ["lowerLipBot", "upperLipTop"],
-    range: [0.27, 0.35], // originally [0.22, 0.35] but smile was too hard to detect
+    range: [0.2, 0.3], // originally [0.22, 0.35] but smile was too hard to detect
+       // [0.27, 0.35] fine for AUTOBONES_19 but not for autobones _21
     isInv: true,
     isDebug: true
   });
@@ -26,7 +27,8 @@ function init_evaluators(){
 
   // OPEN/CLOSE EYES:
   const closeEyeEvaluatorParams = {
-    range: [0.35, 0.65],//[0.4, 0.7],// [0.3, 0.6] --> not sensitive enough [0.5, 0.8] --> too sensitive,
+    range: [0.3, 0.6],//[0.4, 0.7],// [0.3, 0.6] --> not sensitive enough [0.5, 0.8] --> too sensitive,
+      // [0.35, 0.65] -> value for NN_AUTOBONES_19, too sensitive for _21
     isInv: true,
     isDebug: true,
     delayMinMs: 500
@@ -59,7 +61,7 @@ function init_evaluators(){
 
   // EYEBROWS DOWN:
   const eyebrowDownEvaluatorParams = {
-    range: [0.7, 0.9], // [0.8, 1.0] -> too sensitive
+    range: [0.75, 0.95], // [0.8, 1.0] -> too sensitive [0.7, 0.9] -> not sensitive enough
     isInv: true,
     isDebug: true,
     delayMinMs: 500
@@ -76,7 +78,7 @@ function init_evaluators(){
   // COMPOSITE EVALUATORS:
   WebARRocksFaceExpressionsEvaluator.add_expressionEvaluator('WINK', {
     computeFrom: ['CLOSE_LEFT_EYE', 'CLOSE_RIGHT_EYE'],
-    operator: 'MEAN',
+    operator: 'MIN',
     isDebug: true,
     delayMinMs: 500
   });
@@ -154,7 +156,7 @@ function init_triggers(){
 function start(){
   WebARRocksFaceDebugHelper.init({
     spec: {
-      NNCPath: '../../neuralNets/NN_AUTOBONES_19.json'
+      NNCPath: '../../neuralNets/NN_AUTOBONES_21.json'
     },
     //videoURL: '../../../../testVideos/sensitivityEyes.mp4',
     callbackReady: function(err, spec){

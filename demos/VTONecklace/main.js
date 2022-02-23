@@ -17,6 +17,12 @@ function main(){
       }
     },
 
+    // increase stabilization:
+    stabilizerSpec: {
+      beta: 20,
+      forceFilterNNInputPxRange: [1.5, 4]
+    },
+
     solvePnPObjPointsPositions: {
       // indices of the points are given as comments. 
       // Open dev/torso.blend to get point positions

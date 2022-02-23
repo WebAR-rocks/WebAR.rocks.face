@@ -69,6 +69,7 @@ const WebARRocksFaceThreeHelper = (function(){
   const _deg2rad = Math.PI / 180;
   let _spec = null;
   let _stabilizers = null;
+  let _stabilizerSpec = null;
   let _WEBARROCKSFACE = null;
   
   const _shps = { // shader programs
@@ -295,7 +296,7 @@ const WebARRocksFaceThreeHelper = (function(){
       if (faceSlot.faceFollowerParent.visible){ // compute pose only if face follower is visible:
         let landmarks = null;      
         if (!_stabilizers[slotIndex]){
-          _stabilizers[slotIndex] = stabilizer.instance({});
+          _stabilizers[slotIndex] = stabilizer.instance(_stabilizerSpec || {});
         };
         landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidthCSSPx(), that.get_viewHeightCSSPx(), detectState.s);
         
@@ -397,7 +398,7 @@ const WebARRocksFaceThreeHelper = (function(){
 
   
   const that = {
-    init: function(WEBARROCKSFACE, spec){
+    init: function(WEBARROCKSFACE, spec, stabilizerSpec){
       _WEBARROCKSFACE = WEBARROCKSFACE;
       _spec = Object.assign({
         NN: null,
@@ -423,6 +424,7 @@ const WebARRocksFaceThreeHelper = (function(){
         callbackTrack: null,
         callbackRenderVideo: null
       }, spec);
+      _stabilizerSpec = stabilizerSpec;
       
       // init WEBAR.rocks.face: WEBARROCKSFACE
       const defaultSpecLM = {
