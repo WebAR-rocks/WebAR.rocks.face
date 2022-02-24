@@ -39,18 +39,14 @@ let _three = null;
 
 
 function start(){
+  
   // Init WebAR.rocks.face through the earrings 3D helper:
   WebARRocksFaceEarrings3DHelper.init({
     NN: '../../neuralNets/NN_EARS_4.json',
     taaLevel: _settings.taaLevel,
     canvasFace: _canvases.face,
     canvasThree: _canvases.three,
-    debugOccluder: _settings.debugOccluder,
-    callbackReady: function(err){
-      if (err){
-        throw new Error(err);
-      }
-    }
+    debugOccluder: _settings.debugOccluder
     //,videoURL: '../../../../testVideos/1032526922-hd.mov'    
   }).then(function(three){
     
@@ -78,9 +74,19 @@ function start(){
 
     set_occluders();
 
+    if (check_isAppleCrap){
+      WebARRocksFaceEarrings3DHelper.resize(_canvases.three.width, _canvases.three.height - 0.001);
+    }
   }).catch(function(err){
     throw new Error(err);
   });
+}
+
+
+// return true if IOS:
+function check_isAppleCrap(){
+  return /iPad|iPhone|iPod/.test(navigator.platform)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
 
@@ -107,7 +113,7 @@ function set_lighting(){
     const pmremGenerator = new THREE.PMREMGenerator( _three.renderer );
     pmremGenerator.compileEquirectangularShader();
 
-    new THREE.RGBELoader().setDataType( THREE.UnsignedByteType )
+    new THREE.RGBELoader().setDataType( THREE.HalfFloatType )
       .load(_settings.envmapURL, function ( texture ) {
       const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
       pmremGenerator.dispose();
@@ -149,9 +155,9 @@ function set_shinyMetal(model){
       return;
     }
     const mat = threeStuff.material;
-    mat.roughness = 0;
-    mat.metalness = 1;
-    mat.refractionRatio = 1;
+    mat.roughness = 0.0;
+    mat.metalness = 1.0;
+    mat.refractionRatio = 1.0;
   });
 }
 

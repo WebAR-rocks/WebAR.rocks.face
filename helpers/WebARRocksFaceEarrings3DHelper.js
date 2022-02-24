@@ -16,13 +16,12 @@
  * Unlike glasses VTO or flexible masks we don't compute the pose from 2D points
  */ 
 
-"use strict";
 
 const WebARRocksFaceEarrings3DHelper = (function(){
   const _defaultSpec = {
     canvasFace: null,
     canvasThree: null,
-    NN: '../../neuralNets/NN_EARS_2.json',
+    NN: '../../neuralNets/NN_EARS_4.json',
     videoURL: null, // use a video file instead of camera
 
     earringsScale: 1,
@@ -163,6 +162,12 @@ const WebARRocksFaceEarrings3DHelper = (function(){
     // init scene:
     _three.scene = new THREE.Scene();
 
+    // add a cube:
+    /*const debugCube = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshNormalMaterial());
+    debugCube.position.set(0,0,-10);
+    _three.scene.add(debugCube);
+    window.debugThree = _three;//*/
+
     // init loading manager:
     _three.loadingManager = new THREE.LoadingManager();
 
@@ -288,7 +293,8 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       compute_headPose(detectState.rx, detectState.ry, detectState.rz);
 
       // stabilize landmarks positions:
-      const lms = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
+      let lms = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
+      //lms = detectState.landmarks; // disable stabilizer
 
       // compute earrings 2D positions and director vectors:
       extract_earringPosition(lms[_lmIndPerLabel.rightEarBottom], lms[_lmIndPerLabel.rightEarEarring], _earRight);
@@ -319,7 +325,6 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       // set earrings orientation:
       _three.earringRight.rotation.set(0, detectState.ry, 0);
       _three.earringLeft.rotation.set(0, detectState.ry, 0);
-      
     } else {
       _three.earringRight.visible = false;
       _three.earringLeft.visible = false;
@@ -492,6 +497,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       _three.renderer.setSize(cvw, cvh, false);
       _three.renderer.setViewport(0, 0, cvw, cvh);
       _three.composer.setSize(cvw, cvh);
+      console.log('INFO in update_threeCamera(): resolution = ', cvw, cvh);
 
     }
   }; //end that
