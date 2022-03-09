@@ -71,7 +71,7 @@ function main(){
     taaLevel: 3,
 
     rotationContraints: {
-      order: 'XYZ',
+      order: 'YXZ',
       rotXFactor: 1,
       rotYFactor: 0.3,
       rotZFactor: 1,
