@@ -46,6 +46,9 @@ const WebARRocksMirror = (function(){
 
     resizeDelay: 50, // in milliseconds, min delay between 2 canvas resizing
 
+    // add constratins for the rotation:
+    rotationContraints: null,
+
     debugOccluder: false
   };
   const _threeInstances = {
@@ -316,6 +319,8 @@ const WebARRocksMirror = (function(){
           taaLevel: _spec.taaLevel,
 
           stabilizerSpec: _spec.stabilizerSpec,
+
+          rotationContraints: _spec.rotationContraints,
 
           callbackReady: function(err, threeInstances){
             if (err){

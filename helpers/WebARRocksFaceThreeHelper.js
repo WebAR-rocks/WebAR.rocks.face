@@ -152,6 +152,8 @@ const WebARRocksFaceThreeHelper = (function(){
     camera: null,
     faceSlots: [],
     matMov: null,
+    matMov2: null,
+    euler: null,
     preMatrix: null
   };
 
@@ -329,7 +331,11 @@ const WebARRocksFaceThreeHelper = (function(){
       });
     }
 
+    // pre-allocate:
     _three.matMov = new THREE.Matrix4();
+    _three.matMov2 = new THREE.Matrix4();
+    _three.euler = new THREE.Euler();
+
     _three.preMatrix = new THREE.Matrix4().makeRotationX(_spec.rxOffset);
     _three.preMatrix.setPosition(0.0, _spec.translationYZ[0], _spec.translationYZ[1]);
     _three.preMatrix.scale(new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(_spec.scale));
@@ -483,6 +489,10 @@ const WebARRocksFaceThreeHelper = (function(){
       m[1] = -r[1][0], m[5] =  -r[1][1], m[9] =  r[1][2],
       m[2] = -r[2][0], m[6] =  -r[2][1], m[10] =  r[2][2];
 
+      if (_spec.rotationContraints){
+        apply_rotationConstraints(_three.matMov, _spec.rotationContraints);
+      }
+
       _three.matMov.multiply(_three.preMatrix);
      
       faceSlot.faceFollowerParent.matrix.copy(_three.matMov);
@@ -491,6 +501,20 @@ const WebARRocksFaceThreeHelper = (function(){
         faceSlot.faceFollower.position.fromArray(mean).multiplyScalar(-1);
       }
     }
+  }
+
+
+  function  apply_rotationConstraints(threeMat, constraints){
+    _three.euler.setFromRotationMatrix(threeMat, constraints.order);
+    _three.euler.set(
+      constraints.rotXFactor * _three.euler.x,
+      constraints.rotYFactor * _three.euler.y,
+      constraints.rotZFactor * _three.euler.z,
+      constraints.order
+      );
+    _three.matMov2.makeRotationFromEuler(_three.euler);
+    _three.matMov2.copyPosition(threeMat);
+    threeMat.copy(_three.matMov2);
   }
 
 
@@ -547,6 +571,7 @@ const WebARRocksFaceThreeHelper = (function(){
         solvePnPObjPointsPositions: _defaultSolvePnPObjPointsPositions,
         solvePnPImgPointsLabels: _defaultSolvePnPImgPointsLabels,
         isCenterObjPoints: true,
+        rotationContraints: null, // rotation constraints
 
         // stabilizer options:
         stabilizerSpec: {},

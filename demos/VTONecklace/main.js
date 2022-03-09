@@ -70,6 +70,13 @@ function main(){
     // temporal anti aliasing - Number of samples. 0 -> disabled:
     taaLevel: 3,
 
+    rotationContraints: {
+      order: 'XYZ',
+      rotXFactor: 1,
+      rotYFactor: 0.3,
+      rotZFactor: 1,
+    },
+
     // debug flags - all should be false for production:
     debugLandmarks: false,
     debugOccluder: false
