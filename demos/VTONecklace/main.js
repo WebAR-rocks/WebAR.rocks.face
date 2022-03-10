@@ -13,7 +13,7 @@ function main(){
     specWebARRocksFace: {
       NNCPath: '../../neuralNets/NN_NECKLACE_3.json',
       scanSettings: { // harden detection:
-        threshold: 0.9
+        threshold: 0.7
       }
     },
 
