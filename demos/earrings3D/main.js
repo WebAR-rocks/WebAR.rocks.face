@@ -74,7 +74,7 @@ function start(){
 
     set_occluders();
 
-    if (check_isAppleCrap){
+    if (check_isAppleCrap()){
       WebARRocksFaceEarrings3DHelper.resize(_canvases.three.width, _canvases.three.height - 0.001);
     }
   }).catch(function(err){
