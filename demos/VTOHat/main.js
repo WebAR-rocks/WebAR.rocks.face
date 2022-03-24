@@ -62,7 +62,7 @@ function main(){
     // (only the depth buffer is updated).
     occluderURL: "assets/models3D/occluder.glb",
     modelURL: "assets/models3D/hatDraco.glb", //initial model loaded. false or null -> no model
-    envmapURL: "assets/envmaps/venice_sunset_1k.hdr",
+    envmapURL: "assets/envmaps/venice_sunset_512.hdr",
 
     // lighting:
     pointLightIntensity: 0.8, //intensity of the point light. Set to 0 to disable
