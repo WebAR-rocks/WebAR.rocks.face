@@ -9,7 +9,7 @@ import BackButton from '../components/BackButton.js'
 import VTOButton from '../components/VTOButton.js'
 
 // import neural network model:
-import NN from '../contrib/WebARRocksFace/neuralNets/NN_HEADPHONES_3.json'
+import NN from '../contrib/WebARRocksFace/neuralNets/NN_HEADPHONES_4.json'
 
 // import WebARRocksMirror, a helper
 // This helper is not minified, feel free to customize it (and submit pull requests bro):
@@ -37,7 +37,7 @@ const get_pauseButtonText = (isPaused) => {
 
 // fake component, display nothing
 // just used to get the Camera and the renderer used by React-fiber:
-const DirtyHook = (props) => {
+const ThreeGrabber = (props) => {
   const threeFiber = useThree()
   _threeFiber = threeFiber
 
@@ -247,7 +247,7 @@ const VTOHelmet = (props) => {
       }}
       updateDefaultCamera = {false}
       >
-        <DirtyHook sizing={sizing} lighting={_settings.lighting} />
+        <ThreeGrabber sizing={sizing} lighting={_settings.lighting} />
         
         <Suspense fallback={<DebugCube />}>
           <VTOModelContainer

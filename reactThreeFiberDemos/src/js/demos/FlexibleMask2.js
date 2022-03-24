@@ -44,7 +44,7 @@ let _threeCamera = null, _flexibleMaskMesh = null
 
 // fake component, display nothing
 // just used to get the Camera and the renderer used by React-fiber:
-const DirtyHook = (props) => {
+const ThreeGrabber = (props) => {
   const threeFiber = useThree()
   _threeCamera = threeFiber.camera
   useFrame(threeHelper.update_threeCamera.bind(null, props.sizing, threeFiber.camera))
@@ -215,7 +215,7 @@ const FlexibleMask = (props) => {
       }}
       updateDefaultCamera = {false}
       >
-        <DirtyHook sizing={sizing} lighting={_settings.lighting} />
+        <ThreeGrabber sizing={sizing} lighting={_settings.lighting} />
         
         <Suspense fallback={<DebugCube />}>
           <VTOModelContainer

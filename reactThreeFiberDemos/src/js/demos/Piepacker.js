@@ -62,7 +62,7 @@ const size_threeRenderer = (threeRenderer, sizing) => {
 
 // fake component, display nothing
 // just used to get the Camera and the renderer used by React-fiber:
-const DirtyHook = (props) => {
+const ThreeGrabber = (props) => {
   const threeFiber = useThree()
   _threeCamera = threeFiber.camera
   _threeScene = threeFiber.scene
@@ -425,7 +425,7 @@ const Mask = (props) => {
             // as null size, and will resize it crappily
             layerCanvasesRef.current.style.visibility = 'hidden'
           }}>
-          <DirtyHook sizing={sizing} />
+          <ThreeGrabber sizing={sizing} />
           
           <Suspense fallback={<DebugCube />}>
             <ModelContainer

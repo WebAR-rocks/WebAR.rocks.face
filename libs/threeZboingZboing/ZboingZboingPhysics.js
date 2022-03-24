@@ -21,9 +21,10 @@
  * SOFTWARE.
  */
 
-import * as THREE from '../three/v126/build/three.module.js';
-import { SkeletonUtils } from '../three/v126/examples/jsm/utils/SkeletonUtils.js';
+/* eslint-disable */
 
+import * as THREE from '../../libs/three/v136/build/three.module.js';
+import * as SkeletonUtils from '../../libs/three/v136/examples/jsm/utils/SkeletonUtils.js';
 
 
 // allocate intermediary vectorz here, not in the rendering loop:
@@ -32,13 +33,13 @@ const strengthDamper = new THREE.Vector3();
 const strength = new THREE.Vector3();
 const strengthInternal = new THREE.Vector3();
 const strengthSum = new THREE.Vector3();
+const strengthGravity = new THREE.Vector3();
 const dv = new THREE.Vector3();
 const dp = new THREE.Vector3();
 
 const boneVecFrom = new THREE.Vector3();
 const boneVecTo = new THREE.Vector3();
 
-const mat4 = new THREE.Matrix4();
 const quat = new THREE.Quaternion();
 
 
@@ -80,21 +81,24 @@ function update_physicsPosition(dt, strength, position, velocity){
   const accl = strength;
 
   // Euler integration:
-  dv.copy(accl).divideScalar(2*dt); // dv / 2 in fact
+  dv.copy(accl).multiplyScalar(2*dt); // dv / 2 in fact
   velocity.add(dv); // mean velocity during simulation step
 
-  dp.copy(velocity).divideScalar(dt);
+  dp.copy(velocity).multiplyScalar(dt);
   position.add(dp);
 
   velocity.add(dv); // velocity at the end of simulation step
 }
 
 
-function update_bonePhysics(dt, k, bone, rigidBone){
+function update_bonePhysics(dt, k, gravity, bone, rigidBone){
   if (bone.userData.physicsSettings === null) {
     bone.position.copy(rigidBone.userData.startWorldPosition);
     return;
   }  
+  if (bone.userData.isRoot){
+    return;
+  }
   const physicsSettings = bone.userData.physicsSettings;
   
   // apply physics to update world bone start position:
@@ -103,17 +107,22 @@ function update_bonePhysics(dt, k, bone, rigidBone){
   strengthSum.copy(strength);
 
   // compute strength pulling to parent:
-  if (bone.userData.parent){
+  if (bone.userData.parent && k !== 0){
     compute_strength(physicsSettings, bone.userData.parent.userData.endWorldPosition, bone.position, bone.userData.startWorldVelocity, strength);
     strength.multiplyScalar(k);
     strengthSum.add(strength);
   }
 
   // internal strength pulling the start from the end of the bone:
-  if (rigidBone.children.length > 0){
+  if (rigidBone.children.length > 0 && k !== 0){
     compute_strength(physicsSettings, bone.userData.endWorldPosition, bone.position, bone.userData.endWorldVelocity, strengthInternal);
     strengthInternal.multiplyScalar(k);
     strengthSum.add(strengthInternal);
+  }
+
+  if (gravity !== 0){
+    strengthGravity.set(0, -gravity, 0);
+    strengthSum.add(strengthGravity);
   }
 
   update_physicsPosition(dt, strengthSum, bone.userData.nextStartWorldPosition, bone.userData.startWorldVelocity);
@@ -121,18 +130,24 @@ function update_bonePhysics(dt, k, bone, rigidBone){
   // apply physics to update world bone end position:
   if (rigidBone.children.length > 0){
     // internal strength pulling the end from the start of the bone:
-    strengthSum.copy(strengthInternal).multiplyScalar(-1);
+    if (k === 0){
+      strengthSum.set(0.0, 0.0, 0.0);
+    } else {
+      strengthSum.copy(strengthInternal).multiplyScalar(-1);
+    }
 
     // compute strength pulling to rigid rest pose:
     compute_strength(physicsSettings, rigidBone.userData.endWorldPosition, bone.userData.endWorldPosition, bone.userData.endWorldVelocity, strength);
     strengthSum.add(strength);
 
     // compute strength pulling to children:
-    bone.userData.children.forEach(function(boneChild){
-      compute_strength(physicsSettings, boneChild.position, bone.userData.endWorldPosition, bone.userData.endWorldVelocity, strength);
-      strength.multiplyScalar(k / bone.userData.children.length);
-      strengthSum.add(strength);
-    });    
+    if (k !== 0){
+      bone.userData.children.forEach(function(boneChild){
+        compute_strength(physicsSettings, boneChild.position, bone.userData.endWorldPosition, bone.userData.endWorldVelocity, strength);
+        strength.multiplyScalar(k / bone.userData.children.length);
+        strengthSum.add(strength);
+      });
+    }
 
     update_physicsPosition(dt, strengthSum, bone.userData.nextEndWorldPosition, bone.userData.endWorldVelocity);
   }
@@ -171,21 +186,23 @@ function update_boneRotation(bone, rigidBone){
 }
 
 
-function compute_endBonePosition(threeBone, result){
+/*function compute_endBonePosition(threeBone, result){
   result.set(0, 0, 0);
   threeBone.children.forEach(function(threeBoneChild){
     result.add(threeBoneChild.position);
   });
   result.divideScalar(threeBone.children.length);
-}
+}*/
 
 
 const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsSettings, optionsArg){
 
   const options = Object.assign({
+    gravity: 0,
     simuStepsCount: 3,
     isDebug: false,
-    internalStrengthFactor: 0.5
+    internalStrengthFactor: 0.5,
+    bonesNamesShouldContain: null
   }, optionsArg || {});
 
   this.threeClock = new THREE.Clock();
@@ -207,9 +224,15 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
 
 
   this.skeleton.bones = this.rigidSkeleton.bones.map(function(rigidBone){
+
+    // look if the bone is a root bone (no parent bone)
+    const isRoot = (rigidBone.parent && !rigidBone.parent.isBone);
+
     // bones loose their linking, so they are positionned in the world space now
     const bone = new THREE.Bone();
     bone.name = rigidBone.name;
+    bone.userData.isRoot = isRoot;
+    //console.log('[INFO] in ZboingZboingPhysics: bone.name =', bone.name);
     rigidBone.getWorldScale(bone.scale);
     threeScene.add(bone);
 
@@ -237,7 +260,8 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
   // init custom bone data:
   this.skeleton.bones.forEach(function(bone, boneIndex){
     let physicsSettings = bonesPhysicsSettings[bone.name] || bonesPhysicsSettings['DEFAULT'] || null;
-    if (bonesPhysicsSettings[bone.name] === null){
+    if (bonesPhysicsSettings[bone.name] === null
+      || (options.bonesNamesShouldContain !== null && bone.name.indexOf(options.bonesNamesShouldContain) === -1)){
       physicsSettings = null;
     }
 
@@ -302,7 +326,7 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
 
   this.update = function(){
 
-    const dt = Math.max(this.threeClock.getDelta(), 0.1); // in seconds
+    const dt = Math.min(this.threeClock.getDelta(), 0.1); // in seconds
     // dt should not be too large otherwise physics may diverge
     
     //this.rigidSkeleton.pose();
@@ -318,14 +342,16 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
     for(let i = 0; i<options.simuStepsCount; ++i){
       this.skeleton.bones.forEach(function(bone, boneIndex){
         const rigidBone = that.rigidSkeleton.bones[boneIndex];
-        update_bonePhysics(dtStep, options.internalStrengthFactor, bone, rigidBone);
+        update_bonePhysics(dtStep, options.internalStrengthFactor, options.gravity, bone, rigidBone);
       });
       this.skeleton.bones.forEach(apply_bonePhysics);
     }
 
     // apply endbonepositions by changing bone orientations:
     this.skeleton.bones.forEach(function(bone, boneIndex){
-      update_boneRotation(bone, that.rigidSkeleton.bones[boneIndex]);
+      if (bone.userData.isRoot || options.gravity === 0.0){
+        update_boneRotation(bone, that.rigidSkeleton.bones[boneIndex]);
+      }
     });
   }
 

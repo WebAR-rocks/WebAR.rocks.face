@@ -49,6 +49,9 @@ const WebARRocksMirror = (function(){
     // add constratins for the rotation:
     rotationContraints: null,
 
+    // DRACO decompression:
+    dracoDecoderPath: '../../libs/three/v136/examples/js/libs/draco/',
+
     debugOccluder: false
   };
   const _threeInstances = {
@@ -175,7 +178,14 @@ const WebARRocksMirror = (function(){
       return;
     }
 
-    new THREE.GLTFLoader(_threeInstances.loadingManager).load(modelURL, function(model){
+    const gltfLoader = new THREE.GLTFLoader(_threeInstances.loadingManager);
+    if (THREE.DRACOLoader){
+      const dracoLoader = new THREE.DRACOLoader();
+      dracoLoader.setDecoderPath(_spec.dracoDecoderPath);
+      gltfLoader.setDRACOLoader(dracoLoader);
+    }
+
+    gltfLoader.load(modelURL, function(model){
       const threeFaceAccessory = model.scene.clone();
 
       tweak_faceAccessory(threeFaceAccessory);
@@ -229,7 +239,7 @@ const WebARRocksMirror = (function(){
       const pmremGenerator = new THREE.PMREMGenerator( renderer );
       pmremGenerator.compileEquirectangularShader();
 
-      new THREE.RGBELoader(_threeInstances.loadingManager).setDataType( THREE.UnsignedByteType )
+      new THREE.RGBELoader(_threeInstances.loadingManager).setDataType( THREE.HalfFloatType )
         .load(_spec.envmapURL, function ( texture ) {
         _threeInstances.envMap = pmremGenerator.fromEquirectangular( texture ).texture;
         pmremGenerator.dispose();

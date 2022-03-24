@@ -72,6 +72,7 @@ Here are the static JavaScript demos:
   * earrings VTO 3D: [live demo](https://webar.rocks/demos/face/demos/earrings3D/), [source code](/demos/earrings3D/)
   * glasses VTO: [live demo](https://webar.rocks/demos/face/demos/VTOGlasses/), [source code and specific documentation](/demos/VTOGlasses/),
   * headphones/helmet VTO: [live demo](https://webar.rocks/demos/face/demos/VTOHelmet/), [source code](/demos/VTOHelmet/)
+  * hat VTO: [live demo](https://webar.rocks/demos/face/demos/VTOHat/), [source code](/demos/VTOHat/)
   * necklace VTO: [live demo](https://webar.rocks/demos/face/demos/VTONecklace/), [source code](/demos/VTONecklace/)
 
 * Flexible masks:

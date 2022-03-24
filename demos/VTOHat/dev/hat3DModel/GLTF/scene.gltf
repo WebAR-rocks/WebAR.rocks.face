@@ -1,0 +1,340 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 58720,
+      "max": [
+        0.5228415131568909,
+        0.48086416721343994,
+        0.3198971748352051
+      ],
+      "min": [
+        -0.5228415727615356,
+        -0.48086416721343994,
+        -0.3198966979980469
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 704640,
+      "componentType": 5126,
+      "count": 58720,
+      "max": [
+        0.999879002571106,
+        0.9999999403953552,
+        0.9999892115592957
+      ],
+      "min": [
+        -0.9999002814292908,
+        -0.9999122619628906,
+        -0.9999988079071045
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 58720,
+      "max": [
+        0.9980400204658508,
+        0.9980400204658508
+      ],
+      "min": [
+        0.0019499999471008778,
+        0.002090000081807375
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 340134,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 1,
+      "max": [
+        0.0
+      ],
+      "min": [
+        0.0
+      ],
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 1,
+      "max": [
+        0.15366333723068237,
+        -0.11930546164512634,
+        0.18888260424137115,
+        0.9625368118286133
+      ],
+      "min": [
+        0.15366333723068237,
+        -0.11930546164512634,
+        0.18888260424137115,
+        0.9625368118286133
+      ],
+      "type": "VEC4"
+    }
+  ],
+  "animations": [
+    {
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 4,
+            "path": "rotation"
+          }
+        }
+      ],
+      "name": "Take 001",
+      "samplers": [
+        {
+          "input": 4,
+          "interpolation": "LINEAR",
+          "output": 5
+        }
+      ]
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "Virtual Museums of Małopolska (https://sketchfab.com/WirtualneMuzeaMalopolski)",
+      "license": "CC0-1.0 (http://creativecommons.org/publicdomain/zero/1.0/)",
+      "source": "https://sketchfab.com/3d-models/karol-wojtyas-hat-dc3cfee034d248e68cd37d0eb49372d2",
+      "title": "Karol Wojtyła's hat"
+    },
+    "generator": "Sketchfab-12.68.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 1360536,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 469760,
+      "byteOffset": 1360536,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1409280,
+      "byteOffset": 1830296,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 4,
+      "byteOffset": 3239576,
+      "name": "floatBufferViews"
+    },
+    {
+      "buffer": 0,
+      "byteLength": 16,
+      "byteOffset": 3239580,
+      "byteStride": 16,
+      "name": "floatBufferViews"
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 3239596,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/defaultMat_baseColor.jpeg"
+    },
+    {
+      "uri": "textures/defaultMat_metallicRoughness.png"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "defaultMat",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Kapelusz_Karola_Wojtyly_defaultMat_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        -1.0,
+        -2.220446049250313e-16,
+        0.0,
+        1.0602761507034302,
+        -10.317639350891113,
+        -2.2909761534275737e-15,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "e8115fdd94894d8b82a67b927f4a8a34.fbx"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "Object_2"
+    },
+    {
+      "children": [
+        4
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        5
+      ],
+      "name": "Kapelusz_Karola_Wojtyly",
+      "rotation": [
+        0.15366332232952118,
+        -0.11930546164512634,
+        0.18888258934020996,
+        0.9625368118286133
+      ],
+      "scale": [
+        30.64419937133789,
+        30.64419937133789,
+        30.64419937133789
+      ],
+      "translation": [
+        0.5301461219787598,
+        -0.5310523509979248,
+        5.158810615539551
+      ]
+    },
+    {
+      "children": [
+        6
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        -0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        2.9802322387695313e-08,
+        0.0,
+        -2.384185791015625e-07,
+        1.0
+      ],
+      "name": "Object_5"
+    },
+    {
+      "mesh": 0,
+      "name": "Kapelusz_Karola_Wojtyly_defaultMat_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    }
+  ]
+}

@@ -38,7 +38,7 @@ const get_pauseButtonText = (isPaused) => {
 
 // fake component, display nothing
 // just used to get the Camera and the renderer used by React-fiber:
-const DirtyHook = (props) => {
+const ThreeGrabber = (props) => {
   const threeFiber = useThree()
   _threeFiber = threeFiber
 
@@ -247,7 +247,7 @@ const VTONecklace = (props) => {
       }}
       updateDefaultCamera = {false}
       >
-        <DirtyHook sizing={sizing} lighting={_settings.lighting} />
+        <ThreeGrabber sizing={sizing} lighting={_settings.lighting} />
         
         <Suspense fallback={<DebugCube />}>
           <VTOModelContainer

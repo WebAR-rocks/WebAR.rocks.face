@@ -17,8 +17,8 @@ const _spec = {
   bonesPhysics: {
     The_Hood_Rig: null, // this bone should not move
     DEFAULT: { // applied to all other bones:
-      damper: 0.0004,
-      spring: 0.000004
+      damper: 2,
+      spring: 20
     }
   }
 };

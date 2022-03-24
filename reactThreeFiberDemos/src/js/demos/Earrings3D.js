@@ -36,7 +36,7 @@ let _earrings3DHelper = null
 
 // fake component, display nothing
 // just used to get the Camera and the renderer used by React-fiber:
-const DirtyHook = (props) => {
+const ThreeGrabber = (props) => {
   const threeFiber = useThree()
   useFrame(_earrings3DHelper.update_threeCamera.bind(null, props.sizing, threeFiber.camera))
   threeFiber.gl.setPixelRatio(window.devicePixelRatio || 1)
@@ -222,7 +222,7 @@ const Earrings3D = (props) => {
       }}
       updateDefaultCamera = {false}
       >
-        <DirtyHook sizing={sizing} lighting={_settings.lighting} />
+        <ThreeGrabber sizing={sizing} lighting={_settings.lighting} />
         
         <Suspense fallback={<DebugCube />}>
           <EarringContainer side='RIGHT' scale={_settings.scale} GLTFModel={GLTFModelRight} occluderCylinder={_settings.earsOccluderCylinder} sizing={sizing}/>
