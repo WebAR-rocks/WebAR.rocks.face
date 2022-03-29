@@ -11,9 +11,9 @@ function main(){
     //videoURL: '../../../../testVideos/1056010826-hd.mp4', // use a video from a file instead of camera video
 
     specWebARRocksFace: {
-      NNCPath: '../../neuralNets/NN_NECKLACE_3.json',
-      scanSettings: { // harden detection:
-        threshold: 0.7
+      NNCPath: '../../neuralNets/NN_NECKLACE_4.json',
+      scanSettings: {
+        threshold: 0.6
       }
     },
 
@@ -74,7 +74,7 @@ function main(){
       order: 'YXZ',
       rotXFactor: 1,
       rotYFactor: 0.3,
-      rotZFactor: 1,
+      rotZFactor: 0.5,
     },
 
     // debug flags - all should be false for production:
