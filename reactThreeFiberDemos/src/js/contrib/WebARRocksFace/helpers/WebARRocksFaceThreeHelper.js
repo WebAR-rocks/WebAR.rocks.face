@@ -15,7 +15,6 @@
 
 
 import * as THREE from 'three'
-//import stabilizer from './stabilizers/WebARRocksLMStabilizer2.js'
 import stabilizer from './stabilizers/OneEuroStabilizer.js'
 
 
@@ -102,7 +101,9 @@ const WebARRocksFaceThreeHelper = (function(){
   const _three = {
     faceSlots: [],
     matMov: null,
-    preMatrix: null
+    preMatrix: null,
+    matMov2: null,
+    euler: null
   };
   const _dpr = window.devicePixelRatio || 1;
 
@@ -232,7 +233,12 @@ const WebARRocksFaceThreeHelper = (function(){
     _stabilizers = [];
     
     init_shps();
+
+     // pre-allocate:
     _three.matMov = new THREE.Matrix4();
+    _three.matMov2 = new THREE.Matrix4();
+    _three.euler = new THREE.Euler();
+
     _three.preMatrix = new THREE.Matrix4().makeRotationX(_spec.rxOffset);
     _three.preMatrix.setPosition(0.0, _spec.translationYZ[0], _spec.translationYZ[1]);
     _three.preMatrix.scale(new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(_spec.scale));
@@ -345,6 +351,10 @@ const WebARRocksFaceThreeHelper = (function(){
       m[1] = -r[1][0], m[5] =  -r[1][1], m[9] =  r[1][2],
       m[2] = -r[2][0], m[6] =  -r[2][1], m[10] =  r[2][2];
 
+      if (_spec.rotationContraints){
+        apply_rotationConstraints(_three.matMov, _spec.rotationContraints);
+      }
+
       _three.matMov.multiply(_three.preMatrix);
       
       faceSlot.faceFollowerParent.matrix.copy(_three.matMov);
@@ -354,6 +364,20 @@ const WebARRocksFaceThreeHelper = (function(){
         faceSlot.faceFollower.position.fromArray(mean).multiplyScalar(-1);
       }
     }
+  }
+
+
+  function  apply_rotationConstraints(threeMat, constraints){
+    _three.euler.setFromRotationMatrix(threeMat, constraints.order);
+    _three.euler.set(
+      constraints.rotXFactor * _three.euler.x,
+      constraints.rotYFactor * _three.euler.y,
+      constraints.rotZFactor * _three.euler.z,
+      constraints.order
+      );
+    _three.matMov2.makeRotationFromEuler(_three.euler);
+    _three.matMov2.copyPosition(threeMat);
+    threeMat.copy(_three.matMov2);
   }
 
 
@@ -403,6 +427,7 @@ const WebARRocksFaceThreeHelper = (function(){
       _spec = Object.assign({
         NN: null,
         canvas: null,
+        scanSettings: null,
         
         rxOffset: 0,
         translationYZ: [0.0, 0.0], // Y+ -> upper, Z+ -> forward
@@ -418,6 +443,7 @@ const WebARRocksFaceThreeHelper = (function(){
         // pose computation (SolvePnP):
         solvePnPObjPointsPositions: _defaultSolvePnPObjPointsPositions,
         solvePnPImgPointsLabels: _defaultSolvePnPImgPointsLabel,
+        rotationContraints: null,
 
         // callbacks:
         callbackReady: null,

@@ -19,6 +19,11 @@ const WebARRocksMirror = (function(){
 
     stabilizerSpec: {},
 
+    scanSettings: null,
+
+    // add constratins for the rotation:
+    rotationContraints: null,
+
     NN: null
   };
   let _spec = null;
@@ -103,6 +108,10 @@ const WebARRocksMirror = (function(){
           NN: _spec.NN,
           canvas: _spec.canvasFace,
           maxFacesDetected: _spec.maxFacesDetected,
+
+          rotationContraints: _spec.rotationContraints,
+
+          scanSettings: _spec.scanSettings,
 
           callbackReady: function(err, threeInstances){
             if (err){

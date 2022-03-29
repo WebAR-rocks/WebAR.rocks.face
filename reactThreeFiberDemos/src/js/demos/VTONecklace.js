@@ -10,7 +10,7 @@ import BackButton from '../components/BackButton.js'
 import VTOButton from '../components/VTOButton.js'
 
 // import neural network model:
-import NN from '../contrib/WebARRocksFace/neuralNets/NN_NECKLACE_3.json'
+import NN from '../contrib/WebARRocksFace/neuralNets/NN_NECKLACE_4.json'
 
 // import WebARRocksMirror, a helper
 // This helper is not minified, feel free to customize it (and submit pull requests bro):
@@ -194,6 +194,15 @@ const VTONecklace = (props) => {
       stabilizerSpec: { // increase stabilization
         beta: 20,
         forceFilterNNInputPxRange: [1.5, 4]
+      },
+      scanSettings: {
+        threshold: 0.6
+      },
+      rotationContraints: {
+        order: 'YXZ',
+        rotXFactor: 1,
+        rotYFactor: 0.3,
+        rotZFactor: 0.5,
       },
       solvePnPObjPointsPositions: {
         // indices of the points are given as comments. 
