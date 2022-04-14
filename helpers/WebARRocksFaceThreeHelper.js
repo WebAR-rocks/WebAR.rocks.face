@@ -154,6 +154,7 @@ const WebARRocksFaceThreeHelper = (function(){
     matMov: null,
     matMov2: null,
     euler: null,
+    vec3: null,
     preMatrix: null
   };
 
@@ -310,9 +311,17 @@ const WebARRocksFaceThreeHelper = (function(){
       faceFollowerParent.visible = false;
       faceFollowerParent.matrixAutoUpdate = false;
       faceFollowerParent.add(faceFollower);
+      let torsoFollower = null;
+      if (_spec.isComputeTorsoPose){
+        torsoFollower = new THREE.Object3D();
+        torsoFollower.frustumCulled = false;
+        torsoFollower.matrixAutoUpdate = false;
+        faceFollowerParent.add(torsoFollower);
+      }
       _three.faceSlots.push({
         faceFollower: faceFollower,
-        faceFollowerParent: faceFollowerParent
+        faceFollowerParent: faceFollowerParent,
+        torsoFollower: torsoFollower
       });
       _three.scene.add(faceFollowerParent);
     }
@@ -335,6 +344,7 @@ const WebARRocksFaceThreeHelper = (function(){
     _three.matMov = new THREE.Matrix4();
     _three.matMov2 = new THREE.Matrix4();
     _three.euler = new THREE.Euler();
+    _three.vec3 = new THREE.Vector3();
 
     _three.preMatrix = new THREE.Matrix4().makeRotationX(_spec.rxOffset);
     _three.preMatrix.setPosition(0.0, _spec.translationYZ[0], _spec.translationYZ[1]);
@@ -387,6 +397,9 @@ const WebARRocksFaceThreeHelper = (function(){
     if (_spec.callbackReady){
       spec.threeFaceFollowers = _three.faceSlots.map(function(faceSlot){
         return faceSlot.faceFollower;
+      });
+      spec.threeTorsoFollowers = _three.faceSlots.map(function(faceSlot){
+        return faceSlot.torsoFollower;
       });
       spec.threeScene = _three.scene;
       spec.threeRenderer = _three.renderer;
@@ -459,6 +472,10 @@ const WebARRocksFaceThreeHelper = (function(){
       }
     }
 
+    if (_spec.isComputeTorsoPose) {
+      update_torsoPose(faceSlot.faceFollowerParent, faceSlot.torsoFollower);
+    }
+    
     return landmarksStabilized;
   }
 
@@ -549,6 +566,35 @@ const WebARRocksFaceThreeHelper = (function(){
   }
 
 
+
+  function update_torsoPose(faceFollowerParent, torso) {
+    const headMatrixWorld = faceFollowerParent.matrixWorld;
+
+    // compute rotation part:
+    const torsoEuler = _three.euler;
+    torsoEuler.setFromRotationMatrix(headMatrixWorld, 'YZX')
+    torsoEuler._x = _spec.torsoRotX; // > 0 since most people have a camera with a low angle view
+    torsoEuler._y *= _spec.torsoRotYFactor; // lower rotation around vertical axis
+    torsoEuler._z = 0.0;
+    torso.matrixWorld.makeRotationFromEuler(torsoEuler);
+
+    // compute base neck point position in World ref:
+    const threeBaseNeckWorldPos = _three.vec3;
+    threeBaseNeckWorldPos.fromArray(_spec.torsoBaseNeck); // make origin of torso match with base neck
+    threeBaseNeckWorldPos.applyMatrix4(headMatrixWorld);
+
+    // put torso a bit higher:
+    threeBaseNeckWorldPos.setY( threeBaseNeckWorldPos.y + _spec.torsoTranslateY );
+    torso.matrixWorld.setPosition(threeBaseNeckWorldPos);
+
+    // compute torso matrix from its matrixWorld:
+    torso.matrix.copy(torso.parent.matrixWorld).invert().multiply(torso.matrixWorld);
+
+    // update matrix world for all children:
+    torso.updateWorldMatrix(false, true);
+  }
+
+
   function start(domVideo){
     if (domVideo){
       _spec.spec.videoSettings = {videoElement: domVideo};
@@ -563,9 +609,18 @@ const WebARRocksFaceThreeHelper = (function(){
       _spec = Object.assign({
         spec: {},
 
-        rxOffset: 0,
+        // follower object pose tweaks:
+        rxOffset: 0, // in rad, + -> look down
         translationYZ: [0.0, 0.0], // Y+ -> upper, Z+ -> forward
         scale: 1.0,
+
+        // if true, we compute the torso pose depending on the head pose
+        // it can be useful for background removal
+        isComputeTorsoPose: false,
+        torsoRotX: 0, // in rad + -> rotate forward
+        torsoRotYFactor: 0.5,
+        torsoBaseNeck: [0, -58, -18], // position of the base of the neck in the torso ref
+        torsoTranslateY: 70, // + -> up
 
         // pose computation (SolvePnP):
         solvePnPObjPointsPositions: _defaultSolvePnPObjPointsPositions,
@@ -644,7 +699,7 @@ const WebARRocksFaceThreeHelper = (function(){
     },
 
 
-    resize: function(w, h){ //should be called after resize
+    resize: function(w, h){ // should be called after resize
       if (_gl){
         // Fix a bug with IOS14.7 and WebGL2
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, null);

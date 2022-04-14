@@ -1,3 +1,9 @@
+/*
+ * WebARRocksMirror is a wrapper helper for WebARRocksFaceThreeHelper
+ * It is developed for realistic virtual try-on use cases
+ * (glasses, helmets, hats, necklaces)
+*/
+
 
 const WebARRocksMirror = (function(){
   // private variables:

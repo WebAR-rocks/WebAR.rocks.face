@@ -583,6 +583,14 @@ const WebARRocksFaceThreeHelper = (function(){
       return that.get_viewWidth() / that.get_viewHeight();
     },
 
+    get_videoElement: function(){
+      return _videoElement;
+    },
+
+    set_videoElement: function (videoElement) {
+      _videoElement = videoElement
+    },
+
     get_videoGL: function(){
       return _gl;
     },

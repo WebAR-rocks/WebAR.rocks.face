@@ -85,9 +85,9 @@ Here are the static JavaScript demos:
   * makeup texture based VTO: [live demo](https://webar.rocks/demos/face/demos/makeupTexture/), [source code](/demos/makeupTexture/)
   * sport makeup: [live demo](https://webar.rocks/demos/face/demos/makeupSport/), [source code](/demos/makeupSport/)
 
-
-
-* GIF Face replacement: [live demo](https://webar.rocks/demos/face/demos/faceReplacement/gif), [source code](/demos/faceReplacement/gif/)
+* Misc:
+  * Background removal: [live demo](https://webar.rocks/demos/face/demos/backgroundRemoval/), [source code](/demos/backgroundRemoval/)
+  * GIF Face replacement: [live demo](https://webar.rocks/demos/face/demos/faceReplacement/gif), [source code](/demos/faceReplacement/gif/)
 
 
 ## Specifications

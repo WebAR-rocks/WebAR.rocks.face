@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-language" content="en-EN" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+
+    <title>Background removal Demo</title>
+    
+    <!-- INCLUDE WebAR.rocks.face MAIN SCRIPT -->
+    <script src="../../dist/WebARRocksFace.js"></script>
+    
+    <!-- INCLUDE MAIN HELPER -->
+    <script src="../../helpers/WebARRocksFaceThreeHelper.js"></script>
+
+    <!-- THREE.JS, FOR THE RENDERING -->
+    <!-- WARNING: for production you should replace three.js by three.min.js -->
+    <script src="../../libs/three/v136/build/three.js"></script>
+
+    <!-- THREE.JS GLTF loader -->
+    <script src="../../libs/three/v136/examples/js/loaders/GLTFLoader.js"></script>
+
+    <!-- THREE.JS postprocessing - useful for the blur mask pass: -->
+    <script src="../../libs/three/v136/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="../../libs/three/v136/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="../../libs/three/v136/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="../../libs/three/v136/examples/js/shaders/CopyShader.js"></script>
+    
+    <!-- INCLUDE LANDMARKS STABILIZER -->
+    <script src="../../helpers/stabilizers/OneEuroStabilizer.js"></script>
+    
+    <!-- INCLUDE MAIN DEMO SCRIPT: -->
+    <script src="./main.js"></script>
+
+    <style type='text/css'>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: url('assets/background.jpg') no-repeat center center fixed;
+        background-size: cover;
+        width: 100vw;
+        height: 100vh;
+      }
+      #WebARRocksFaceCanvas, #threeCanvas {
+        display: none;
+      }
+
+      #compositeCanvas {
+        z-index: 4;
+        position: fixed;
+        width: 100vw;
+        top: 0;
+        left: 0;
+        
+        /* mirror the canvas: */
+        transform: rotateY(180deg);
+      }
+
+     
+      /* FROM HERE, ALL IS FOR DEBUG (so should be commented) */
+      /*#WebARRocksFaceCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        border: 1px solid red;
+        display: block;
+        max-width: 33vw;
+        z-index: 4;
+      } 
+      #threeCanvas {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 1;
+        border: 1px solid lime;
+        max-width: 33vw;
+        display: block;
+        z-index: 4;
+      } //*/
+    </style>
+  </head>
+  <body>
+     <!--
+      The first canvas is used by WebAR.rocks
+      It is linked to a WebGL context used by the deep learning engine
+      And it displays the video of the camera.
+      
+      Since we need to transfer the video to a texture for face detection,
+      it is not costly at all to use this texture for display.
+
+      You can tweak the rendering of the video in WebARRocksFaceThreeHelper.js,
+      by editing the fragment shader of _shps.copy
+
+      This canvas is not displayed on the screen
+    -->
+    <canvas id='WebARRocksFaceCanvas'></canvas>
+
+
+    <!--
+      The second canvas is used by THREE.js for 3D rendering to render
+      the blurred background mask. It is not displayed on the screen
+    -->
+    <canvas id='threeCanvas'></canvas>
+
+
+    <!--
+      This is the composite canvas, where we draw the first canvas
+      using the second canvas as a mask -->
+    <canvas id='compositeCanvas'></canvas>  
+  </body>
+</html>
+ 
