@@ -15,7 +15,7 @@ const SETTINGS = {
   // torso occluder pose:
   torsoRotX: 0, // in rad. + -> rotate forward
   torsoBaseNeck: [0, -58, -18], // position of the base of the neck in the torso ref
-  torsoTranslateY: 70, // + -> up
+  torsoTranslateY: 95, // + -> up
   
 
   // debug flags. All should be set to false:
