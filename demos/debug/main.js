@@ -7,7 +7,7 @@ const _appStates = {
 
 const _state = {
   appState: _appStates.notLoaded,
-  NNURL: 'NN_FACE_0.json',
+  NNURL: null,
   video: null,
   canvas: null
 };

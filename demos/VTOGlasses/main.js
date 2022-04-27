@@ -20,9 +20,9 @@ function main(){
     ],
 
     specWebARRocksFace: {
-      NNCPath: '../../neuralNets/NN_GLASSES_6.json',
+      NNCPath: '../../neuralNets/NN_GLASSES_9.json',
       scanSettings: {
-        threshold: 0.9
+        threshold: 0.8
       }
     },
 

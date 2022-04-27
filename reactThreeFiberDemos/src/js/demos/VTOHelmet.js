@@ -190,7 +190,7 @@ const VTOHelmet = (props) => {
       NN,
       canvasFace: canvasFaceRef.current,
       scanSettings: {
-        threshold: 0.7
+        threshold: 0.7 // detection threshold, between 0 and 1
       },
       maxFacesDetected: 1,
       solvePnPObjPointsPositions: {
