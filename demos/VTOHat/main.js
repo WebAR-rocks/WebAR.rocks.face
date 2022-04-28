@@ -11,11 +11,14 @@ function main(){
     //videoURL: '../../../../testVideos/1056010826-hd.mp4', // use a video from a file instead of camera video
 
     specWebARRocksFace: {
-      NNCPath: '../../neuralNets/NN_HEADPHONES_4.json',
+      NNCPath: '../../neuralNets/NN_HEADPHONESL_0.json',
       scanSettings: {
         threshold: 0.6
       }
     },
+
+    // lighting:
+    isLightReconstructionEnabled: true,
 
     // increase stabilization:
     stabilizerSpec: {
@@ -63,11 +66,6 @@ function main(){
     occluderURL: "assets/models3D/occluder.glb",
     modelURL: "assets/models3D/hatDraco.glb", //initial model loaded. false or null -> no model
     envmapURL: "assets/envmaps/venice_sunset_512.hdr",
-
-    // lighting:
-    pointLightIntensity: 0.8, //intensity of the point light. Set to 0 to disable
-    pointLightY: 200, // larger -> move the pointLight to the top
-    hemiLightIntensity: 1, // intensity of the hemispheric light. Set to 0 to disable (not really useful if we use an envmap)
 
     // temporal anti aliasing - Number of samples. 0 -> disabled:
     taaLevel: 0,

@@ -27,7 +27,14 @@ const WebARRocksMirror = (function(){
     },
 
     stabilizerSpec: {},
-    
+
+    // light reconstruction:
+    isLightReconstructionEnabled: false,
+    lightReconstructionIntensityPow: 3,
+    lightReconstructionAmbIntensityFactor: 30.0,
+    lightReconstructionDirIntensityFactor: 30.0,
+    lightReconstructionTotalIntensityMin: 0.1,
+
     isGlasses: true,
     modelURL: null, // initial 3D model
     occluderURL: null, // occluder
@@ -253,17 +260,19 @@ const WebARRocksMirror = (function(){
       });
     }
 
-    //  We add a soft light. Should not be necessary if we use an envmap:
-    if (_spec.hemiLightIntensity > 0) {
-      const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x000000, _spec.hemiLightIntensity );
-      scene.add(hemiLight);
-    }
+    if (!_spec.isLightReconstructionEnabled){
+      //  We add a soft light. Should not be necessary if we use an envmap:
+      if (_spec.hemiLightIntensity > 0) {
+        const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x000000, _spec.hemiLightIntensity );
+        scene.add(hemiLight);
+      }
 
-    // add a pointLight to highlight specular lighting:
-    if ( _spec.pointLightIntensity > 0){
-      const pointLight = new THREE.PointLight( 0xffffff, _spec.pointLightIntensity );
-      pointLight.position.set(0, _spec.pointLightY, 0);
-      scene.add(pointLight);
+      // add a pointLight to highlight specular lighting:
+      if ( _spec.pointLightIntensity > 0){
+        const pointLight = new THREE.PointLight( 0xffffff, _spec.pointLightIntensity );
+        pointLight.position.set(0, _spec.pointLightY, 0);
+        scene.add(pointLight);
+      }
     }
 
     // load occluder:
@@ -325,7 +334,7 @@ const WebARRocksMirror = (function(){
 
 
         // Init WebAR.rocks.face through the helper:
-        const webARRocksSpec = {
+        const threeHelperSpec = {
           spec: _spec.specWebARRocksFace,
           canvas: _spec.canvasFace,
           canvasThree: _spec.canvasThree,
@@ -333,6 +342,12 @@ const WebARRocksMirror = (function(){
           
           isPostProcessing: (_spec.bloom) ? true : false,
           taaLevel: _spec.taaLevel,
+
+          isLightReconstructionEnabled: _spec.isLightReconstructionEnabled,
+          lightReconstructionIntensityPow: _spec.lightReconstructionIntensityPow,
+          lightReconstructionAmbIntensityFactor: _spec.lightReconstructionAmbIntensityFactor,
+          lightReconstructionDirIntensityFactor: _spec.lightReconstructionDirIntensityFactor,
+          lightReconstructionTotalIntensityMin: _spec.lightReconstructionTotalIntensityMin,
 
           stabilizerSpec: _spec.stabilizerSpec,
 
@@ -351,12 +366,12 @@ const WebARRocksMirror = (function(){
           }
         };
         if (spec.solvePnPObjPointsPositions){
-          webARRocksSpec.solvePnPObjPointsPositions = spec.solvePnPObjPointsPositions;
+          threeHelperSpec.solvePnPObjPointsPositions = spec.solvePnPObjPointsPositions;
         }
         if (spec.solvePnPImgPointsLabels){
-          webARRocksSpec.solvePnPImgPointsLabels = spec.solvePnPImgPointsLabels;
+          threeHelperSpec.solvePnPImgPointsLabels = spec.solvePnPImgPointsLabels;
         }
-        WebARRocksFaceThreeHelper.init(webARRocksSpec);
+        WebARRocksFaceThreeHelper.init(threeHelperSpec);
       }); //end returned promise
     }, //end init()
 

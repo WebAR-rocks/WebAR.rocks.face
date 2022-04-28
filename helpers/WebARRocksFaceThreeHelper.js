@@ -144,18 +144,24 @@ const WebARRocksFaceThreeHelper = (function(){
   };
   const _three = {
     isPostProcessing: false,
+
     taaLevel: 0,
     canvas: null,
     renderer: null,
     composer: null,
     scene: null,
     camera: null,
+
     faceSlots: [],
+    
     matMov: null,
     matMov2: null,
     euler: null,
     vec3: null,
-    preMatrix: null
+    preMatrix: null,
+
+    ambLight: null,
+    dirLight: null
   };
 
   let _isDrawVideo = true;
@@ -350,7 +356,57 @@ const WebARRocksFaceThreeHelper = (function(){
     _three.preMatrix.setPosition(0.0, _spec.translationYZ[0], _spec.translationYZ[1]);
     _three.preMatrix.scale(new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(_spec.scale));
 
+    init_lightReconstruction();
+
     that.update_threeCamera();
+  }
+
+
+  function init_lightReconstruction(){
+    if (!_spec.isLightReconstructionEnabled){
+      return;
+    }
+
+    _three.ambLight = new THREE.AmbientLight( 0xffffff, 1.0 );
+    _three.scene.add(_three.ambLight);
+
+    _three.dirLight = new THREE.DirectionalLight( 0xffffff, 1.0 );
+    _three.scene.add(_three.dirLight);
+  }
+
+
+  function update_lightReconstruction(detectState){
+    /*console.log('light reconstruction params: lAmb='
+      + detectState.lAmb.toFixed(3)
+      +' lDir=' + detectState.lDir.toFixed(3)
+      +' lTheta=' + detectState.lTheta.toFixed(3)
+      +' lPhi=' + detectState.lPhi.toFixed(3)); return;//*/
+    let ambIntensity = detectState.lAmb, dirIntensity = detectState.lDir;
+
+    // minorate:
+    const totalIntensity = ambIntensity + dirIntensity;
+    if (totalIntensity < _spec.lightReconstructionTotalIntensityMin){
+      s = _spec.lightReconstructionTotalIntensityMin / totalIntensity;
+      ambIntensity *= s, dirIntensity *= s;
+    }
+
+    // apply pow:
+    ambIntensity = Math.pow(ambIntensity, _spec.lightReconstructionIntensityPow);
+    dirIntensity = Math.pow(dirIntensity, _spec.lightReconstructionIntensityPow);
+    
+    // apply light intensities:
+    _three.ambLight.intensity = ambIntensity * _spec.lightReconstructionAmbIntensityFactor;
+    _three.dirLight.intensity = dirIntensity * _spec.lightReconstructionDirIntensityFactor;
+
+    /*console.log('ambIntensity=' + _three.ambLight.intensity.toFixed(4)
+      + 'dirIntensity=' + _three.dirLight.intensity.toFixed(4)); //*/
+
+    // set dir light direction:
+    //_three.dirLight.intensity = 10, _three.ambLight.intensity = 0.0;
+    const theta = detectState.lTheta, phi = detectState.lPhi;
+    const cTheta = Math.cos(theta), sTheta = Math.sin(theta);
+    const cPhi = Math.cos(phi), sPhi = Math.sin(phi);
+    _three.dirLight.position.set(sTheta*cPhi, cTheta*cPhi, sPhi);
   }
 
   
@@ -405,6 +461,8 @@ const WebARRocksFaceThreeHelper = (function(){
       spec.threeRenderer = _three.renderer;
       spec.threeComposer = _three.composer;
       spec.threeCamera = _three.camera;
+      spec.threeAmbLight = _three.ambLight;
+      spec.threeDirLight = _three.dirLight;
       _spec.callbackReady(err, spec);
     }
   }
@@ -419,13 +477,20 @@ const WebARRocksFaceThreeHelper = (function(){
     }
     
     let landmarksStabilized = null;
+    let detectState0 = null;
     if (detectStates.length){ // multiface detection:
       landmarksStabilized = detectStates.map(process_faceSlot);
+      detectState0 = detectStates[0];
     } else { // only 1 face detected
       landmarksStabilized = process_faceSlot(detectStates, 0);
+      detectState0 = detectStates;
     }
     
     render_three();
+
+    if (_spec.isLightReconstructionEnabled && detectState0['isDetected']){
+      update_lightReconstruction(detectState0);
+    }
     
     if (_spec.callbackTrack){
       _spec.callbackTrack(detectStates, landmarksStabilized);
@@ -608,6 +673,13 @@ const WebARRocksFaceThreeHelper = (function(){
     init: function(spec){
       _spec = Object.assign({
         spec: {},
+
+        // enable light reconstruction:
+        isLightReconstructionEnabled: false,
+        lightReconstructionIntensityPow: 3.0,
+        lightReconstructionAmbIntensityFactor: 30.0,
+        lightReconstructionDirIntensityFactor: 30.0,
+        lightReconstructionTotalIntensityMin: 0.1,
 
         // follower object pose tweaks:
         rxOffset: 0, // in rad, + -> look down

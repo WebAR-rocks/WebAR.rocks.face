@@ -11,6 +11,7 @@ import DemoEarrings3D from './js/demos/Earrings3D.js'
 
 import DemoVTOGlasses from './js/demos/VTOGlasses.js'
 import DemoVTOHelmet from './js/demos/VTOHelmet.js'
+import DemoVTOHat from './js/demos/VTOHat.js'
 import DemoVTONecklace from './js/demos/VTONecklace.js'
 
 import DemoFlexibleMask2 from './js/demos/FlexibleMask2.js'
@@ -35,6 +36,10 @@ render(
 
         <Route path="/VTOHelmet">
           <DemoVTOHelmet />
+        </Route>
+
+        <Route path="/VTOHat">
+          <DemoVTOHat />
         </Route>
 
         <Route path="/VTONecklace">

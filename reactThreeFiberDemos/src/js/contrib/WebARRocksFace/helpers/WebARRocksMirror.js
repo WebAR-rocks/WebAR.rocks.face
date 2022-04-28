@@ -21,6 +21,13 @@ const WebARRocksMirror = (function(){
 
     scanSettings: null,
 
+    // light reconstruction:
+    isLightReconstructionEnabled: false,
+    lightReconstructionIntensityPow: 3,
+    lightReconstructionAmbIntensityFactor: 30.0,
+    lightReconstructionDirIntensityFactor: 30.0,
+    lightReconstructionTotalIntensityMin: 0.1,
+
     // add constratins for the rotation:
     rotationContraints: null,
 
@@ -104,7 +111,7 @@ const WebARRocksMirror = (function(){
         _spec = Object.assign({}, _defaultSpec, spec);
         
         // Init WebAR.rocks.face through the helper:
-        const webARRocksFaceThreeSpec = {
+        const threeHelperSpec = {
           NN: _spec.NN,
           canvas: _spec.canvasFace,
           maxFacesDetected: _spec.maxFacesDetected,
@@ -121,15 +128,18 @@ const WebARRocksMirror = (function(){
             }
             _state = _states.idle;
             resolve();
+          },
+          callbackTrack: function(detectState){
+            WebARRocksFaceLightingHelper.update_lightReconstruction(detectState);
           }
         };
         if (spec.solvePnPObjPointsPositions){
-          webARRocksFaceThreeSpec.solvePnPObjPointsPositions = spec.solvePnPObjPointsPositions;
+          threeHelperSpec.solvePnPObjPointsPositions = spec.solvePnPObjPointsPositions;
         }
         if (spec.solvePnPImgPointsLabels){
-          webARRocksFaceThreeSpec.solvePnPImgPointsLabels = spec.solvePnPImgPointsLabels;
+          threeHelperSpec.solvePnPImgPointsLabels = spec.solvePnPImgPointsLabels;
         }
-        WebARRocksFaceThreeHelper.init(WEBARROCKSFACE, webARRocksFaceThreeSpec, _spec.stabilizerSpec);
+        WebARRocksFaceThreeHelper.init(WEBARROCKSFACE, threeHelperSpec, _spec.stabilizerSpec);
       }); //end returned promise
     }, //end init()
 
