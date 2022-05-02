@@ -23,23 +23,33 @@
 
 /* eslint-disable */
 
-import * as THREE from 'three';
-import { SkeletonUtils } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import {
+  AnimationMixer,
+  Bone,
+  BoxGeometry,
+  Clock,
+  Quaternion,
+  Matrix4,
+  Mesh,
+  MeshNormalMaterial,
+  Vector3
+} from 'three'
+import { clone as SkeletonUtilsClone } from 'three/examples/jsm/utils/SkeletonUtils'
 
 
 // allocate intermediary vectorz here, not in the rendering loop:
-const strengthSpring = new THREE.Vector3();
-const strengthDamper = new THREE.Vector3();
-const strength = new THREE.Vector3();
-const strengthInternal = new THREE.Vector3();
-const strengthSum = new THREE.Vector3();
-const dv = new THREE.Vector3();
-const dp = new THREE.Vector3();
+const strengthSpring = new Vector3();
+const strengthDamper = new Vector3();
+const strength = new Vector3();
+const strengthInternal = new Vector3();
+const strengthSum = new Vector3();
+const dv = new Vector3();
+const dp = new Vector3();
 
-const boneVecFrom = new THREE.Vector3();
-const boneVecTo = new THREE.Vector3();
+const boneVecFrom = new Vector3();
+const boneVecTo = new Vector3();
 
-const quat = new THREE.Quaternion();
+const quat = new Quaternion();
 
 
 
@@ -189,7 +199,7 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
     bonesNamesShouldContain: null
   }, optionsArg || {});
 
-  this.threeClock = new THREE.Clock();
+  this.threeClock = new Clock();
   this.threeClock.start();
 
   // copy the skeleton to a rigid, invisible skeleton
@@ -198,7 +208,7 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
   this.parent = this.skinnedMesh.parent;
 
   //this.rigidSkeleton.pose();
-  this.rigidSkinnedMesh =  SkeletonUtils.clone(this.skinnedMesh);
+  this.rigidSkinnedMesh =  SkeletonUtilsClone(this.skinnedMesh);
   this.skeleton = this.rigidSkinnedMesh.skeleton;
 
   // force skeleton update;
@@ -209,7 +219,7 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
 
   this.skeleton.bones = this.rigidSkeleton.bones.map(function(rigidBone){
     // bones loose their linking, so they are positionned in the world space now
-    const bone = new THREE.Bone();
+    const bone = new Bone();
     bone.name = rigidBone.name;
     //console.log('[INFO] in ZboingZboingPhysics: bone.name =', bone.name);
     rigidBone.getWorldScale(bone.scale);
@@ -246,7 +256,7 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
 
     let debugEndPositionMesh = null;
     if (options.isDebug && physicsSettings){
-      debugEndPositionMesh = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.1,0.5), new THREE.MeshNormalMaterial());
+      debugEndPositionMesh = new Mesh(new BoxGeometry(0.5,0.1,0.5), new MeshNormalMaterial());
       threeScene.add(debugEndPositionMesh);
     }
 
@@ -259,11 +269,11 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
 
     Object.assign(bone.userData, {
       physicsSettings: physicsSettings,
-      startWorldVelocity: new THREE.Vector3(),
-      endWorldVelocity: new THREE.Vector3(),
-      endWorldPosition: (options.isDebug && debugEndPositionMesh) ? debugEndPositionMesh.position : new THREE.Vector3(),
-      nextStartWorldPosition: new THREE.Vector3(),
-      nextEndWorldPosition: new THREE.Vector3(),
+      startWorldVelocity: new Vector3(),
+      endWorldVelocity: new Vector3(),
+      endWorldPosition: (options.isDebug && debugEndPositionMesh) ? debugEndPositionMesh.position : new Vector3(),
+      nextStartWorldPosition: new Vector3(),
+      nextEndWorldPosition: new Vector3(),
       ind: boneIndex,
       parent: null,
       children: []
@@ -272,8 +282,8 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
 
   this.rigidSkeleton.bones.forEach(function(bone, boneIndex){
     Object.assign(bone.userData, {
-      startWorldPosition: new THREE.Vector3(),
-      endWorldPosition: new THREE.Vector3(),
+      startWorldPosition: new Vector3(),
+      endWorldPosition: new Vector3(),
       ind: boneIndex
     });
   });
@@ -299,7 +309,7 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
   // we should run it on the rigid (unvisible mesh)
   // not directly on the skinnedmesh otherwise it will mess with physics
   this.create_animationMixer = function(){
-    return new THREE.AnimationMixer(this.rigidSkinnedMesh);
+    return new AnimationMixer(this.rigidSkinnedMesh);
   }
 
 
@@ -362,7 +372,7 @@ const ZboingZboingPhysics = function(threeScene, threeSkinnedMesh, bonesPhysicsS
     });
 
     // bind the rigid skeleton to the mesh:
-    this.skinnedMesh.bind(this.rigidSkeleton, new THREE.Matrix4());
+    this.skinnedMesh.bind(this.rigidSkeleton, new Matrix4());
     this.skeleton.dispose();
   }
 }

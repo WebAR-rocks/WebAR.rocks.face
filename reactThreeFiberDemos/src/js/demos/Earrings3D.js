@@ -1,7 +1,13 @@
 import React, { useEffect, useRef, useState, Suspense } from 'react'
 import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import * as THREE from 'three'
+import {
+  CylinderGeometry,
+  Euler,
+  Matrix4,
+  MeshNormalMaterial,
+  Vector3
+} from 'three'
 
 // import GLTF loader - originally in examples/jsm/loaders/
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
@@ -74,9 +80,9 @@ const set_shinyMetal = (model) => {
 
 const create_occluderMesh = (occluderCylinder, side) => {
   // create occluder geometry for right ear:
-  const occluderRightGeom = new THREE.CylinderGeometry(occluderCylinder.radius, occluderCylinder.radius, occluderCylinder.height)
-  const matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler().fromArray(occluderCylinder.euler))
-  matrix.setPosition(new THREE.Vector3().fromArray(occluderCylinder.offset))
+  const occluderRightGeom = new CylinderGeometry(occluderCylinder.radius, occluderCylinder.radius, occluderCylinder.height)
+  const matrix = new Matrix4().makeRotationFromEuler(new Euler().fromArray(occluderCylinder.euler))
+  matrix.setPosition(new Vector3().fromArray(occluderCylinder.offset))
   occluderRightGeom.applyMatrix4(matrix)
   
   // create the occluder mesh (invert geometry if side == LEFT):
@@ -92,7 +98,7 @@ const EarringContainer = (props) => {
     _earrings3DHelper.set_earring(threeObject3D, props.side)
     const occluderMesh = create_occluderMesh(props.occluderCylinder, props.side)
     if (props.occluderCylinder.debug){
-      occluderMesh.material = new THREE.MeshNormalMaterial()
+      occluderMesh.material = new MeshNormalMaterial()
     }
     threeObject3D.add(occluderMesh)
   }, [props.GLTFModel, props.sizing])

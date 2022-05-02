@@ -13,7 +13,18 @@
  * OR TO ADDRESS A SPECIFIC USE CASE.
  */
 
-import * as THREE from 'three'
+import {
+  BufferAttribute,
+  Color,
+  DoubleSide,
+  Matrix4,
+  Mesh,
+  MeshNormalMaterial,
+  ShaderMaterial,
+  Vector2,
+  Vector3,
+  Vector4
+} from 'three'
 
 const WebARRocksFaceFlexibleMaskHelper = (function(){
   const _settings = {
@@ -191,7 +202,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
       // Build vertices array:
       const vertices = [];
       for (let i=0; i<geom.attributes.position.count; ++i){
-        vertices.push(new THREE.Vector3().fromArray(geom.attributes.position.array.slice(3*i, 3*i+3)));
+        vertices.push(new Vector3().fromArray(geom.attributes.position.array.slice(3*i, 3*i+3)));
       }
       geom.userData.vertices = vertices;
 
@@ -309,7 +320,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
           return;
         }
 
-        const kpPos = new THREE.Vector3();
+        const kpPos = new Vector3();
         const kpData = allFace3DKeypoints[label];
         if (typeof(kpData) === 'number'){ // indice is provided
           kpPos.copy(vertices[kpData]);
@@ -322,14 +333,14 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
           label: label,
           ind: labelIndice,
           position: kpPos,
-          positionMesh: new THREE.Vector3(),
-          positionView: new THREE.Vector3(),
-          positionClip: new THREE.Vector4(),
-          positionVpProjected: new THREE.Vector2(),
-          positionVpMeasured: new THREE.Vector2(),
-          displacementVp: new THREE.Vector2(),
-          displacementView: new THREE.Vector4(),
-          displacementObj: new THREE.Vector4(),
+          positionMesh: new Vector3(),
+          positionView: new Vector3(),
+          positionClip: new Vector4(),
+          positionVpProjected: new Vector2(),
+          positionVpMeasured: new Vector2(),
+          displacementVp: new Vector2(),
+          displacementView: new Vector4(),
+          displacementObj: new Vector4(),
           closestIndice: -1,
           smallestDistance: Infinity
         };
@@ -627,8 +638,8 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
 
     bind_keypointsMorphInfluenceToGeom: function(geom, keypointsMorphInfluences){
       // build bufferAttributes:
-      const kpIndicesBA = new THREE.BufferAttribute(keypointsMorphInfluences.indices, 3, false);
-      const kpMorphInfluenceBA = new THREE.BufferAttribute(keypointsMorphInfluences.morphInfluences, 3, false);
+      const kpIndicesBA = new BufferAttribute(keypointsMorphInfluences.indices, 3, false);
+      const kpMorphInfluenceBA = new BufferAttribute(keypointsMorphInfluences.morphInfluences, 3, false);
       
       // bind BA to geometry:
       geom.setAttribute( 'kpIndices', kpIndicesBA );
@@ -641,7 +652,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
       const colors = [];
       for (let i=0; i<keypointsCount; ++i){
         const hue = i / keypointsCount;
-        const threeColor = new THREE.Color().setHSL(hue, 1, 0.5);
+        const threeColor = new Color().setHSL(hue, 1, 0.5);
         colors.push(threeColor);
       }
 
@@ -667,7 +678,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
           gl_FragColor = vec4(vCol, 1.0);\n\
         }";
 
-      const debugMat = new THREE.ShaderMaterial({
+      const debugMat = new ShaderMaterial({
         uniforms: {
           'kpColors': {value: colors}
         },
@@ -675,7 +686,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
         fragmentShader: fragmentShader
       });
 
-      return new THREE.Mesh(geom, debugMat);
+      return new Mesh(geom, debugMat);
     },
 
 
@@ -683,7 +694,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
       // build kp displacement array:
       const kpDisplacements = [];
       for (let i=0; i<keypointsCount; ++i){
-        kpDisplacements.push(new THREE.Vector3());
+        kpDisplacements.push(new Vector3());
       }
 
       // instantiate material:
@@ -731,13 +742,13 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
 
 
     build_flexibleMask: function(allLandmarksLabels, geom, face3DKeypointsPositions, optionsArg){
-      _working.vec3 = new THREE.Vector3();
-      _working.mat4 = new THREE.Matrix4();
+      _working.vec3 = new Vector3();
+      _working.mat4 = new Matrix4();
       
       const options = Object.assign({}, _defaultBuildOptions, optionsArg);
 
       if (_settings.debugMaskMesh){
-        return new THREE.Mesh(geom, new THREE.MeshNormalMaterial({side: THREE.DoubleSide}));
+        return new Mesh(geom, new MeshNormalMaterial({side: DoubleSide}));
       }
 
       that.preprocess_geom(geom); // build edge graph, vertices array, ...
@@ -762,7 +773,7 @@ const WebARRocksFaceFlexibleMaskHelper = (function(){
 
       // build new material and mesh:
       const mat = that.build_flexibleMaskMaterial(originalMaterial, keypointsCount);
-      const mesh = new THREE.Mesh(geom, mat);
+      const mesh = new Mesh(geom, mat);
       mesh.userData.keypoints = keypoints;
       return mesh;
     },

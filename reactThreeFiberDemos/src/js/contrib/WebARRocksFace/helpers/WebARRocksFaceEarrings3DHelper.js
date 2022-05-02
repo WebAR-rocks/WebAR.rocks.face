@@ -18,7 +18,15 @@
  * Unlike glasses VTO or flexible masks we don't compute the pose from 2D points
  */ 
 
-import * as THREE from 'three'
+import {
+  DoubleSide,
+  Euler,
+  Matrix4,
+  Mesh,
+  ShaderLib,
+  ShaderMaterial,
+  Vector3
+} from 'three'
 
 //import WebARRocksLMStabilizer from './stabilizers/WebARRocksLMStabilizer2.js'
 import WebARRocksLMStabilizer from './stabilizers/OneEuroStabilizer.js'
@@ -143,35 +151,35 @@ const WebARRocksFaceEarrings3DHelper = (function(){
 
   function init_three(){
     // init stuffs used for head pose computation:
-    _headPose.euler = new THREE.Euler();
-    _headPose.ear2ear = new THREE.Vector3();
+    _headPose.euler = new Euler();
+    _headPose.ear2ear = new Vector3();
 
     // init vectors used for earrings position computation:
     const create_ear = function(){
       return {
-        projected: new THREE.Vector3(),
-        u: new THREE.Vector3(),
-        pos: new THREE.Vector3()
+        projected: new Vector3(),
+        u: new Vector3(),
+        pos: new Vector3()
       };
     };
     _earLeft = create_ear();
     _earRight = create_ear();
 
     // intermediary computation allocations:
-    _comp.urCrossK = new THREE.Vector3();
-    _comp.ulCrossK = new THREE.Vector3();
-    _comp.denom = new THREE.Vector3();
+    _comp.urCrossK = new Vector3();
+    _comp.ulCrossK = new Vector3();
+    _comp.denom = new Vector3();
   }
 
   function get_occluderMat(){
     if (_three.occluderMat !== null){
       return _three.occluderMat;
     }
-    _three.occluderMat = new THREE.ShaderMaterial({
-      vertexShader: THREE.ShaderLib.basic.vertexShader,
+    _three.occluderMat = new ShaderMaterial({
+      vertexShader: ShaderLib.basic.vertexShader,
       fragmentShader: "precision lowp float;\n void main(void){\n gl_FragColor = vec4(1., 0., 0., 1.);\n }",
-      uniforms: THREE.ShaderLib.basic.uniforms,
-      side: THREE.DoubleSide,
+      uniforms: ShaderLib.basic.uniforms,
+      side: DoubleSide,
       colorWrite: false
     });
     return _three.occluderMat;
@@ -361,12 +369,12 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       } else if (side === 'LEFT'){
         // compute geomLeft from geomRight:
         const geomLeft = geomRight.clone();
-        const invXMatrix = new THREE.Matrix4().makeScale(-1,1,1);
+        const invXMatrix = new Matrix4().makeScale(-1,1,1);
         geomLeft.applyMatrix4(invXMatrix);
         geom = geomLeft;
       }
 
-      const threeMesh = new THREE.Mesh(geom, get_occluderMat());
+      const threeMesh = new Mesh(geom, get_occluderMat());
       threeMesh.renderOrder = -1e12; // render first
       threeMesh.frustumCulled = false;
       return threeMesh;

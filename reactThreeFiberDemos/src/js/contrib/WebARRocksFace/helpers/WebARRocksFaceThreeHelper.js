@@ -14,7 +14,16 @@
  */
 
 
-import * as THREE from 'three'
+import {
+  DoubleSide,
+  Euler,
+  Matrix4,
+  Mesh,
+  MeshNormalMaterial,
+  ShaderLib,
+  ShaderMaterial,
+  Vector3,
+} from 'three'
 import stabilizer from './stabilizers/OneEuroStabilizer.js'
 
 
@@ -94,7 +103,7 @@ const WebARRocksFaceThreeHelper = (function(){
   };
 
   const _previousSizing = {
-    width: 1,
+    width: -1,
     height: -1
   };
 
@@ -235,13 +244,13 @@ const WebARRocksFaceThreeHelper = (function(){
     init_shps();
 
      // pre-allocate:
-    _three.matMov = new THREE.Matrix4();
-    _three.matMov2 = new THREE.Matrix4();
-    _three.euler = new THREE.Euler();
+    _three.matMov = new Matrix4();
+    _three.matMov2 = new Matrix4();
+    _three.euler = new Euler();
 
-    _three.preMatrix = new THREE.Matrix4().makeRotationX(_spec.rxOffset);
+    _three.preMatrix = new Matrix4().makeRotationX(_spec.rxOffset);
     _three.preMatrix.setPosition(0.0, _spec.translationYZ[0], _spec.translationYZ[1]);
-    _three.preMatrix.scale(new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(_spec.scale));
+    _three.preMatrix.scale(new Vector3(1.0, 1.0, 1.0).multiplyScalar(_spec.scale));
 
     init_PnPSolver(_spec.solvePnPImgPointsLabels, _spec.solvePnPObjPointsPositions);
     _isInitialized = true;
@@ -530,19 +539,19 @@ const WebARRocksFaceThreeHelper = (function(){
       let mat = null;
       if (isDebug){
         occluderGeometry.computeVertexNormals();
-        mat = new THREE.MeshNormalMaterial({side: THREE.DoubleSide});
+        mat = new MeshNormalMaterial({side: DoubleSide});
       } else {
-        mat = new THREE.ShaderMaterial({
-          vertexShader: THREE.ShaderLib.basic.vertexShader,
+        mat = new ShaderMaterial({
+          vertexShader: ShaderLib.basic.vertexShader,
           fragmentShader: "precision lowp float;\n void main(void){\n gl_FragColor = vec4(1.,0.,0.,1.);\n }",
-          uniforms: THREE.ShaderLib.basic.uniforms,
-          side: THREE.DoubleSide,
+          uniforms: ShaderLib.basic.uniforms,
+          side: DoubleSide,
           colorWrite: false
         });
       }
 
       // create mesh:
-      const occluderMesh = new THREE.Mesh(occluderGeometry, mat);
+      const occluderMesh = new Mesh(occluderGeometry, mat);
       occluderMesh.renderOrder = -1e12; // render first
       occluderMesh.userData.isOccluder = true;
 

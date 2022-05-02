@@ -1,6 +1,8 @@
 /* eslint-disable */
 
-import * as THREE from 'three';
+import {
+  Vector2
+} from 'three';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import WEBARROCKSFACE from '../dist/WebARRocksFace.module.js';
@@ -65,7 +67,7 @@ const WebARRocksMirror = (function(){
 
       if (glassesBranchesSpec){
         const glassesBranchUniforms = {
-          uBranchFading: {value: new THREE.Vector2(glassesBranchesSpec.fadingZ, glassesBranchesSpec.fadingTransition)}, // first value: position (lower -> to the back), second: transition brutality
+          uBranchFading: {value: new Vector2(glassesBranchesSpec.fadingZ, glassesBranchesSpec.fadingTransition)}, // first value: position (lower -> to the back), second: transition brutality
           uBranchBendingAngle: {value: glassesBranchesSpec.bendingAngle * _d2r},
           uBranchBendingZ: {value: glassesBranchesSpec.bendingZ}
         };

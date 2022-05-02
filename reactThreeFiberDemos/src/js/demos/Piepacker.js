@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 // import SkeletonUtils, useful to clone a THREE instance with a skeleton
-import { SkeletonUtils } from 'three/examples/jsm/utils/SkeletonUtils.js'
+import { clone as SkeletonUtilsClone } from 'three/examples/jsm/utils/SkeletonUtils'
 
 // import some UI components:
 import BackButton from '../components/BackButton.js'
@@ -187,7 +187,7 @@ const ModelContainer = (props) => {
   
   // import main model:
   const gltf = useLoader(GLTFLoader, props.GLTFModel)
-  const model = SkeletonUtils.clone(gltf.scene)
+  const model = SkeletonUtilsClone(gltf.scene)
 
   // extract animations:
   if (gltf.animations.length > 0){

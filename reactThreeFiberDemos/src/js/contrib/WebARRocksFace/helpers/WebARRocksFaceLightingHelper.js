@@ -1,6 +1,15 @@
 /* eslint-disable */
 
-import * as THREE from 'three'
+import {
+  ACESFilmicToneMapping,
+  AmbientLight,
+  DirectionalLight,
+  HalfFloatType,
+  HemisphereLight,
+  PointLight,
+  PMREMGenerator,
+  sRGBEncoding
+} from 'three'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 
 
@@ -33,10 +42,10 @@ const WebARRocksFaceLightingHelper = (function(){
 
 
   function init_lightReconstructionLights(threeScene, spec){
-    _lightReconstruction.ambLight = new THREE.AmbientLight( 0xffffff, 1.0 );
+    _lightReconstruction.ambLight = new AmbientLight( 0xffffff, 1.0 );
     add_light(threeScene, _lightReconstruction.ambLight);
 
-    _lightReconstruction.dirLight = new THREE.DirectionalLight( 0xffffff, 1.0 );
+    _lightReconstruction.dirLight = new DirectionalLight( 0xffffff, 1.0 );
      add_light(threeScene, _lightReconstruction.dirLight);
   }
 
@@ -45,14 +54,14 @@ const WebARRocksFaceLightingHelper = (function(){
     // simple lighting:
     //  We add a soft light. Should not be necessary if we use an envmap:
     if (spec.hemiLightIntensity > 0) {
-      const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x000000, spec.hemiLightIntensity );
+      const hemiLight = new HemisphereLight( 0xffffff, 0x000000, spec.hemiLightIntensity );
       add_light(threeScene, hemiLight);
     }
 
 
     // add a pointLight to highlight specular lighting:
     if ( spec.pointLightIntensity > 0){
-      const pointLight = new THREE.PointLight( 0xffffff, spec.pointLightIntensity );
+      const pointLight = new PointLight( 0xffffff, spec.pointLightIntensity );
       pointLight.position.set(0, spec.pointLightY, 0);
       add_light(threeScene, pointLight);
     }
@@ -87,8 +96,8 @@ const WebARRocksFaceLightingHelper = (function(){
 
 
     set_rendererEncoding(threeRenderer){
-      threeRenderer.toneMapping = THREE.ACESFilmicToneMapping;
-      threeRenderer.outputEncoding = THREE.sRGBEncoding;
+      threeRenderer.toneMapping = ACESFilmicToneMapping;
+      threeRenderer.outputEncoding = sRGBEncoding;
     },
 
 
@@ -137,10 +146,10 @@ const WebARRocksFaceLightingHelper = (function(){
       
       if (_spec.envMap){
         // image based lighting:
-        const pmremGenerator = new THREE.PMREMGenerator( threeRenderer );
+        const pmremGenerator = new PMREMGenerator( threeRenderer );
         pmremGenerator.compileEquirectangularShader();
 
-        new RGBELoader().setDataType( THREE.UnsignedByteType )
+        new RGBELoader().setDataType( HalfFloatType )
           .load(_spec.envMap, function ( texture ) {
           const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
           pmremGenerator.dispose();
