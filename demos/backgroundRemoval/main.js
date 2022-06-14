@@ -57,7 +57,7 @@ function main(){ // entry point
     },
 
     // increase stabilization:
-    stabilizerSpec: {
+    landmarksStabilizerSpec: {
       beta: 20,
       forceFilterNNInputPxRange: [1.5, 4]
     },

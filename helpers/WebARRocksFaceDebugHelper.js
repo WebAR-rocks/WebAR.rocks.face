@@ -39,7 +39,7 @@ const WebARRocksFaceDebugHelper = (function(){
     glVerticesVBO: null
   };
 
-  const _stabilizers = [];
+  const _landmarksStabilizers = [];
 
 
   // compile a shader:
@@ -149,12 +149,12 @@ const WebARRocksFaceDebugHelper = (function(){
   }
 
 
-  function get_stabilizer(slotIndex){
-    if (!_stabilizers[slotIndex]){
-      _stabilizers[slotIndex] = WebARRocksLMStabilizer.instance({});
+  function get_landmarksStabilizer(slotIndex){
+    if (!_landmarksStabilizers[slotIndex]){
+      _landmarksStabilizers[slotIndex] = WebARRocksLMStabilizer.instance({});
     }
 
-    return _stabilizers[slotIndex];
+    return _landmarksStabilizers[slotIndex];
   }
 
 
@@ -163,7 +163,7 @@ const WebARRocksFaceDebugHelper = (function(){
       // stabilize landmarks:
       let landmarks = null;
       if (_spec.isStabilized){
-        landmarks = get_stabilizer(slotIndex).update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
+        landmarks = get_landmarksStabilizer(slotIndex).update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
       } else {
         landmarks = detectState.landmarks;
       }
@@ -171,7 +171,7 @@ const WebARRocksFaceDebugHelper = (function(){
       // draw landmarks:
       draw_landmarks(landmarks);
     } else if(_spec.isStabilized){
-      get_stabilizer(slotIndex).reset();
+      get_landmarksStabilizer(slotIndex).reset();
     }
   }
 

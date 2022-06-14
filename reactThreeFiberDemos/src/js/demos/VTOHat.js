@@ -194,7 +194,7 @@ const VTOHat = (props) => {
       scanSettings: {
         threshold: 0.6 // detection threshold, between 0 and 1
       },
-      stabilizerSpec: { // increase stabilization
+      landmarksStabilizerSpec: { // increase stabilization
         beta: 20,
         forceFilterNNInputPxRange: [1.5, 4]
       },

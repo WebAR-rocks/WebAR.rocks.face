@@ -15,8 +15,8 @@
 
 import WEBARROCKSFACE from '../dist/WebARRocksFace.module.js';
 
-//import WebARRocksLMStabilizer from './stabilizers/WebARRocksLMStabilizer2.js';
-import WebARRocksLMStabilizer from './stabilizers/OneEuroStabilizer.js';
+//import WebARRocksLMStabilizer from './landmarksStabilizers/WebARRocksLMStabilizer2.js';
+import WebARRocksLMStabilizer from './landmarksStabilizers/OneEuroLMStabilizer.js';
 
 
 const WebARRocksFaceShape2DHelper = (function(){
@@ -35,7 +35,7 @@ const WebARRocksFaceShape2DHelper = (function(){
   let _glv = null, _glvVideoTexture = null; // glv is for video and computation
   let _videoTransformMat2 = null;
 
-  let _stabilizer = null;
+  let _landmarksStabilizer = null;
 
   const _shps = {};
 
@@ -65,10 +65,10 @@ const WebARRocksFaceShape2DHelper = (function(){
 
     // draw shapes:
     if (detectState.isDetected){
-      const landmarksStabilized = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
+      const landmarksStabilized = _landmarksStabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
       _shapes.forEach(draw_shape.bind(null, landmarksStabilized));
     } else {
-      _stabilizer.reset();
+      _landmarksStabilizer.reset();
     }
 
     _gl.flush();
@@ -776,7 +776,7 @@ const WebARRocksFaceShape2DHelper = (function(){
     init: function(spec){
       _spec = Object.assign({}, _defaultSpec, spec);
 
-      _stabilizer = WebARRocksLMStabilizer.instance({});
+      _landmarksStabilizer = WebARRocksLMStabilizer.instance({});
 
       init_gl();
 

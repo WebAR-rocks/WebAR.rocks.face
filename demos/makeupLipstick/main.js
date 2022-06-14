@@ -3,8 +3,8 @@ let _selectedDOMColorButton = null;
 
 // tweak contours coefficients - 0 -> no tweak:
 const mouthWiden = 0.01;
-const upperLipOut = 0.01;
-const lowerLipOut = 0.01;
+const upperLipOut = 0;//0.01;
+const lowerLipOut = 0.005;//0.01;
 
 const SHAPELIPS = {
   name: 'LIPS',
@@ -248,7 +248,8 @@ function start(){
     canvasVideo: _canvasVideo,
     canvasAR:_canvasAR,
     shapes: [ SHAPELIPS ]
-    //,videoURL: '../../../../testVideos/1032526922-hd.mov'
+   // ,videoURL: '../../../../testVideos/1032526922-hd.mov'
+    //,videoURL: '../../../../testVideos/1057538806-hd.mp4'
   }).then(function(){
 
   }).catch(function(err){

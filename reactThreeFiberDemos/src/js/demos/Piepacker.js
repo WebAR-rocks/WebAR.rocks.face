@@ -291,7 +291,7 @@ const Mask = (props) => {
       if (_physics){ // avoid big zboingzboing when mask appears
         _physics.needsReset = true
       }
-      threeHelper.reset_stabilizers()
+      threeHelper.reset_landmarksStabilizers()
     } else { 
       console.log('FACE LOST')
 

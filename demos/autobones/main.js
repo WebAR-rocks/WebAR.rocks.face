@@ -79,7 +79,7 @@ function init_WebarRocksFace(canvasFace, canvasThree, specWebARRocksFace){
       canvasThree: canvasThree,
       videoURL: null,
       
-      stabilizerSpec: {},
+      landmarksStabilizerSpec: {},
 
       solvePnPImgPointsLabels: ['chin',
         'leftEarBottom',

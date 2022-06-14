@@ -28,8 +28,8 @@ import {
   Vector3
 } from 'three'
 
-//import WebARRocksLMStabilizer from './stabilizers/WebARRocksLMStabilizer2.js'
-import WebARRocksLMStabilizer from './stabilizers/OneEuroStabilizer.js'
+//import WebARRocksLMStabilizer from './landmarksStabilizers/WebARRocksLMStabilizer2.js'
+import WebARRocksLMStabilizer from './landmarksStabilizers/OneEuroLMStabilizer.js'
 
 
 const WebARRocksFaceEarrings3DHelper = (function(){
@@ -76,7 +76,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
   let _videoElement = null, _cameraFoVY = -1;
   let _gl = null, _glVideoTexture = null, _glShpDrawVideo = null;
   let _earLeft = null, _earRight = null;
-  let _stabilizer = null;
+  let _landmarksStabilizer = null;
   let _shpDrawVideoUniformTransform2D = null, _videoTransformMat2 = null;
 
   const _headPose = {
@@ -247,7 +247,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       compute_headPose(detectState.rx, detectState.ry, detectState.rz);
 
       // stabilize landmarks positions:
-      const lms = _stabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
+      const lms = _landmarksStabilizer.update(detectState.landmarks, that.get_viewWidth(), that.get_viewHeight(), detectState.s);
       //const lms = detectState.landmarks; // no stabilization
 
       // compute earrings 2D positions and director vectors:
@@ -294,7 +294,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       if (_three.earringLeft !== null){
         _three.earringLeft.visible = false;
       }
-      _stabilizer.reset();
+      _landmarksStabilizer.reset();
     }
 
     if (_spec.callbackTrack !== null){
@@ -309,7 +309,7 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       _spec = Object.assign({}, _defaultSpec, spec);
       _WEBARROCKSFACE = WebARRocksFaceInstance;
 
-      _stabilizer = WebARRocksLMStabilizer.instance({});
+      _landmarksStabilizer = WebARRocksLMStabilizer.instance({});
       
       return new Promise(function(accept, reject){
         _WEBARROCKSFACE.init({

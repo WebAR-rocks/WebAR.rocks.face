@@ -26,7 +26,7 @@ const WebARRocksMirror = (function(){
       //,maxFacesDetected: 2 // Experimental: add face accessory on multiple detected faces
     },
 
-    stabilizerSpec: {},
+    landmarksStabilizerSpec: {},
 
     // light reconstruction:
     isLightReconstructionEnabled: false,
@@ -349,7 +349,7 @@ const WebARRocksMirror = (function(){
           lightReconstructionDirIntensityFactor: _spec.lightReconstructionDirIntensityFactor,
           lightReconstructionTotalIntensityMin: _spec.lightReconstructionTotalIntensityMin,
 
-          stabilizerSpec: _spec.stabilizerSpec,
+          landmarksStabilizerSpec: _spec.landmarksStabilizerSpec,
 
           rotationContraints: _spec.rotationContraints,
 

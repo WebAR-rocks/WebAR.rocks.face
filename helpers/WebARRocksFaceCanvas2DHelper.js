@@ -22,7 +22,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
   // private variables:
   let _spec = null;
   let _gl = null, _cv = null, _glVideoTexture = null, _videoTransformMat2 = null, _landmarksLabels = null;
-  let _stabilizer = null;
+  let _landmarksStabilizer = null;
 
   const _shps = {};
   const _friendlyDetectState = {
@@ -146,7 +146,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
       const cvw = _cv.width;
       const cvh = _cv.height;
 
-      landmarksStabilized = _stabilizer.update(detectState.landmarks, cvw, cvh, detectState.s);
+      landmarksStabilized = _landmarksStabilizer.update(detectState.landmarks, cvw, cvh, detectState.s);
 
       // compute face crop points:
       // size of face crop square in pixels:
@@ -190,7 +190,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
     init: function(spec){
       _spec = spec;
 
-      _stabilizer = WebARRocksLMStabilizer.instance({});
+      _landmarksStabilizer = WebARRocksLMStabilizer.instance({});
 
       WEBARROCKSFACE.init(Object.assign({
         callbackReady: callbackReady,

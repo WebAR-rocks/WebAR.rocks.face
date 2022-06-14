@@ -121,7 +121,7 @@ const WebARRocksFaceThreeHelper = (function(){
   const _deg2rad = Math.PI / 180;
   let _cameraFoVY = -1;
   let _spec = null;
-  let _stabilizers = null;
+  let _landmarksStabilizers = null;
 
   const _shps = { // shader programs
     copy: null
@@ -419,7 +419,7 @@ const WebARRocksFaceThreeHelper = (function(){
       return;
     }
 
-    window.addEventListener('focus', that.reset_stabilizers);
+    window.addEventListener('focus', that.reset_landmarksStabilizers);
 
     console.log('INFO in WebARRocksFaceThreeHelper: WebAR.Rocks.face is ready. spec =', spec);
     
@@ -438,10 +438,10 @@ const WebARRocksFaceThreeHelper = (function(){
 
     // init stabilizer:
     if (typeof(WebARRocksLMStabilizer) === 'undefined' ){
-      _stabilizers = null;
+      _landmarksStabilizers = null;
       console.warn("WARNING in WebARRocksFaceThreeHelper: cannot find WebARRocksLMStabilizer. Points won't be stabilized");
     } else {
-      _stabilizers = [];
+      _landmarksStabilizers = [];
     }
 
     init_shps();
@@ -518,13 +518,13 @@ const WebARRocksFaceThreeHelper = (function(){
     if (detectState.isDetected) {
       
       let landmarks = null;
-      if (_stabilizers === null){
+      if (_landmarksStabilizers === null){
         landmarksStabilized = detectState.landmarks;
       } else {
-        if (!_stabilizers[slotIndex]){
-          _stabilizers[slotIndex] = WebARRocksLMStabilizer.instance(_spec.stabilizerSpec);
+        if (!_landmarksStabilizers[slotIndex]){
+          _landmarksStabilizers[slotIndex] = WebARRocksLMStabilizer.instance(_spec.landmarksStabilizerSpec);
         };
-        landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidthCSSPx(), that.get_viewHeightCSSPx(), detectState.s);
+        landmarksStabilized = _landmarksStabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidthCSSPx(), that.get_viewHeightCSSPx(), detectState.s);
       }
 
       compute_pose(landmarksStabilized, faceSlot);
@@ -532,8 +532,8 @@ const WebARRocksFaceThreeHelper = (function(){
       faceSlot.faceFollowerParent.visible = true;      
     } else if (faceSlot.faceFollowerParent.visible){
       faceSlot.faceFollowerParent.visible = false;
-      if (_stabilizers && _stabilizers[slotIndex]){
-        _stabilizers[slotIndex].reset();
+      if (_landmarksStabilizers && _landmarksStabilizers[slotIndex]){
+        _landmarksStabilizers[slotIndex].reset();
       }
     }
 
@@ -701,7 +701,7 @@ const WebARRocksFaceThreeHelper = (function(){
         rotationContraints: null, // rotation constraints
 
         // stabilizer options:
-        stabilizerSpec: {},
+        landmarksStabilizerSpec: {},
 
         // THREE specifics:
         canvasThree: null,
@@ -943,10 +943,10 @@ const WebARRocksFaceThreeHelper = (function(){
     },
 
 
-    reset_stabilizers: function () {
+    reset_landmarksStabilizers: function () {
       console.log('INFO in WebARRocksFaceThreeHelper: reset stabilizers')
-      if (_stabilizers && _stabilizers.length) {
-        _stabilizers.forEach(function (stab) {
+      if (_landmarksStabilizers && _landmarksStabilizers.length) {
+        _landmarksStabilizers.forEach(function (stab) {
           stab.reset();
         })
       }

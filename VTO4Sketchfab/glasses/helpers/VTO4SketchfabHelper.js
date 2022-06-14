@@ -46,7 +46,7 @@ const VTO4SketchfabHelper = (function(){
         threshold: 0.94
       }
     },
-    stabilizerSpec: {},
+    landmarksStabilizerSpec: {},
 
     // model adjustment:
     rx: 5, // rotation around X axis (look up/down), in Deg. + -> branches up
@@ -110,7 +110,7 @@ const VTO4SketchfabHelper = (function(){
   let _webARCanvas = null;
   let _video = null;
   let _isWebARRocksFaceInitialized = false;
-  let _stabilizer = null;
+  let _landmarksStabilizer = null;
 
   let _isSetMatrixBusy = false;
   let _VTOFoV = 0;
@@ -214,7 +214,7 @@ const VTO4SketchfabHelper = (function(){
     }
 
     const landmarks  = detectState.landmarks;
-    const landmarksStabilized = (_stabilizer === null) ? landmarks : _stabilizer.update(landmarks, _dims.width, _dims.height);
+    const landmarksStabilized = (_landmarksStabilizer === null) ? landmarks : _landmarksStabilizer.update(landmarks, _dims.width, _dims.height);
     
     const w2 = -_dims.width * 0.5;
     const h2 = _dims.height * 0.5;
@@ -301,7 +301,7 @@ const VTO4SketchfabHelper = (function(){
 
     // init stabilizer:
     if (typeof(WebARRocksLMStabilizer) !== 'undefined'){
-      _stabilizer = WebARRocksLMStabilizer.instance(_spec.stabilizerSpec);
+      _landmarksStabilizer = WebARRocksLMStabilizer.instance(_spec.landmarksStabilizerSpec);
     }
 
     return new Promise(function(accept, reject){

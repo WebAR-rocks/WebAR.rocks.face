@@ -190,7 +190,7 @@ const VTONecklace = (props) => {
       NN,
       canvasFace: canvasFaceRef.current,
       maxFacesDetected: 1,
-      stabilizerSpec: { // increase stabilization
+      landmarksStabilizerSpec: { // increase stabilization
         beta: 20,
         forceFilterNNInputPxRange: [1.5, 4]
       },

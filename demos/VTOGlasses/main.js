@@ -26,7 +26,7 @@ function main(){
       }
     },
 
-    stabilizerSpec: {
+    landmarksStabilizerSpec: {
 
     },
     

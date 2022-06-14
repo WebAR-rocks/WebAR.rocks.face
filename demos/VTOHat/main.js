@@ -21,7 +21,7 @@ function main(){
     isLightReconstructionEnabled: true,
 
     // increase stabilization:
-    stabilizerSpec: {
+    landmarksStabilizerSpec: {
       beta: 20,
       forceFilterNNInputPxRange: [1.5, 4]
     },

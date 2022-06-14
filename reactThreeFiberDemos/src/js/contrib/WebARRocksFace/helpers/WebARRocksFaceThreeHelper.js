@@ -24,7 +24,7 @@ import {
   ShaderMaterial,
   Vector3,
 } from 'three'
-import stabilizer from './stabilizers/OneEuroStabilizer.js'
+import stabilizer from './landmarksStabilizers/OneEuroLMStabilizer.js'
 
 
 
@@ -76,8 +76,8 @@ const WebARRocksFaceThreeHelper = (function(){
     
   const _deg2rad = Math.PI / 180;
   let _spec = null;
-  let _stabilizers = null;
-  let _stabilizerSpec = null;
+  let _landmarksStabilizers = null;
+  let _landmarksStabilizerSpec = null;
   let _WEBARROCKSFACE = null;
   
   const _shps = { // shader programs
@@ -221,7 +221,7 @@ const WebARRocksFaceThreeHelper = (function(){
       return;
     }
 
-    window.addEventListener('focus', that.reset_stabilizers);
+    window.addEventListener('focus', that.reset_landmarksStabilizers);
 
     console.log('INFO in WebARRocksFaceThreeHelper: WebAR.Rocks.face is ready. spec =', spec);
     
@@ -239,7 +239,7 @@ const WebARRocksFaceThreeHelper = (function(){
     });
 
     // init stabilizer:
-    _stabilizers = [];
+    _landmarksStabilizers = [];
     
     init_shps();
 
@@ -310,10 +310,10 @@ const WebARRocksFaceThreeHelper = (function(){
       
       if (faceSlot.faceFollowerParent.visible){ // compute pose only if face follower is visible:
         let landmarks = null;      
-        if (!_stabilizers[slotIndex]){
-          _stabilizers[slotIndex] = stabilizer.instance(_stabilizerSpec || {});
+        if (!_landmarksStabilizers[slotIndex]){
+          _landmarksStabilizers[slotIndex] = stabilizer.instance(_landmarksStabilizerSpec || {});
         };
-        landmarksStabilized = _stabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidthCSSPx(), that.get_viewHeightCSSPx(), detectState.s);
+        landmarksStabilized = _landmarksStabilizers[slotIndex].update(detectState.landmarks, that.get_viewWidthCSSPx(), that.get_viewHeightCSSPx(), detectState.s);
         
         compute_pose(landmarksStabilized, faceSlot);
       }
@@ -325,8 +325,8 @@ const WebARRocksFaceThreeHelper = (function(){
       if (_spec.isVisibilityAuto){
         faceSlot.faceFollowerParent.visible = false;
       }
-      if (_stabilizers && _stabilizers[slotIndex]){
-        _stabilizers[slotIndex].reset();
+      if (_landmarksStabilizers && _landmarksStabilizers[slotIndex]){
+        _landmarksStabilizers[slotIndex].reset();
       }
     }
 
@@ -431,7 +431,7 @@ const WebARRocksFaceThreeHelper = (function(){
 
   
   const that = {
-    init: function(WEBARROCKSFACE, spec, stabilizerSpec){
+    init: function(WEBARROCKSFACE, spec, landmarksStabilizerSpec){
       _WEBARROCKSFACE = WEBARROCKSFACE;
       _spec = Object.assign({
         NN: null,
@@ -459,7 +459,7 @@ const WebARRocksFaceThreeHelper = (function(){
         callbackTrack: null,
         callbackRenderVideo: null
       }, spec);
-      _stabilizerSpec = stabilizerSpec;
+      _landmarksStabilizerSpec = landmarksStabilizerSpec;
       
       // init WEBAR.rocks.face: WEBARROCKSFACE
       const defaultSpecLM = {
@@ -668,10 +668,10 @@ const WebARRocksFaceThreeHelper = (function(){
     },
 
 
-    reset_stabilizers: function () {
+    reset_landmarksStabilizers: function () {
       console.log('INFO in WebARRocksFaceThreeHelper: reset stabilizers');
-      if (_stabilizers && _stabilizers.length) {
-        _stabilizers.forEach(function (stab) {
+      if (_landmarksStabilizers && _landmarksStabilizers.length) {
+        _landmarksStabilizers.forEach(function (stab) {
           stab.reset();
         })
       }

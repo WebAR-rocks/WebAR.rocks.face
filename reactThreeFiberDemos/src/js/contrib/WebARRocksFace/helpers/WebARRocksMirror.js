@@ -19,7 +19,7 @@ const WebARRocksMirror = (function(){
 
     maxFacesDetected: 1,
 
-    stabilizerSpec: {},
+    landmarksStabilizerSpec: {},
 
     scanSettings: null,
 
@@ -141,7 +141,7 @@ const WebARRocksMirror = (function(){
         if (spec.solvePnPImgPointsLabels){
           threeHelperSpec.solvePnPImgPointsLabels = spec.solvePnPImgPointsLabels;
         }
-        WebARRocksFaceThreeHelper.init(WEBARROCKSFACE, threeHelperSpec, _spec.stabilizerSpec);
+        WebARRocksFaceThreeHelper.init(WEBARROCKSFACE, threeHelperSpec, _spec.landmarksStabilizerSpec);
       }); //end returned promise
     }, //end init()
 
