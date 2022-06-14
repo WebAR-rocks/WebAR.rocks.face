@@ -1,9 +1,14 @@
 // settings:
 const _settings = {
-  maskPath: 'assets/readyPlayerMeSkinned5.glb',
-  moveFactorEyes: 1.2, // eyebrows movement amplitude
-  moveFactorNose: 1.2, // nose side movement amplitude
-  moveFactorMouth: 1.5 // mouth movement amplitude
+  maskPath: 'assets/readyPlayerMeSkinned5_1.glb',
+  moveFactorEyes: 1.4,  // eyebrows movement amplitude
+  moveFactorNose: 1.2,  // nose side movement amplitude
+
+  moveFactorMouth: 1.4, // mouth movement amplitude
+  moveFactorMouthCenter: 1.1,
+  moveFactorMouthCorners: 1.0, // lower than mouth movement amplitude to avoid collision with teeth if mouth open wide
+
+  isDebugSetMatTransparent: false // set mask material transparent for debugging purpose
 }
 
 
@@ -39,7 +44,7 @@ function main(){
 
   init_WebarRocksFace(_canvases.face, _canvases.three, 
     { // spec for WEBARROCKSFACE
-      NNCPath: '../../neuralNets/NN_AUTOBONES_21.json',
+      NNCPath: '../../neuralNets/NN_AUTOBONES2_0.json',
       scanSettings: {
         threshold: 0.8,
         isCleanGLStateAtEachIteration: false,
@@ -120,7 +125,13 @@ function tweak_materialsToBasic(threeObject){
     threeNode.material = new THREE.MeshBasicMaterial({
       map: mat.map,
       color: mat.color
-    })
+    });
+    if (_settings.isDebugSetMatTransparent){
+      threeNode.material = new THREE.MeshNormalMaterial();
+      threeNode.material.transparent = true;
+      threeNode.material.opacity = 0.5;
+      threeNode.material.side = THREE.DoubleSide;
+    }
   })
 }
 
@@ -178,13 +189,13 @@ function create_autobones(threeRoot){
     LNostril: _settings.moveFactorNose,
 
     // MOUTH:
-    UpperLipCenter: _settings.moveFactorMouth,
+    UpperLipCenter: _settings.moveFactorMouthCenter,
     LUpperLip: _settings.moveFactorMouth,
-    LLipCorner: _settings.moveFactorMouth,
+    LLipCorner: _settings.moveFactorMouthCorners,
     LLowerLip: _settings.moveFactorMouth,
-    LowerLipCenter: _settings.moveFactorMouth,
+    LowerLipCenter: _settings.moveFactorMouthCenter,
     RLowerLip: _settings.moveFactorMouth,
-    RLipCorner: _settings.moveFactorMouth,
+    RLipCorner: _settings.moveFactorMouthCorners,
     RUpperLip: _settings.moveFactorMouth
   };
 
@@ -212,7 +223,9 @@ function create_autobones(threeRoot){
     },
     { // options
       webARRocksLandmarks: WEBARROCKSFACE.get_LMLabels(),
-      moveFactorsPerAutobone: moveFactorsPerAutobone
+      moveFactorsPerAutobone: moveFactorsPerAutobone,
+      isSubMeanDisplacement: true,
+      isMoveRootByMeanDisplacement: false
     });
 
   return autobones;
