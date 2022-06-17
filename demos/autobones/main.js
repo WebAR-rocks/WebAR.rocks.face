@@ -1,7 +1,9 @@
 // settings:
 const _settings = {
-  maskPath: 'assets/readyPlayerMeSkinned5_1.glb',
-  moveFactorEyes: 1.4,  // eyebrows movement amplitude
+  maskPath: 'assets/readyPlayerMeSkinned6_2.glb',
+  moveFactorEyebrows: 1.4,  // eyebrows movement amplitude
+  moveFactorEyelids: 2.0,  // eyebrows movement amplitude
+  
   moveFactorNose: 1.2,  // nose side movement amplitude
 
   moveFactorMouth: 1.4, // mouth movement amplitude
@@ -181,8 +183,11 @@ function build_scene(){
 function create_autobones(threeRoot){
   const autobonesSkinnedMesh = extract_autobonesSkinnedMesh(threeRoot);
   const moveFactorsPerAutobone = {
-    RBrow: _settings.moveFactorEyes,
-    LBrow: _settings.moveFactorEyes,
+    // EYES AREA:
+    RBrow: _settings.moveFactorEyebrows,
+    LBrow: _settings.moveFactorEyebrows,
+    REyeLid: _settings.moveFactorEyelids,
+    LEyeLid: _settings.moveFactorEyelids,
 
     //NOSE:
     RNostril: _settings.moveFactorNose,
@@ -203,9 +208,11 @@ function create_autobones(threeRoot){
     autobonesSkinnedMesh,
     {
       // map autobones (by bones names) to WebAR;face landmarks:
-      // EYES:
+      // EYES AREA:
       RBrow: 'rightEyeBrowCenter',
       LBrow: 'leftEyeBrowCenter',
+      REyeLid: 'rightEyeTop',
+      LEyeLid: 'leftEyeTop',
 
       //NOSE:
       RNostril: 'noseRight',
