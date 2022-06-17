@@ -4,7 +4,7 @@ const _settings = {
   moveFactorEyebrows: 1.4,  // eyebrows movement amplitude
   moveFactorEyelids: 2.0,  // eyebrows movement amplitude
   
-  moveFactorNose: 1.2,  // nose side movement amplitude
+  moveFactorNose: 1.5,  // nose side movement amplitude
 
   moveFactorMouth: 1.4, // mouth movement amplitude
   moveFactorMouthCenter: 1.1,
