@@ -11,16 +11,16 @@ function main(){
     //videoURL: '../../../../testVideos/1056010826-hd.mp4', // use a video from a file instead of camera video
 
     specWebARRocksFace: {
-      NNCPath: '../../neuralNets/NN_NECKLACE_6.json',
+      NNCPath: '../../neuralNets/NN_NECKLACE_7.json',
       scanSettings: {
-        threshold: 0.6
+        threshold: 0.7
       }
     },
 
     // increase stabilization:
     landmarksStabilizerSpec: {
-      beta: 20,
-      forceFilterNNInputPxRange: [1.5, 4]
+      beta: 5,
+      forceFilterNNInputPxRange: [4, 12]
     },
 
     solvePnPObjPointsPositions: {

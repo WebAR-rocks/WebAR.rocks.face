@@ -9,7 +9,7 @@ import BackButton from '../components/BackButton.js'
 import VTOButton from '../components/VTOButton.js'
 
 // import neural network model:
-import NN from '../contrib/WebARRocksFace/neuralNets/NN_NECKLACE_6.json'
+import NN from '../contrib/WebARRocksFace/neuralNets/NN_NECKLACE_7.json'
 
 // import WebARRocksMirror, a helper
 // This helper is not minified, feel free to customize it (and submit pull requests bro):
@@ -191,11 +191,11 @@ const VTONecklace = (props) => {
       canvasFace: canvasFaceRef.current,
       maxFacesDetected: 1,
       landmarksStabilizerSpec: { // increase stabilization
-        beta: 20,
-        forceFilterNNInputPxRange: [1.5, 4]
+        beta: 5,
+        forceFilterNNInputPxRange: [4, 12]
       },
       scanSettings: {
-        threshold: 0.6
+        threshold: 0.7
       },
       rotationContraints: {
         order: 'YXZ',
