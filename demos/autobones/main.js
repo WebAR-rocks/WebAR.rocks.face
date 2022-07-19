@@ -2,7 +2,7 @@
 const _settings = {
   maskPath: 'assets/readyPlayerMeSkinned6_2.glb',
   moveFactorEyebrows: 1.4,  // eyebrows movement amplitude
-  moveFactorEyelids: 2.0,  // eyebrows movement amplitude
+  moveFactorEyelids: 1.5,  // eyebrows movement amplitude
   
   moveFactorNose: 1.5,  // nose side movement amplitude
 
@@ -46,7 +46,7 @@ function main(){
 
   init_WebarRocksFace(_canvases.face, _canvases.three, 
     { // spec for WEBARROCKSFACE
-      NNCPath: '../../neuralNets/NN_AUTOBONES2_0.json',
+      NNCPath: '../../neuralNets/NN_AUTOBONES2_4.json',
       scanSettings: {
         threshold: 0.8,
         isCleanGLStateAtEachIteration: false,
