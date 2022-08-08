@@ -435,6 +435,7 @@ const WebARRocksFaceThreeHelper = (function(){
       _WEBARROCKSFACE = WEBARROCKSFACE;
       _spec = Object.assign({
         NN: null,
+        NNCPath: null,
         canvas: null,
         scanSettings: null,
         
@@ -464,13 +465,15 @@ const WebARRocksFaceThreeHelper = (function(){
       // init WEBAR.rocks.face: WEBARROCKSFACE
       const defaultSpecLM = {
         canvas: null,
-        NN: null,        
+        NN: null, 
+        NNCPath: null,       
         callbackReady: callbackReady,
         callbackTrack: callbackTrack
       };
       const specLM = Object.assign({}, defaultSpecLM, {
         canvas: _spec.canvas,
         NN: _spec.NN,
+        NNCPath: _spec.NNCPath,
         isTrackingEnabled: _spec.isTrackingEnabled,
         animateDelay: _spec.animateDelay,
         maxFacesDetected: _spec.maxFacesDetected,
