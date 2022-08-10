@@ -11,6 +11,8 @@ Facial landmarks positions are also among the neuron network outputs. There is s
 * [Features](#features)
 * [Architecture](#architecture)
 * [Demonstrations](#demonstrations)
+  * [Included in this repository](#included-in-this-repository)
+  * [They trust us](#they-trust-us)
 * [Specifications](#specifications)
   * [Get started](#get-started)
   * [Optional init arguments](#optional-init-arguments)
@@ -55,7 +57,10 @@ Here are the main features of the library:
 * `/blenderPluginFlexibleMaskExporter`: Blender plugin to export the metadata JSON file used in the *flexibleMask2* demo.
 * `/VTO4Sketchfab`: Integration with [Sketchfab](https://sketchfab.com/) 3D viewer
 
+
 ## Demonstrations
+
+### Included in this repository
 
 The best demos have been ported to a modern front-end development environment (NPM / Webpack / React / Three Fiber / ES6) in  the [/reactThreeFiberDemos](/reactThreeFiberDemos) directory. This is a standalone directory.
 
@@ -88,6 +93,16 @@ Here are the static JavaScript demos:
 * Misc:
   * Background removal: [live demo](https://webar.rocks/demos/face/demos/backgroundRemoval/), [source code](/demos/backgroundRemoval/)
   * GIF Face replacement: [live demo](https://webar.rocks/demos/face/demos/faceReplacement/gif), [source code](/demos/faceReplacement/gif/)
+
+
+### They trust us
+
+**Jam.gg**: The best social online gaming platform [Jam.gg](https://jam.gg) (formerly *Piepacker*), with more than 2 million users worldwide, relies on this library to add funny masks and face filters in augmented reality to its users. To test it, subscribe or log-in, select a game, create or join a gaming room and select a mask.
+
+**Kinder**: *Applaydu*, an educative mobile application published by Kinder, relies on WebAR.rocks.face face detection and tracking library for augmented reality face masks. This application is developped by Gameloft in collaboration with the University of Oxford’s Department of Education. It is released both for iOS and Android. Just for Android it has been downloaded more than 10 million times. More information and download link are on [Kinder Official website](https://www.kinder.com/us/en/applaydu?utm_source=vanity&utm_medium=redirect&utm_campaign=/applaydu).
+
+**Franky's hat**: Franky's hat relies on this library for hats virtual try-on. You can check it out from [Franky's hat website](https://frankys-hats.com/), then click on *TRY IN AR* button.
+
 
 
 ## Specifications
