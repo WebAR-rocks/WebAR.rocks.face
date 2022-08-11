@@ -337,4 +337,4 @@ For more information, please read the [LICENSE](/LICENSE) file.
 * [WebAR.rocks website](https://webar.rocks)
 * [Webgl Academy: tutorials on WebGL and THREE.JS](http://www.webglacademy.com)
 * [WebAR.rocks on Linkedin](https://www.linkedin.com/company/webar-rocks)
-* [WebAR.rocks on Twitter](https://twitter.com/Jeeliz_AR)
+* [WebAR.rocks on Twitter](https://twitter.com/WebARRocks)
