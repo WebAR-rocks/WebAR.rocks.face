@@ -20,7 +20,6 @@ Facial landmarks positions are also among the neuron network outputs. There is s
   * [The returned objects](#the-returned-objects)
   * [Miscellaneous methods](#miscellaneous-methods)
   * [Multiple faces](#multiple-faces)
-  * [Optimization](#optimization)
   * [Using Module](#using-module)
 * [Hosting](#hosting)
 * [About the tech](#about-the-tech)
@@ -183,9 +182,6 @@ If the user has a mobile device in portrait display mode, the width and height o
 * `<boolean> isKeepRunningOnWinFocusLost`: Whether we should keep the detection loop running even if the user switches the browser tab or minimizes the browser window. Default value is `false`. This option is useful for a videoconferencing app, where a face mask should be still computed if the *FaceFilter* window is not the active window. Even with this option toggled on, the face tracking is still slowed down when the FaceFilter window is not active.
 
 
-
-
-
 ### Error codes
 
 The initialization function ( `callbackReady` in the code snippet ) will be called with an error code ( `errCode` ). It can have these values:
@@ -296,11 +292,6 @@ Be careful to enable gzip HTTP/HTTPS compression for JSON and JS files. Indeed, 
 
 The neuron network file, `neuralNets/NN_<xxx>.json` is loaded using an ajax `XMLHttpRequest` after calling `WEBARROCKSFACE.init()`. This loading is proceeded after the user has accepted to share its camera. So we won't load this quite heavy file if the user refuses to share it or if there is no camera available. The loading can be faster if you systematically preload `neuralNets/NN_<xxx>.json` using a service worker or a simple raw `XMLHttpRequest` just after the HTML page loading. Then the file will be already in the browser cache when WebAR.rocks.face will request it.
 
-Some directories of the latest version of this library are hosted on `https://cdn.webar.rocks/face/` and served through a content delivery network (CDN):
-
-* [/dist](/dist/)
-* [/helpers](/helpers/)
-
 
 
 ## About the tech
@@ -316,6 +307,7 @@ This library relies on [WebAR.rocks](https://webar.rocks) WebGL Deep Learning te
 * If `WebGL2` is not available, and if `WebGL1` is not available or neither `OES_TEXTURE_FLOAT` or `OES_HALF_TEXTURE_FLOAT` are implemented, the user is not compatible.
 
 If a compatibility error is triggered, please post an issue on this repository. If this is a problem with the camera access, please first retry after closing all applications which could use your device (Skype, Messenger, other browser tabs and windows, ...). Please include:
+
 * a screenshot of [webglreport.com - WebGL1](http://webglreport.com/?v=1) (about your `WebGL1` implementation),
 * a screenshot of [webglreport.com - WebGL2](http://webglreport.com/?v=2) (about your `WebGL2` implementation),
 * the log from the web console,
