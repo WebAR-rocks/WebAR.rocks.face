@@ -188,7 +188,7 @@ const FlexibleMask = (props) => {
         console.log('threeHelper has been initialized successfully')
       },
       callbackTrack: (detectStates, landmarksStabilized) => {
-        if (_flexibleMaskMesh && _threeCamera){
+        if (_flexibleMaskMesh && _threeCamera && landmarksStabilized){
           flexibleMaskHelper.update_flexibleMask(_threeCamera, _flexibleMaskMesh, detectStates, landmarksStabilized)
         }
       }

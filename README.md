@@ -300,6 +300,7 @@ The neuron network file, `neuralNets/NN_<xxx>.json` is loaded using an ajax `XML
 
 This library relies on [WebAR.rocks](https://webar.rocks) WebGL Deep Learning technology to detect and track the user's face using a neural network. The accuracy is adaptative: the best is the hardware, the more detections are processed per second. All is done on the client-side.
 
+
 ### Compatibility
 
 * If `WebGL2` is available, it uses `WebGL2` and no specific extension is required,

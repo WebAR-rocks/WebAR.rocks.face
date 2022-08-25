@@ -224,8 +224,8 @@ const VTONecklace = (props) => {
         "torsoNeckRightUp",
         "torsoNeckBackUp",
         "torsoNeckCenterDown",
-        "torsoNeckLeftDown",
-        "torsoNeckRightDown",
+        //"torsoNeckLeftDown",
+        //"torsoNeckRightDown",
         "torsoNeckBackDown"
       ]
     }).then(() => {

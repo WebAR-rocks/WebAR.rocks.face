@@ -469,28 +469,8 @@ const WebARRocksFaceThreeHelper = (function(){
 
 
   function callbackTrack(detectStates){
-    _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
-   
-    // draw the video:
-    if (_isDrawVideo){
-      draw_video();
-    }
-    
-    let landmarksStabilized = null;
-    let detectState0 = null;
-    if (detectStates.length){ // multiface detection:
-      landmarksStabilized = detectStates.map(process_faceSlot);
-      detectState0 = detectStates[0];
-    } else { // only 1 face detected
-      landmarksStabilized = process_faceSlot(detectStates, 0);
-      detectState0 = detectStates;
-    }
-    
-    render_three();
-
-    if (_spec.isLightReconstructionEnabled && detectState0['isDetected']){
-      update_lightReconstruction(detectState0);
-    }
+    that.render_video();
+    that.render_AR(detectStates);
     
     if (_spec.callbackTrack){
       _spec.callbackTrack(detectStates, landmarksStabilized);
@@ -763,6 +743,34 @@ const WebARRocksFaceThreeHelper = (function(){
       } else {
         return start(null);
       }      
+    },
+
+
+    render_video: function(){
+      _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
+   
+      if (_isDrawVideo){
+        draw_video();
+      }
+    },
+
+
+    render_AR: function(detectStates){
+      let landmarksStabilized = null;
+      let detectState0 = null;
+      if (detectStates.length){ // multiface detection:
+        landmarksStabilized = detectStates.map(process_faceSlot);
+        detectState0 = detectStates[0];
+      } else { // only 1 face detected
+        landmarksStabilized = process_faceSlot(detectStates, 0);
+        detectState0 = detectStates;
+      }
+      
+      render_three();
+
+      if (_spec.isLightReconstructionEnabled && detectState0['isDetected']){
+        update_lightReconstruction(detectState0);
+      }
     },
 
 

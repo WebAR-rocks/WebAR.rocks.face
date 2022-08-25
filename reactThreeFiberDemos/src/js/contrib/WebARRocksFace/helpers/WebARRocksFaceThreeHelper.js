@@ -262,20 +262,19 @@ const WebARRocksFaceThreeHelper = (function(){
 
 
   function callbackTrack(detectStates){
-    _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
-   
-    // draw the video:
-    draw_video();
+    that.render_video();
     
-    if (_spec.maxFacesDetected > _three.faceSlots.length || !_isInitialized){
+    if (!_isInitialized){
       return;
     }
-
     let landmarksStabilized = null;
-    if (detectStates.length){ // multiface detection:
-      landmarksStabilized = detectStates.map(process_faceSlot);
-    } else { // only 1 face detected
-      landmarksStabilized = process_faceSlot(detectStates, 0);
+    
+    if (_spec.maxFacesDetected <= _three.faceSlots.length) {
+      if (detectStates.length){ // multiface detection:
+        landmarksStabilized = detectStates.map(process_faceSlot);
+      } else { // only 1 face detected
+        landmarksStabilized = process_faceSlot(detectStates, 0);
+      }
     }
     
     if (_spec.callbackTrack){
@@ -491,6 +490,14 @@ const WebARRocksFaceThreeHelper = (function(){
 
       console.log('INFO in WebARRocksFaceThreeHelper - WEBARROCKSFACE.init spec = ', specLM);
       _WEBARROCKSFACE.init(specLM);
+    },
+
+
+    render_video: function(){
+      _gl.viewport(0, 0, that.get_viewWidth(), that.get_viewHeight());
+   
+      // draw the video:
+      draw_video();
     },
 
 
