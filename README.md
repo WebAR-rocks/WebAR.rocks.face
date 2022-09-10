@@ -96,7 +96,7 @@ Here are the static JavaScript demos:
 
 ### They trust us
 
-**Jam.gg**: The best social online gaming platform [Jam.gg](https://jam.gg) (formerly *Piepacker*), with more than 2 million users worldwide, relies on this library to add funny masks and face filters in augmented reality to its users. To test it, subscribe or log-in, select a game, create or join a gaming room and select a mask.
+**Jam.gg**: The best social online gaming platform [Jam.gg](https://jam.gg) (formerly *Piepacker*), with more than 5 million users worldwide, relies on this library to add amazing 3D masks and face filters in augmented reality to its users. To test it, subscribe or log-in, select a game, create or join a gaming room and select a mask.
 
 **Kinder**: *Applaydu*, an educative mobile application published by Kinder, relies on WebAR.rocks.face face detection and tracking library for augmented reality face masks. This application is developped by Gameloft in collaboration with the University of Oxford’s Department of Education. It is released both for iOS and Android. Just for Android it has been downloaded more than 10 million times. More information and download link are on [Kinder Official website](https://www.kinder.com/us/en/applaydu?utm_source=vanity&utm_medium=redirect&utm_campaign=/applaydu).
 
