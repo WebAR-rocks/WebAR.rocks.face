@@ -470,7 +470,7 @@ const WebARRocksFaceThreeHelper = (function(){
 
   function callbackTrack(detectStates){
     that.render_video();
-    that.render_AR(detectStates);
+    const landmarksStabilized = that.render_AR(detectStates);
     
     if (_spec.callbackTrack){
       _spec.callbackTrack(detectStates, landmarksStabilized);
@@ -771,6 +771,7 @@ const WebARRocksFaceThreeHelper = (function(){
       if (_spec.isLightReconstructionEnabled && detectState0['isDetected']){
         update_lightReconstruction(detectState0);
       }
+      return landmarksStabilized;
     },
 
 
