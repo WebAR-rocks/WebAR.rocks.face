@@ -76,7 +76,6 @@ const VTOModelContainer = (props) => {
     mirrorHelper.set_glassesPose(model)
     mirrorHelper.tweak_materials(model, props.glassesBranches)
     mirrorHelper.set_faceFollower(threeObject3DParent, threeObject3D, props.faceIndex)
-    window.plapp = threeObject3D;
     //return mirrorHelper.clean;
   }, [props.GLTFModel, props.sizing])  
 
