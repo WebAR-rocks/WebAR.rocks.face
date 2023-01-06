@@ -23,7 +23,7 @@ function main(){
       NNCPath: '../../neuralNets/NN_GLASSES_9.json',
       scanSettings: {
         threshold: 0.8,
-        translationScalingFactors: [0.07, 0.07, 0.1]
+        //translationScalingFactors: [0.07, 0.07, 0.1]
       }
     },
 
@@ -32,7 +32,7 @@ function main(){
       minCutOff: 0.001,
       //dcutoff: 1,
       freqRange: [2, 144],
-      forceFilterNNInputPxRange: [3.5, 7],//[1.5, 4],
+      forceFilterNNInputPxRange: [2.5, 6],//[1.5, 4],
     },
     
     canvasFace: canvasFace,
