@@ -126,14 +126,16 @@ const WebARRocksLMStabilizer = (function(){
       const defaultSpec = {
         // One Euro filter settings:
         freq: 30,
-        freqRange: [12, 144],
+        freqRange: [5, 144],
         minCutOff: 0.001,
         beta: 50,
         dcutoff: 1.0,
 
         // WebAR.rocks enhancement
         NNInputSizePx: 128,
-        forceFilterNNInputPxRange: [0.8, 2]
+        forceFilterNNInputPxRange: [0.8, 2],
+
+        isDebug: false
       };
       const _spec = Object.assign({}, defaultSpec, spec);
       const _filters = [];
@@ -161,7 +163,8 @@ const WebARRocksLMStabilizer = (function(){
           const aspectRatio = widthPx / heightPx;
 
           // Stabilize each lm with one euro filter
-          const timestamp = _timer.now() / 1000.0;
+          const timestamp = _timer.now() / 1000.0; // in seconds
+
           for (let i=0; i<LMCount; ++i) {
             const x = landmarks[i][0];
             const y = landmarks[i][1];
@@ -177,6 +180,9 @@ const WebARRocksLMStabilizer = (function(){
             const dy = compute_distanceNNInput(y, yStab, _spec.NNInputSizePx, scale * aspectRatio);
             const dMax = Math.max(dx, dy);
             if (dMax > _spec.forceFilterNNInputPxRange[0]){
+              if (_spec.isDebug){
+                console.log('INFO in OneEuroLMStabilizer: Force stalling');
+              }
               const k = smoothStep(_spec.forceFilterNNInputPxRange, dMax);
               xStab = mix(xStab, x, k);
               yStab = mix(yStab, y, k);

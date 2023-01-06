@@ -11,7 +11,7 @@ function main(){
     //videoURL: '../../../../testVideos/1056010826-hd.mp4', // use a video from a file instead of camera video
 
     specWebARRocksFace: {
-      NNCPath: '../../neuralNets/NN_NECKLACE_8.json',
+      NNCPath: '../../neuralNets/NN_NECKLACE_9.json',
       scanSettings: {
         threshold: 0.7
       }
@@ -20,7 +20,8 @@ function main(){
     // increase stabilization:
     landmarksStabilizerSpec: {
       beta: 5,
-      forceFilterNNInputPxRange: [4, 12]
+      forceFilterNNInputPxRange: [8, 16] // for NN_NECKLACE_9
+      //forceFilterNNInputPxRange: [4, 12] // for NN_NECKLACE_8
     },
 
     solvePnPObjPointsPositions: {

@@ -22,12 +22,17 @@ function main(){
     specWebARRocksFace: {
       NNCPath: '../../neuralNets/NN_GLASSES_9.json',
       scanSettings: {
-        threshold: 0.8
+        threshold: 0.8,
+        translationScalingFactors: [0.07, 0.07, 0.1]
       }
     },
 
     landmarksStabilizerSpec: {
-
+      beta: 20,
+      minCutOff: 0.001,
+      //dcutoff: 1,
+      freqRange: [2, 144],
+      forceFilterNNInputPxRange: [2.5, 6],//[1.5, 4],
     },
     
     canvasFace: canvasFace,
@@ -36,7 +41,8 @@ function main(){
     maxFacesDetected: 1,   
 
     // initial canvas dimensions:
-    width: window.innerWidth,
+    //width: window.innerWidth, // fullscreen
+    width: (window.innerWidth > window.innerHeight) ? window.innerHeight * (9/16): window.innerWidth,// always portrait mode (fullscreen on mobile, cropped on desktop)
     height: window.innerHeight,
 
     // Branch fading parameters (branch become transparent near the ears)

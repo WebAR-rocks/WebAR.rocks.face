@@ -50,13 +50,15 @@
         background-color: silver;
       }
       #WebARRocksFaceCanvas, #threeCanvas {
-        position: absolute;
-        width: 100vw;
+        /*position: absolute;
+        width: 100vw;*/
+        position: fixed;
+        height: 100vh;
         top: 0;
-        left: 0;
+        left: 50%;
 
         /* mirror the canvas: */
-        transform: rotateY(180deg);
+        transform: rotateY(180deg) translate(50%, 0px);
       }
 
       #WebARRocksFaceCanvas {
