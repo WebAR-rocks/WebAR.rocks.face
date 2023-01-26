@@ -24,7 +24,8 @@ function main(){
       scanSettings: {
         threshold: 0.8,
         //translationScalingFactors: [0.07, 0.07, 0.1]
-      }
+      },
+      maxFacesDetected: 1
     },
 
     landmarksStabilizerSpec: {
@@ -37,8 +38,6 @@ function main(){
     
     canvasFace: canvasFace,
     canvasThree: canvasThree,
-
-    maxFacesDetected: 1,   
 
     // initial canvas dimensions:
     //width: window.innerWidth, // fullscreen
