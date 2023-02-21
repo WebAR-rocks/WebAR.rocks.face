@@ -214,6 +214,12 @@ const VTOGlasses = (props) => {
       scanSettings: {
         threshold: 0.8 // detection threshold, between 0 and 1
       },
+      landmarksStabilizerSpec: {
+        beta: 10,
+        minCutOff: 0.001,
+        freqRange: [2, 144],
+        forceFilterNNInputPxRange: [2.5, 6],//[1.5, 4],
+      },
       solvePnPImgPointsLabels: [
         //'chinLeft', 'chinRight',
 
