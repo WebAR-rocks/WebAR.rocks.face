@@ -8,8 +8,8 @@ const SETTINGS = {
   
   //hideIfNotDetectedDuringNframes: 3,
 
-  nDetectsGif: 32, // number of positive detections to perfectly locate the face in the gif
-  nMaxTestsGif: 300, // maximum nomber of detection trial, after that abandon
+  nDetectsGif: 24, // number of positive detections to perfectly locate the face in the gif
+  nMaxTestsGif: 200, // maximum nomber of detection trial, after that abandon
 
   detectGifThreshold: 0.9,
 
@@ -100,7 +100,7 @@ function main(){
 
   WEBARROCKSFACE.init({
     canvas: document.getElementById('WebARRocksFaceCanvas'),
-    NNCPath: '../../../neuralNets/NN_FACE_0.json',
+    NNCPath: '../../../neuralNets/NN_FACE_3.json',
     callbackReady: function(errCode, spec){
       if (errCode){
         console.log('AN ERROR HAPPENS. ERROR CODE =', errCode);
@@ -141,12 +141,13 @@ function start(){
 function set_gifFrameAsInput(frameIndex){
   console.log('INFO: set_gifFrameAsInput() - frameIndex =', frameIndex);
   GL.bindTexture(GL.TEXTURE_2D, GIF.baseTexture);
-  GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, false);
+  GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, true);
   GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, GL.RGBA, GL.UNSIGNED_BYTE, GIF.frames[frameIndex]);
   GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
   GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
   GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
   GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+  GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, false);
   WEBARROCKSFACE.set_inputTexture(GIF.baseTexture, GIF.image.width, GIF.image.height);
 }
 
