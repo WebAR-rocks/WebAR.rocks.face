@@ -265,6 +265,26 @@ const WebARRocksFaceThreeHelper = (function(){
   }
 
 
+  function init_postprocessingPasses(){
+    const renderScenePass = new THREE.RenderPass( _three.scene, _three.camera );
+    if (_three.taaLevel > 0){
+      // add temporal anti-aliasing pass:
+      const taaRenderPass = new THREE.TAARenderPass( _three.scene, _three.camera );
+      taaRenderPass.unbiased = false;
+      _three.composer.addPass( taaRenderPass );
+      taaRenderPass.sampleLevel = _three.taaLevel;
+    }
+
+    _three.composer.addPass( renderScenePass );
+
+    if (_three.taaLevel > 0){
+      renderScenePass.enabled = false;
+      const copyPass = new THREE.ShaderPass( THREE.CopyShader );
+      _three.composer.addPass( copyPass );
+    }
+  }
+
+
   function init_three(maxFacesDetected){
     console.log('INFO in WebARRocksFaceThreeHelper - init_three(). Max faces detected = ', maxFacesDetected);
 
@@ -288,23 +308,7 @@ const WebARRocksFaceThreeHelper = (function(){
     
     if (_three.isPostProcessing){
       _three.composer = new THREE.EffectComposer( _three.renderer );
-      const renderScenePass = new THREE.RenderPass( _three.scene, _three.camera );
-      if (_three.taaLevel > 0){
-        // add temporal anti-aliasing pass:
-        const taaRenderPass = new THREE.TAARenderPass( _three.scene, _three.camera );
-        taaRenderPass.unbiased = false;
-        _three.composer.addPass( taaRenderPass );
-        taaRenderPass.sampleLevel = _three.taaLevel;
-      }
-
-      _three.composer.addPass( renderScenePass );
-
-      if (_three.taaLevel > 0){
-        renderScenePass.enabled = false;
-        const copyPass = new THREE.ShaderPass( THREE.CopyShader );
-        _three.composer.addPass( copyPass );
-      }
-
+      init_postprocessingPasses();
     } // end if postprocessing
 
     // create face slots objects:
@@ -685,6 +689,8 @@ const WebARRocksFaceThreeHelper = (function(){
 
         // THREE specifics:
         canvasThree: null,
+
+        // postprocessing:
         isPostProcessing: false,
         taaLevel: 0,
 

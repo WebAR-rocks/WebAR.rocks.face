@@ -104,50 +104,50 @@ function init_triggers(){
     threshold: 0.5,
     hysteresis: 0.1,
     onStart: function(){
-      console.log('TRIGGER FIRED - MOUTH OPEN');
+      console.log('TRIGGER FIRED - MOUTH OPEN START');
     },
     onEnd: function(){
-      console.log('TRIGGER FIRED - MOUTH CLOSED');
+      console.log('TRIGGER FIRED - MOUTH OPEN END');
     }
   });
   WebARRocksFaceExpressionsEvaluator.add_trigger('SMILE', {
     threshold: 0.5,
     hysteresis: 0.1,
     onStart: function(){
-      console.log('TRIGGER FIRED - SMILE');
+      console.log('TRIGGER FIRED - SMILE START');
     },
     onEnd: function(){
-      console.log('TRIGGER FIRED - NOT SMILE');
+      console.log('TRIGGER FIRED - SMILE END');
     }
   });
   WebARRocksFaceExpressionsEvaluator.add_trigger('WINK', {
     threshold: 0.5,
     hysteresis: 0.1,
     onStart: function(){
-      console.log('TRIGGER FIRED - WINK');
+      console.log('TRIGGER FIRED - WINK START');
     },
     onEnd: function(){
-      console.log('TRIGGER FIRED - NOT WINK');
+      console.log('TRIGGER FIRED - WINK END');
     }
   });
   WebARRocksFaceExpressionsEvaluator.add_trigger('EYEBROWS_UP', {
     threshold: 0.5,
     hysteresis: 0.1,
     onStart: function(){
-      console.log('TRIGGER FIRED - EYEBROWS UP');
+      console.log('TRIGGER FIRED - EYEBROWS UP START');
     },
     onEnd: function(){
-      console.log('TRIGGER FIRED - NOT EYEBROWS UP');
+      console.log('TRIGGER FIRED - EYEBROWS UP END');
     }
   });
   WebARRocksFaceExpressionsEvaluator.add_trigger('EYEBROWS_DOWN', {
     threshold: 0.5,
     hysteresis: 0.1,
     onStart: function(){
-      console.log('TRIGGER FIRED - EYEBROWS DOWN');
+      console.log('TRIGGER FIRED - EYEBROWS DOWN START');
     },
     onEnd: function(){
-      console.log('TRIGGER FIRED - NOT EYEBROWS DOWN');
+      console.log('TRIGGER FIRED - EYEBROWS DOWN END');
     }
   });
 }

@@ -33,6 +33,8 @@ const WebARRocksMirror = (function(){
     // add constratins for the rotation:
     rotationContraints: null,
 
+    callbackTrack: null,
+
     NN: null
   };
   let _spec = null;
@@ -133,6 +135,9 @@ const WebARRocksMirror = (function(){
           },
           callbackTrack: function(detectState){
             WebARRocksFaceLightingHelper.update_lightReconstruction(detectState);
+            if (_spec.callbackTrack){
+              _spec.callbackTrack(detectState);
+            }
           }
         };
         if (spec.solvePnPObjPointsPositions){
