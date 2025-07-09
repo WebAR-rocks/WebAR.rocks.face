@@ -5,8 +5,8 @@ import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 // import components:
-import BackButton from '../components/BackButton.js'
-import VTOButton from '../components/VTOButton.js'
+import BackButton from '../components/BackButton'
+import VTOButton from '../components/VTOButton'
 
 // import neural network model:
 import NN from '../contrib/WebARRocksFace/neuralNets/NN_HEADPHONES_4.json'
@@ -98,7 +98,7 @@ const DebugCube = (props) => {
   const s = props.size || 1
   return (
     <mesh name="debugCube">
-      <boxBufferGeometry args={[s, s, s]} />
+      <boxGeometry args={[s, s, s]} />
       <meshNormalMaterial />
     </mesh>
     )
@@ -245,7 +245,6 @@ const VTOHelmet = (props) => {
       gl={{
         preserveDrawingBuffer: true // allow image capture
       }}
-      updateDefaultCamera = {false}
       >
         <ThreeGrabber sizing={sizing} lighting={_settings.lighting} />
         

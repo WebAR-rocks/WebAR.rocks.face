@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, Suspense } from 'react'
 
 // import components:
-import BackButton from '../components/BackButton.js'
+import BackButton from '../components/BackButton'
 
 // import neural network model:
 import NN from '../contrib/WebARRocksFace/neuralNets/NN_FULLMAKEUP_4.json'

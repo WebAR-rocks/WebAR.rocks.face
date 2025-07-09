@@ -52,7 +52,7 @@ Here are the main features of the library:
 * `/helpers/`: scripts which can help you to use this library in some specific use cases,
 * `/neuralNets/`: neural networks models,
 * `/libs/`: 3rd party libraries and 3D engines used in the demos,
-* `/reactThreeFiberDemos`: Demos with Webpack/NPM/React/Three Fiber,
+* `/reactThreeFiberDemos`: Demos with Vite/NPM/React/Three Fiber,
 * `/blenderPluginFlexibleMaskExporter`: Blender plugin to export the metadata JSON file used in the *flexibleMask2* demo.
 * `/VTO4Sketchfab`: Integration with [Sketchfab](https://sketchfab.com/) 3D viewer
 
@@ -61,7 +61,7 @@ Here are the main features of the library:
 
 ### Included in this repository
 
-The best demos have been ported to a modern front-end development environment (NPM / Webpack / React / Three Fiber / ES6) in  the [/reactThreeFiberDemos](/reactThreeFiberDemos) directory. This is a standalone directory.
+The best demos have been ported to a modern front-end development environment (NPM / Vite / React / Three Fiber / ES6) in  the [/reactThreeFiberDemos](/reactThreeFiberDemos) directory. This is a standalone directory.
 
 
 Here are the static JavaScript demos:

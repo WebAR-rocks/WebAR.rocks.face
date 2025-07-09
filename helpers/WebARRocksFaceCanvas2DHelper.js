@@ -28,13 +28,14 @@ const WebARRocksFaceCanvas2DHelper = (function(){
   const _friendlyDetectState = {
     isDetected: false,
     faceCrop: [[0,0],[0,0],[0,0],[0,0]],
-    ry: 0,
-    faceWidth: 0,
+    ry: 0.0,
+    faceWidth: 0.0,
     landmarks: {}
   };
 
   // degrees to radians:
-  const _deg2rad = Math.PI / 180;
+  const _rad2deg = 180 / Math.PI;
+
 
   // private functions:
   // compile a shader:
@@ -49,6 +50,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
     }
     return glShader;
   };
+
 
   // build the shader program:
   function build_shaderProgram(shaderVertexSource, shaderFragmentSource, id) {
@@ -168,7 +170,7 @@ const WebARRocksFaceCanvas2DHelper = (function(){
       _friendlyDetectState.faceWidth = w;
 
       // copy Y rotation:
-      _friendlyDetectState.ry = detectState.ry / _deg2rad;
+      _friendlyDetectState.ry = detectState.ry * _rad2deg;
 
       // compute landmarks pixel positions:
       const landmarks = _friendlyDetectState.landmarks;

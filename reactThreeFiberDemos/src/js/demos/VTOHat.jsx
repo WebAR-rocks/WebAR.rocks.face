@@ -1,30 +1,31 @@
-import React, {useEffect, useRef, useState, Suspense } from 'react'
+import React, { useEffect, useRef, useState, Suspense } from 'react'
 import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber'
 
 // import GLTF loader - originally in examples/jsm/loaders/
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 
 // import components:
-import BackButton from '../components/BackButton.js'
-import VTOButton from '../components/VTOButton.js'
+import BackButton from '../components/BackButton'
+import VTOButton from '../components/VTOButton'
 
 // import neural network model:
-import NN from '../contrib/WebARRocksFace/neuralNets/NN_NECKLACE_7.json'
+import NN from '../contrib/WebARRocksFace/neuralNets/NN_HEADPHONESL_2.json'
 
 // import WebARRocksMirror, a helper
 // This helper is not minified, feel free to customize it (and submit pull requests bro):
 import mirrorHelper from '../contrib/WebARRocksFace/helpers/WebARRocksMirror.js'
 
 // ASSETS:
-// import 3D models of necklaces:
-import GLTFModel1 from '../../assets/VTONecklace/models3D/blackPanther.glb'
-import GLTFModel2 from '../../assets/VTONecklace/models3D/nativeAmerican.glb'
+// import 3D model of hat:
+import GLTFModel from '../../assets/VTOHat/models3D/hatDraco.glb'
+//const GLTFModel = 'VTOHat/models3D/hatDraco.glb'
 
 // import occluder
-import GLTFOccluderModel from '../../assets/VTONecklace/models3D/occluder.glb'
+import GLTFOccluderModel from '../../assets/VTOHat/models3D/occluder.glb'
 
 // import envMap:
-import envMap from '../../assets/VTONecklace/envmaps/venice_sunset_1k.hdr'
+import envMap from '../../assets/VTOHat/envmaps/venice_sunset_512.hdr'
 
 
 
@@ -71,10 +72,15 @@ const VTOModelContainer = (props) => {
     const model = threeObject3D.children[0]
 
     mirrorHelper.set_faceFollower(threeObject3DParent, threeObject3D, props.faceIndex)
-  }, [props.GLTFModel, props.sizing])
+  }, [props.GLTFModel, props.sizing]) 
   
   // import main model:
-  const gltf = useLoader(GLTFLoader, props.GLTFModel)
+  console.log('IMPORT ' + props.GLTFModel)
+  const gltf = useLoader(GLTFLoader, props.GLTFModel, (loader) => {
+    const dracoLoader = new DRACOLoader()
+    dracoLoader.setDecoderPath('/draco/') // public path with draco loader
+    loader.setDRACOLoader(dracoLoader)
+  })
   const model = gltf.scene.clone()
   
   // import and create occluder:
@@ -98,42 +104,40 @@ const DebugCube = (props) => {
   const s = props.size || 1
   return (
     <mesh name="debugCube">
-      <boxBufferGeometry args={[s, s, s]} />
+      <boxGeometry args={[s, s, s]} />
       <meshNormalMaterial />
     </mesh>
     )
 }
 
 
-const VTONecklace = (props) => {
+const VTOHat = (props) => {
   const PI = 3.1415
   const scale = 100
-
   // state:
   const [sizing, setSizing] = useState(compute_sizing())
-  const [model, setModel] = useState(GLTFModel1)
+  const [model, setModel] = useState(GLTFModel)
   const [isInitialized] = useState(true)
 
   // refs:
   const togglePauseRef = useRef()
   const canvasFaceRef = useRef()
-
+  
   // misc private vars:
   const _settings = {
     lighting: {
       envMap,
-      pointLightIntensity: 0.5, // intensity of the point light. Set to 0 to disable
-      pointLightY: 200, // larger -> move the pointLight to the top
-      hemiLightIntensity: 0 // intensity of the hemispheric light. Set to 0 to disable (not really useful if we use an envmap)
+      isLightReconstructionEnabled: true
     },
-
+    
     // occluder 3D model:
     GLTFOccluderModel
   }
+
   let _timerResize = null
   let _isPaused = false
 
-
+ 
   const handle_resize = () => {
     // do not resize too often:
     if (_timerResize){
@@ -189,44 +193,40 @@ const VTONecklace = (props) => {
     mirrorHelper.init({
       NN,
       canvasFace: canvasFaceRef.current,
-      maxFacesDetected: 1,
-      landmarksStabilizerSpec: { // increase stabilization
-        beta: 5,
-        forceFilterNNInputPxRange: [4, 12]
-      },
       scanSettings: {
-        threshold: 0.7
+        threshold: 0.6 // detection threshold, between 0 and 1
       },
-      rotationContraints: {
-        order: 'YXZ',
-        rotXFactor: 1,
-        rotYFactor: 0.3,
-        rotZFactor: 0.5,
+      landmarksStabilizerSpec: { // increase stabilization
+        beta: 20,
+        forceFilterNNInputPxRange: [1.5, 4]
       },
+      maxFacesDetected: 1,
       solvePnPObjPointsPositions: {
-        // indices of the points are given as comments. 
-        // Open dev/torso.blend to get point positions
+        "noseLeft": [21.862150,-0.121031,67.803383], // 1791
+        "noseRight": [-20.539499,0.170727,69.944778], // 2198
 
-        "torsoNeckCenterUp": [0.000006,-78.167770,33.542694], // ind: 4,
-        "torsoNeckCenterDown": [0.000004,-112.370636,44.173981], // ind: 5,
+        "leftEyeExt": [44.507431,34.942841,38.750019], // 1808
+        "rightEyeExt": [-44.064968,35.399670,39.362930], // 2214
+       
+        "leftEarTop": [89.165428,16.312811,-49.064980], // 3870
+        "leftEarBase": [78.738243,-6.044550,-23.177490], // 2994
+        "leftEarBottom": [78.786850,-41.321789,-24.603769], // 1741
 
-        "torsoNeckLeftUp": [77.729225,-1.220459,-42.653336], // ind: 41,
-        "torsoNeckLeftDown": [130.661072,-11.937241,-44.706360], // ind: 117,
-        "torsoNeckRightUp": [-77.898209,-1.191437,-42.648613],// ind: 14,
-        "torsoNeckRightDown": [-130.661041,-11.937241,-44.706360],// ind: 112,
+        "rightEarTop": [-88.488602,17.271400,-48.199409], // 5622
+        "rightEarBase": [-78.156998,-5.305619,-22.164619], // 4779
+        "rightEarBottom": [-78.945511,-41.255100,-26.536131], // 5641
 
-        "torsoNeckBackUp": [-0.040026,-11.528961,-99.635696],// ind: 218,
-        "torsoNeckBackDown": [0.000007,-47.934677,-127.748184]// ind: 2
+        "leftTemple": [60.262970,83.790382,-13.540310], // 108
+        "rightTemple": [-60.034760,83.584427,-13.248530], // 286
+
+        "foreHead": [-1.057755,97.894547,24.654940], // 696
       },
       solvePnPImgPointsLabels: [
-        "torsoNeckCenterUp",
-        "torsoNeckLeftUp",
-        "torsoNeckRightUp",
-        "torsoNeckBackUp",
-        "torsoNeckCenterDown",
-        //"torsoNeckLeftDown",
-        //"torsoNeckRightDown",
-        "torsoNeckBackDown"
+        "foreHead",
+        "leftTemple", "rightTemple",
+        "leftEarTop", "rightEarTop",
+        "leftEyeExt", "rightEyeExt",
+        "rightEarBottom", "leftEarBottom",
       ]
     }).then(() => {
       // handle resizing / orientation change:
@@ -253,7 +253,6 @@ const VTONecklace = (props) => {
       gl={{
         preserveDrawingBuffer: true // allow image capture
       }}
-      updateDefaultCamera = {false}
       >
         <ThreeGrabber sizing={sizing} lighting={_settings.lighting} />
         
@@ -262,7 +261,7 @@ const VTONecklace = (props) => {
             GLTFModel={model}
             GLTFOccluderModel={_settings.GLTFOccluderModel}
             faceIndex={0}
-            sizing={sizing}/>
+            sizing={sizing} />
         </Suspense>
       </Canvas>
 
@@ -276,13 +275,12 @@ const VTONecklace = (props) => {
       <BackButton />
 
       <div className="VTOButtons">
-        <VTOButton onClick={setModel.bind(null, GLTFModel1)}>Black Panther</VTOButton>
-        <VTOButton onClick={setModel.bind(null, GLTFModel2)}>Native American</VTOButton>
         <VTOButton ref={togglePauseRef} onClick={toggle_pause}>{get_pauseButtonText(_isPaused)}</VTOButton>
         <VTOButton onClick={capture_image}>Capture</VTOButton>
       </div>
     </div>
   )
+  
 } 
 
-export default VTONecklace
+export default VTOHat

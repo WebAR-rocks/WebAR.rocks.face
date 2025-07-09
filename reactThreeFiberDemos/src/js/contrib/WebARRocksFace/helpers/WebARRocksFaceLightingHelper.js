@@ -8,7 +8,7 @@ import {
   HemisphereLight,
   PointLight,
   PMREMGenerator,
-  sRGBEncoding
+  //sRGBEncoding
 } from 'three'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 
@@ -97,7 +97,7 @@ const WebARRocksFaceLightingHelper = (function(){
 
     set_rendererEncoding(threeRenderer){
       threeRenderer.toneMapping = ACESFilmicToneMapping;
-      threeRenderer.outputEncoding = sRGBEncoding;
+      //threeRenderer.outputEncoding = sRGBEncoding;
     },
 
 

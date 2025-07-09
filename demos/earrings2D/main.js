@@ -13,7 +13,7 @@ const _earringSettings = {
                   // 1 -> earring are displaed above the spotted position 
   k: 0.7,  // position is interpolated between 2 keypoints. this is the interpolation coefficient
            // 0-> earrings are at the bottom of the ear, 1-> earrings are further back
-}
+};
 
 const _earringsVisibility = {
   right: false,
@@ -30,11 +30,11 @@ function start(){
 
     callbackReady: function(err, spec){ // called when everything is ready
       if (err) {
-        console.log('ERROR in demo.js: ', err);
+        console.log('ERROR in main.js: ', err);
         return;
       }
 
-      console.log('INFO in demo.js: WebAR.rocks.face is ready :)');
+      console.log('INFO in main.js: WebAR.rocks.face is ready :)');
     },
 
     callbackTrack: function(detectState){

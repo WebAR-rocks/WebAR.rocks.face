@@ -45,6 +45,9 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       threshold: 0.7
     },
 
+    // stabilizer options:
+    landmarksStabilizerSpec: {},
+
     // callbacks
     callbackTrack: null,
 
@@ -372,12 +375,48 @@ const WebARRocksFaceEarrings3DHelper = (function(){
   }
 
 
+  function inverse_facesIndexOrder(geom){
+    if (geom.faces){
+      // geometry
+      geom.faces.forEach(function(face){
+        // change rotation order:
+        const b = face.b, c = face.c;
+        face.c = b, face.b = c;
+      });
+    } else  {
+      // buffer geometry
+      const arr = geom.index.array;
+      const facesCount = arr.length / 3;
+      for (let i=0; i<facesCount; ++i){
+        const b = arr[i*3 + 1], c = arr[i*3 + 2];
+        arr[i*3 + 2] = b, arr[i*3 + 1] = c;
+      }
+    }
+    geom.computeVertexNormals();
+  }
+
+
+  function mirror_XMesh(threeMesh){
+    // compute matrix to apply to the geometry, K
+    const M = threeMesh.matrixWorld;
+    const invXMatrix = new THREE.Matrix4().makeScale(-1, 1, 1);
+    const K = new THREE.Matrix4().copy(M).invert().multiply(invXMatrix).multiply(M);
+
+    // clone and invert the mesh:
+    //const threeMeshMirrorX = threeMesh.clone();
+    threeMesh.geometry = threeMesh.geometry.clone();
+   
+    threeMesh.geometry.applyMatrix4(K);
+    inverse_facesIndexOrder(threeMesh.geometry);
+  }
+
+
   // public methods:
   const that = {
     init: function(spec){
       _spec = Object.assign({}, _defaultSpec, spec);
 
-      _landmarksStabilizer = WebARRocksLMStabilizer.instance({});
+      _landmarksStabilizer = WebARRocksLMStabilizer.instance(_spec.landmarksStabilizerSpec);
 
       if (_spec.videoURL){
         const domVideo = document.createElement('video');
@@ -499,6 +538,18 @@ const WebARRocksFaceEarrings3DHelper = (function(){
       _three.composer.setSize(cvw, cvh);
       console.log('INFO in update_threeCamera(): resolution = ', cvw, cvh);
 
+    },
+
+
+    create_earringLeftFromEarringRight: function(threeModelRight){
+      const threeModelLeft = threeModelRight.clone();
+      threeModelLeft.traverse(function(threeNode){
+        if (!threeNode.isMesh && !threeNode.isSkinnedMesh){
+          return;
+        }
+        mirror_XMesh(threeNode);
+      });
+      return threeModelLeft;
     }
   }; //end that
   return that;

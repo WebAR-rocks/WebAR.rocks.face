@@ -13,8 +13,8 @@ import {
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 // import components:
-import BackButton from '../components/BackButton.js'
-import VTOButton from '../components/VTOButton.js'
+import BackButton from '../components/BackButton'
+import VTOButton from '../components/VTOButton'
 
 // import main script:
 import WEBARROCKSFACE from '../contrib/WebARRocksFace/dist/WebARRocksFace.module.js'
@@ -121,7 +121,7 @@ const EarringContainer = (props) => {
 const DebugCube = () => {
   return (
     <mesh name="debugCube">
-      <boxBufferGeometry args={[1, 1, 1]} />
+      <boxGeometry args={[1, 1, 1]} />
       <meshNormalMaterial />
     </mesh>
     )
@@ -226,7 +226,6 @@ const Earrings3D = (props) => {
       gl={{
         preserveDrawingBuffer: true // allow image capture
       }}
-      updateDefaultCamera = {false}
       >
         <ThreeGrabber sizing={sizing} lighting={_settings.lighting} />
         

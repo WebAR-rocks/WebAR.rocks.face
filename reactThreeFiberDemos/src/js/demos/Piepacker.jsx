@@ -9,8 +9,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { clone as SkeletonUtilsClone } from 'three/examples/jsm/utils/SkeletonUtils'
 
 // import some UI components:
-import BackButton from '../components/BackButton.js'
-import VTOButton from '../components/VTOButton.js'
+import BackButton from '../components/BackButton'
+import VTOButton from '../components/VTOButton'
 
 // import neural network model:
 import NN from '../contrib/WebARRocksFace/neuralNets/NN_FACE_3.json'
@@ -53,7 +53,8 @@ let _threeAnimationMixer = null, _threeClock = null
 
 // size a three renderer:
 const size_threeRenderer = (threeRenderer, sizing) => {
-  threeRenderer.setSize(sizing.width, sizing.height, false)
+  const dpr = window.devicePixelRatio || 1
+  threeRenderer.setSize(sizing.width / dpr, sizing.height / dpr, false)
   const canvasStyle = threeRenderer.domElement.style
   canvasStyle.removeProperty('width')
   canvasStyle.removeProperty('height')
@@ -233,7 +234,7 @@ const DebugCube = (props) => {
   const s = props.size || 1
   return (
     <mesh name="debugCube">
-      <boxBufferGeometry args={[s, s, s]} />
+      <boxGeometry args={[s, s, s]} />
       <meshNormalMaterial />
     </mesh>
     )
@@ -417,7 +418,6 @@ const Mask = (props) => {
           gl = {{
             preserveDrawingBuffer: true // allow image capture
           }}
-          updateDefaultCamera = {false}
           onCreated = {(threeFiber) => {
             // should fix the race condition where everything is black:
             size_threeRenderer(threeFiber.gl, sizing)
